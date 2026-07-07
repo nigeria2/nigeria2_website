@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WardRouteImport } from './routes/ward'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProblemUnitsRouteImport } from './routes/problem-units'
@@ -27,12 +28,16 @@ import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R2027IndexRouteImport } from './routes/2027.index'
 import { Route as WardsStateRouteImport } from './routes/wards.$state'
-import { Route as WardCodeRouteImport } from './routes/ward.$code'
 import { Route as StatesStateRouteImport } from './routes/states.$state'
 import { Route as R2027SenateRouteImport } from './routes/2027.senate'
 import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
 import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
 
+const WardRoute = WardRouteImport.update({
+  id: '/ward',
+  path: '/ward',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -123,11 +128,6 @@ const WardsStateRoute = WardsStateRouteImport.update({
   path: '/wards/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WardCodeRoute = WardCodeRouteImport.update({
-  id: '/ward/$code',
-  path: '/ward/$code',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StatesStateRoute = StatesStateRouteImport.update({
   id: '/states/$state',
   path: '/states/$state',
@@ -166,11 +166,11 @@ export interface FileRoutesByFullPath {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
-  '/ward/$code': typeof WardCodeRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
 }
@@ -190,11 +190,11 @@ export interface FileRoutesByTo {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
-  '/ward/$code': typeof WardCodeRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027': typeof R2027IndexRoute
 }
@@ -216,11 +216,11 @@ export interface FileRoutesById {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
-  '/ward/$code': typeof WardCodeRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
 }
@@ -243,11 +243,11 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
-    | '/ward/$code'
     | '/wards/$state'
     | '/2027/'
   fileRoutesByTo: FileRoutesByTo
@@ -267,11 +267,11 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
-    | '/ward/$code'
     | '/wards/$state'
     | '/2027'
   id:
@@ -292,11 +292,11 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
-    | '/ward/$code'
     | '/wards/$state'
     | '/2027/'
   fileRoutesById: FileRoutesById
@@ -318,13 +318,20 @@ export interface RootRouteChildren {
   ProblemUnitsRoute: typeof ProblemUnitsRoute
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
+  WardRoute: typeof WardRoute
   StatesStateRoute: typeof StatesStateRoute
-  WardCodeRoute: typeof WardCodeRoute
   WardsStateRoute: typeof WardsStateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ward': {
+      id: '/ward'
+      path: '/ward'
+      fullPath: '/ward'
+      preLoaderRoute: typeof WardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -451,13 +458,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WardsStateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ward/$code': {
-      id: '/ward/$code'
-      path: '/ward/$code'
-      fullPath: '/ward/$code'
-      preLoaderRoute: typeof WardCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/states/$state': {
       id: '/states/$state'
       path: '/states/$state'
@@ -522,8 +522,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProblemUnitsRoute: ProblemUnitsRoute,
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
+  WardRoute: WardRoute,
   StatesStateRoute: StatesStateRoute,
-  WardCodeRoute: WardCodeRoute,
   WardsStateRoute: WardsStateRoute,
 }
 export const routeTree = rootRouteImport

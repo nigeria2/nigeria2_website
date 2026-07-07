@@ -5,7 +5,10 @@ import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { stateSlug } from '../stateSlug'
 
-export const Route = createFileRoute('/ward/$code')({ component: WardPage })
+export const Route = createFileRoute('/ward')({
+  component: WardPage,
+  validateSearch: (s: Record<string, unknown>): { ward: string } => ({ ward: String(s.ward ?? '') }),
+})
 
 type PU = { pu_name: string; pu_code: string; registered_voters: number | null; known_votes: number | null }
 type Detail = { state: string; lga: string; ward: string; ward_code: string; polling_units: PU[] }
@@ -14,10 +17,14 @@ const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', san
 const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '11px 14px' }
 
 function WardPage() {
-  const { code } = Route.useParams()
+  const { ward: code } = Route.useSearch()
   const [d, setD] = useState<Detail | null>(null)
 
   useEffect(() => {
+    if (!code) {
+      setD({ state: '', lga: '', ward: '', ward_code: '', polling_units: [] })
+      return
+    }
     setD(null)
     fetch(`${API_BASE}/api/wards/${encodeURIComponent(code)}/polling-units`)
       .then((r) => r.json())
