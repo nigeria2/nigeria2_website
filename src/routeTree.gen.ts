@@ -14,6 +14,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProblemUnitsRouteImport } from './routes/problem-units'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PredictionsRouteImport } from './routes/predictions'
+import { Route as PoliticiansRouteImport } from './routes/politicians'
 import { Route as PartiesRouteImport } from './routes/parties'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MethodologyRouteImport } from './routes/methodology'
@@ -53,6 +54,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const PredictionsRoute = PredictionsRouteImport.update({
   id: '/predictions',
   path: '/predictions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticiansRoute = PoliticiansRouteImport.update({
+  id: '/politicians',
+  path: '/politicians',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartiesRoute = PartiesRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
@@ -231,6 +241,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
@@ -276,6 +288,7 @@ export interface RootRouteChildren {
   MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
   PartiesRoute: typeof PartiesRoute
+  PoliticiansRoute: typeof PoliticiansRoute
   PredictionsRoute: typeof PredictionsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProblemUnitsRoute: typeof ProblemUnitsRoute
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/predictions'
       fullPath: '/predictions'
       preLoaderRoute: typeof PredictionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politicians': {
+      id: '/politicians'
+      path: '/politicians'
+      fullPath: '/politicians'
+      preLoaderRoute: typeof PoliticiansRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parties': {
@@ -456,6 +476,7 @@ const rootRouteChildren: RootRouteChildren = {
   MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
   PartiesRoute: PartiesRoute,
+  PoliticiansRoute: PoliticiansRoute,
   PredictionsRoute: PredictionsRoute,
   PrivacyRoute: PrivacyRoute,
   ProblemUnitsRoute: ProblemUnitsRoute,

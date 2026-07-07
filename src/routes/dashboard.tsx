@@ -94,6 +94,7 @@ function Dashboard() {
       {/* tabs */}
       <div style={{ background: '#fff', borderBottom: '1px solid #dbe4dc', display: 'flex', gap: '4px', padding: '0 24px' }}>
         <Link to="/predictions" style={tabBase}>Predictions</Link>
+        <Link to="/politicians" style={tabBase}>Politicians</Link>
         <span style={tabActive}>Profile</span>
       </div>
 

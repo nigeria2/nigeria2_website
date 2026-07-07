@@ -11,7 +11,7 @@ export const Route = createFileRoute('/admin')({
   ),
 })
 
-type View = 'users' | 'experts' | 'traces' | 'predictions' | 'ballots'
+type View = 'users' | 'experts' | 'traces' | 'predictions' | 'ballots' | 'politicians'
 
 const NAV: { id: View; label: string; icon: string }[] = [
   { id: 'users', label: 'Interested Users', icon: '👥' },
@@ -19,6 +19,7 @@ const NAV: { id: View; label: string; icon: string }[] = [
   { id: 'traces', label: 'Traces', icon: '🧭' },
   { id: 'predictions', label: 'Predictions', icon: '🎯' },
   { id: 'ballots', label: 'Party Ballots', icon: '🗳️' },
+  { id: 'politicians', label: 'Politicians', icon: '🏛️' },
 ]
 
 const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governor', senate: 'Senate' }
@@ -85,7 +86,7 @@ function Admin() {
 
         {/* main */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : view === 'ballots' ? <PartyBallots /> : <Traces />}
+          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : view === 'ballots' ? <PartyBallots /> : view === 'politicians' ? <PoliticiansAdmin /> : <Traces />}
         </div>
       </div>
     </div>
@@ -596,6 +597,80 @@ function PartyBallots() {
             {saved && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f8a4a' }}>✓ Saved</span>}
           </div>
         </>
+      )}
+    </div>
+  )
+}
+
+const ADMIN_STATES = ['Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT', 'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara']
+
+type PhotoSub = { id: number; politician_id: number; politician_name: string; state: string; author_name: string; image: string; created_at: string | null }
+
+function PoliticiansAdmin() {
+  const { token } = useAuth()
+  const [subs, setSubs] = useState<PhotoSub[] | null>(null)
+  const [form, setForm] = useState({ name: '', state: 'Akwa Ibom', title: '', party: '' })
+  const [added, setAdded] = useState('')
+
+  const loadSubs = () => apiFetch('/api/admin/politician-photos', token).then((r) => (r.ok ? r.json() : [])).then(setSubs).catch(() => setSubs([]))
+  useEffect(() => {
+    if (token) loadSubs()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  const addPolitician = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) return
+    const res = await apiFetch('/api/admin/politicians', token, { method: 'POST', body: JSON.stringify(form) })
+    if (res.ok) {
+      setAdded(`✓ Added ${form.name}`)
+      setForm({ name: '', state: form.state, title: '', party: '' })
+    }
+  }
+  const act = async (id: number, action: 'approve' | 'reject') => {
+    const res = await apiFetch(`/api/admin/politician-photos/${id}/${action}`, token, { method: 'POST' })
+    if (res.ok) loadSubs()
+  }
+
+  const lbl2: React.CSSProperties = { display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', color: '#0f2a1c', textTransform: 'uppercase', marginBottom: '5px' }
+  const inp2: React.CSSProperties = { width: '100%', border: '2px solid #d7e0d9', borderRadius: '4px', background: '#f9fbf8', padding: '10px 12px', fontFamily: "'Archivo', sans-serif", fontSize: '14px', color: '#0f2a1c' }
+
+  return (
+    <div>
+      <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#0f2a1c', margin: '0 0 4px' }}>Politicians</h1>
+      <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 20px' }}>Add political figures and approve the photos contributors submit.</p>
+
+      <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '22px', marginBottom: '22px' }}>
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c', marginBottom: '14px' }}>Add a politician</div>
+        <form onSubmit={addPolitician} style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr 1.4fr 1fr auto', gap: '10px', alignItems: 'end' }}>
+          <div><label style={lbl2}>Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inp2} required /></div>
+          <div><label style={lbl2}>State</label><select value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} style={inp2}>{ADMIN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
+          <div><label style={lbl2}>Title</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Governor" style={inp2} /></div>
+          <div><label style={lbl2}>Party</label><input value={form.party} onChange={(e) => setForm({ ...form, party: e.target.value })} placeholder="APC" style={inp2} /></div>
+          <button type="submit" style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '11px 20px', cursor: 'pointer' }}>Add</button>
+        </form>
+        {added && <div style={{ marginTop: '12px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f8a4a' }}>{added}</div>}
+      </div>
+
+      <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c', marginBottom: '12px' }}>Pending photo submissions {subs ? `(${subs.length})` : ''}</div>
+      {!subs ? (
+        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Loading…</div>
+      ) : subs.length === 0 ? (
+        <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '36px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No photos awaiting approval.</div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
+          {subs.map((s) => (
+            <div key={s.id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px', textAlign: 'center' }}>
+              <img src={s.image} alt={s.politician_name} style={{ width: '100%', maxWidth: '150px', aspectRatio: '1', objectFit: 'cover', borderRadius: '10px', margin: '0 auto 10px', display: 'block' }} />
+              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{s.politician_name}</div>
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093', marginBottom: '12px' }}>{s.state} · by {s.author_name}</div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                <button onClick={() => act(s.id, 'approve')} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '5px', padding: '8px 14px', cursor: 'pointer' }}>Approve</button>
+                <button onClick={() => act(s.id, 'reject')} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#c0392b', background: '#fff', border: '2px solid #e3c4c0', borderRadius: '5px', padding: '6px 12px', cursor: 'pointer' }}>Reject</button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   )
