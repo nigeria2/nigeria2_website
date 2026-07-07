@@ -60,6 +60,7 @@ export function HomeFooter() {
             <div style={colTitle}>Projects</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
               <Link to="/2027" className="footer-link" style={colLink}>2027 Prediction</Link>
+              <Link to="/problem-units" className="footer-link" style={colLink}>2027 Problem Polling Units</Link>
               <Link to="/parties" className="footer-link" style={colLink}>Political Parties</Link>
               <a href="https://forensic.nigeria2.com/" className="footer-link" style={colLink}>2023 Vote Counting</a>
             </div>

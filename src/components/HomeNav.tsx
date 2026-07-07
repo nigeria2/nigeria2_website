@@ -12,6 +12,14 @@ const navLink: React.CSSProperties = {
   padding: '2px 0',
 }
 
+const navSep: React.CSSProperties = {
+  width: '1px',
+  height: '15px',
+  background: '#d5ddd6',
+  display: 'inline-block',
+  flex: 'none',
+}
+
 /** White top navigation bar used across the site. */
 export function HomeNav() {
   const { user } = useAuth()
@@ -41,13 +49,15 @@ export function HomeNav() {
         N<span style={{ color: '#0f2a1c' }}>2.0</span>
       </Link>
 
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '34px' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
         <Link to="/2027" className="nav-underline" style={{ ...navLink, borderBottom: on2027 ? '2px solid #ffe14d' : '2px solid transparent' }}>
           2027 Prediction
         </Link>
+        <span aria-hidden style={navSep} />
         <Link to="/problem-units" className="nav-underline" style={{ ...navLink, borderBottom: onProblem ? '2px solid #ffe14d' : '2px solid transparent' }}>
-          Problem Polling Units
+          2027 Problem Polling Units
         </Link>
+        <span aria-hidden style={navSep} />
         <a href="https://forensic.nigeria2.com/" className="nav-underline" style={{ ...navLink, borderBottom: '2px solid transparent' }}>
           2023 Vote Counting
         </a>
