@@ -3,6 +3,7 @@ import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { NIGERIA_STATES } from '../nigeriaStates'
 import { STATE_BOUNDS } from '../stateBounds'
+import { STATE_BY_SLUG } from '../stateSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -15,7 +16,7 @@ type LoaderData = { state: string; week: string; byRace: Record<string, PartySco
 
 export const Route = createFileRoute('/states/$state')({
   loader: async ({ params }): Promise<LoaderData> => {
-    const state = decodeURIComponent(params.state)
+    const state = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
     try {
       const meta = await fetch(`${API_BASE}/api/predictions/meta`).then((r) => r.json())
       const week: string = meta.weeks?.[0] ?? ''
@@ -37,7 +38,7 @@ export const Route = createFileRoute('/states/$state')({
     }
   },
   head: ({ params }) => {
-    const s = decodeURIComponent(params.state)
+    const s = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
     const title = `${s} — 2027 Election Prediction | Nigeria 2.0`
     const description = `Projected 2027 presidential, governorship and senate results for ${s} State, Nigeria — a party-by-party breakdown from Nigeria 2.0.`
     return {

@@ -4,6 +4,7 @@ import { HomeNav } from './HomeNav'
 import { HomeFooter } from './HomeFooter'
 import { NigeriaMap } from './NigeriaMap'
 import { NIGERIA_STATES } from '../nigeriaStates'
+import { stateSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 
 export const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -217,7 +218,7 @@ export function Race2027({ race }: { race: string }) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
                           {states.map((st) => (
-                            <Link key={st.name} to="/states/$state" params={{ state: st.name }} style={{ display: 'block', textDecoration: 'none', background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
+                            <Link key={st.name} to="/states/$state" params={{ state: stateSlug(st.name) }} style={{ display: 'block', textDecoration: 'none', background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
                               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
                                 <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{st.name}</span>
                                 {!noData && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px' }}>{Math.round(st.score)}%</span>}

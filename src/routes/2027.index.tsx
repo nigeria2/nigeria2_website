@@ -4,6 +4,7 @@ import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { TrendChart } from '../components/TrendChart'
 import { NIGERIA_STATES } from '../nigeriaStates'
+import { stateSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 import { colorOf, RACES, RACE_PATH, TYPE_LABEL, weekLabel, type Row } from '../components/Race2027'
 
@@ -196,7 +197,7 @@ function Overview2027() {
                 <Link
                   key={s.name}
                   to="/states/$state"
-                  params={{ state: s.name }}
+                  params={{ state: stateSlug(s.name) }}
                   className="nav-underline"
                   style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c', textDecoration: 'none', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '8px', padding: '11px 14px' }}
                 >
