@@ -137,9 +137,9 @@ function StatePage() {
                   {lga.lgas.map((l) => {
                     const words = l.lga.split(/\s+/)
                     const lines = words.length <= 1 ? [l.lga] : [words[0], words.slice(1).join(' ')]
-                    const FS = 12
+                    const FS = 15
                     return (
-                      <text key={`t-${l.lga}`} textAnchor="middle" fontFamily="'Archivo', sans-serif" fontWeight={700} fontSize={FS} fill="#111111" style={{ paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: 1.1, pointerEvents: 'none' }}>
+                      <text key={`t-${l.lga}`} textAnchor="middle" fontFamily="'Archivo', sans-serif" fontWeight={700} fontSize={FS} fill="#111111" style={{ paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: 1.4, pointerEvents: 'none' }}>
                         {lines.length === 1 ? (
                           <tspan x={l.cx} y={l.cy + FS * 0.34}>{lines[0]}</tspan>
                         ) : (
