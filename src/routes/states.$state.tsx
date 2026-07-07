@@ -114,6 +114,16 @@ function StatePage() {
     viewBox = `${x - pad} ${y - pad} ${w + pad * 2} ${h + pad * 2}`
   }
 
+  const govTotal = governor.reduce((sum, g) => sum + (g.votes || 0), 0)
+  const panelStyle: React.CSSProperties = { background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px' }
+  const panelTitle: React.CSSProperties = { fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', marginBottom: '4px' }
+  const statRow = (label: string, value: string) => (
+    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', padding: '8px 0', borderTop: '1px solid #f2f5f1' }}>
+      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#5c6b60' }}>{label}</span>
+      <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{value}</span>
+    </div>
+  )
+
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
@@ -136,52 +146,7 @@ function StatePage() {
       </div>
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 72px' }}>
-        {/* key statistics */}
-        {facts && (
-          <div style={{ marginBottom: '30px' }}>
-            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '22px', color: '#0f2a1c', margin: '0 0 14px' }}>Key statistics</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '12px' }}>
-              {([
-                ['Capital', facts.capital || '—'],
-                ['State code', facts.code || '—'],
-                ['Active phone lines · 2021', fmt(facts.active_phone_2021)],
-                ['Active phone lines · 2020', fmt(facts.active_phone_2020)],
-                ['Newly registered voters · 2022', fmt(facts.newly_registered_voters_2022)],
-                ['Presidential voters · 2019', fmt(facts.voters_presidential_2019)],
-                ['NIN enrolments', fmt(facts.nin_total)],
-                ['Total votes · 2023', fmt(facts.votes_2023)],
-              ] as [string, string][]).map(([label, value]) => (
-                <div key={label} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', lineHeight: 1.1 }}>{value}</div>
-                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#8aa093', marginTop: '5px' }}>{label}</div>
-                </div>
-              ))}
-            </div>
-            {(facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
-              const b = facts.buhari_votes_2019 ?? 0
-              const a = facts.atiku_votes_2019 ?? 0
-              const m = Math.max(1, b, a)
-              const row = (label: string, v: number, color: string) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
-                  <span style={{ width: '190px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>{label}</span>
-                  <div style={{ flex: 1, height: '18px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
-                  </div>
-                  <span style={{ width: '90px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
-                </div>
-              )
-              return (
-                <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', marginTop: '14px' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginBottom: '4px' }}>2019 Presidential result</div>
-                  {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
-                  {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
-                </div>
-              )
-            })()}
-          </div>
-        )}
-
-        <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.1fr', gap: '28px', alignItems: 'start' }}>
+        <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1.05fr 0.95fr', gap: '28px', alignItems: 'start' }}>
           {/* state map — segmented by LGA, coloured by verified 2023 winner */}
           <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px' }}>
             {lga && lga.lgas.length > 0 ? (
@@ -195,9 +160,9 @@ function StatePage() {
                   {lga.lgas.map((l) => {
                     const words = l.lga.split(/\s+/)
                     const lines = words.length <= 1 ? [l.lga] : [words[0], words.slice(1).join(' ')]
-                    const FS = 15
+                    const FS = 19
                     return (
-                      <text key={`t-${l.lga}`} textAnchor="middle" fontFamily="'Archivo', sans-serif" fontWeight={700} fontSize={FS} fill="#111111" style={{ paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: 1.4, pointerEvents: 'none' }}>
+                      <text key={`t-${l.lga}`} textAnchor="middle" fontFamily="'Archivo', sans-serif" fontWeight={700} fontSize={FS} fill="#111111" style={{ paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: 1.9, pointerEvents: 'none' }}>
                         {lines.length === 1 ? (
                           <tspan x={l.cx} y={l.cy + FS * 0.34}>{lines[0]}</tspan>
                         ) : (
@@ -231,27 +196,100 @@ function StatePage() {
             )}
           </div>
 
-          {/* per-race breakdown */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* statistics panel */}
+          {facts ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ ...panelStyle, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', lineHeight: 1.1 }}>{facts.capital || '—'}</div>
+                  <div style={panelTitle}>Capital</div>
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', lineHeight: 1.1 }}>{facts.code || '—'}</div>
+                  <div style={panelTitle}>State code</div>
+                </div>
+              </div>
+
+              <div style={panelStyle}>
+                <div style={panelTitle}>Voters</div>
+                {statRow('Presidential voters · 2019', fmt(facts.voters_presidential_2019))}
+                {statRow('Newly registered · 2022', fmt(facts.newly_registered_voters_2022))}
+              </div>
+
+              <div style={panelStyle}>
+                <div style={panelTitle}>Votes</div>
+                {statRow('Presidential · 2019', fmt(facts.total_votes_2019 ?? (((facts.buhari_votes_2019 ?? 0) + (facts.atiku_votes_2019 ?? 0)) || null)))}
+                {statRow('Presidential · 2023', fmt(facts.votes_2023))}
+                {statRow('Governorship · 2019', govTotal ? govTotal.toLocaleString() : '—')}
+              </div>
+
+              <div style={panelStyle}>
+                <div style={panelTitle}>Active phone lines</div>
+                {statRow('2021', fmt(facts.active_phone_2021))}
+                {statRow('2020', fmt(facts.active_phone_2020))}
+              </div>
+
+              <div style={panelStyle}>
+                <div style={panelTitle}>NIN enrolment</div>
+                {statRow('Total', fmt(facts.nin_total))}
+                {statRow('Male', fmt(facts.nin_male))}
+                {statRow('Female', fmt(facts.nin_female))}
+              </div>
+            </div>
+          ) : (
+            <div />
+          )}
+        </div>
+
+        {/* 2019 presidential result — moved below the state */}
+        {facts && (facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
+          const b = facts.buhari_votes_2019 ?? 0
+          const a = facts.atiku_votes_2019 ?? 0
+          const m = Math.max(1, b, a)
+          const row = (label: string, v: number, color: string) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+              <span style={{ width: '210px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>{label}</span>
+              <div style={{ flex: 1, minWidth: '140px', height: '20px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
+              </div>
+              <span style={{ width: '100px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
+            </div>
+          )
+          return (
+            <div style={{ marginTop: '38px' }}>
+              <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>2019 Presidential result</h2>
+              <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
+                {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
+                {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* 2027 projection (crowd-sourced forecast) */}
+        <div style={{ marginTop: '38px' }}>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2027 projection</h2>
+          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Our crowd-sourced forecast for {state}{week ? ` · ${weekLabel(week)}` : ''}.</p>
+          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {RACES.map((et) => {
               const rows = byRace[et] ?? []
               return (
                 <div key={et} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
                     <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c' }}>{TYPE_LABEL[et]}</div>
-                    {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party} leads</div>}
+                    {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party}</div>}
                   </div>
                   {rows.length === 0 ? (
-                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data for this race.</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data.</div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
                       {rows.map((r) => (
-                        <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                          <span style={{ width: '48px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
-                          <div style={{ flex: 1, height: '8px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                        <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '44px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
+                          <div style={{ flex: 1, height: '7px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
                             <div style={{ height: '100%', width: `${Math.min(100, Math.round(r.score))}%`, background: colorOf(r.party) }} />
                           </div>
-                          <span style={{ width: '38px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
+                          <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
                         </div>
                       ))}
                     </div>
@@ -332,8 +370,8 @@ function StatePage() {
         {/* Political heavyweights (only shown when we have them) */}
         {politicians.length > 0 && (
           <div style={{ marginTop: '38px' }}>
-            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>Political Heavyweights</h2>
-            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Key political figures from {state}.</p>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>Politicians</h2>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Political figures from {state}, including 2019 governorship candidates.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
               {politicians.map((pol) => (
                 <div key={pol.name} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
