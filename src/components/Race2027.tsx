@@ -175,28 +175,53 @@ export function Race2027({ race }: { race: string }) {
           {!model ? (
             <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Loading…</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '12px' }}>
-              {[...NIGERIA_STATES]
-                .sort((a, b) => a.name.localeCompare(b.name))
-                .map((s) => {
-                  const l = model.leader[s.name]
-                  const bg = l ? colorOf(l.party) : NO_DATA_FILL
-                  const fg = textOn(bg)
-                  return (
-                    <div key={s.name} style={{ background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
-                      <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{s.name}</div>
-                      {l ? (
-                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px', marginTop: '9px' }}>
-                          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px' }}>{l.party}</span>
-                          <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px' }}>{Math.round(l.score)}%</span>
+            (() => {
+              // Group states by their projected winning party.
+              const groups: Record<string, { name: string; score: number }[]> = {}
+              NIGERIA_STATES.forEach((s) => {
+                const l = model.leader[s.name]
+                const key = l ? l.party : '—'
+                ;(groups[key] ??= []).push({ name: s.name, score: l ? l.score : 0 })
+              })
+              const order = Object.keys(groups)
+                .filter((k) => k !== '—')
+                .sort((a, b) => groups[b].length - groups[a].length || a.localeCompare(b))
+              if (groups['—']) order.push('—')
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {order.map((party) => {
+                    const noData = party === '—'
+                    const bg = noData ? NO_DATA_FILL : colorOf(party)
+                    const fg = textOn(bg)
+                    const states = groups[party].slice().sort((a, b) => a.name.localeCompare(b.name))
+                    return (
+                      <div key={party}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                          <span style={{ background: bg, color: fg, fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', padding: '6px 14px', borderRadius: '6px' }}>
+                            {noData ? 'No data' : party}
+                          </span>
+                          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#5c6b60' }}>
+                            {states.length} {states.length === 1 ? 'state' : 'states'}
+                          </span>
                         </div>
-                      ) : (
-                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', marginTop: '9px', opacity: 0.85 }}>No data</div>
-                      )}
-                    </div>
-                  )
-                })}
-            </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
+                          {states.map((st) => (
+                            <div key={st.name} style={{ background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
+                              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{st.name}</div>
+                              {noData ? (
+                                <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', marginTop: '9px', opacity: 0.85 }}>No data</div>
+                              ) : (
+                                <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', marginTop: '9px', textAlign: 'right' }}>{Math.round(st.score)}%</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()
           )}
 
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '26px 0 34px' }}>
