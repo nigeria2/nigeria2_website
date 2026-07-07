@@ -56,11 +56,11 @@ function Home() {
         }}
         className="home-main"
       >
-        <div style={{ width: '100%', aspectRatio: '4 / 3', overflow: 'hidden', background: '#1e8b3f', borderRadius: '6px' }}>
+        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '6px' }}>
           <img
             src="/fpimg.jpg"
             alt="Nigeria 2.0 team"
-            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
           />
         </div>
 
