@@ -77,7 +77,20 @@ function Onboarding() {
   const [f, setF] = useState<Form>({ name: '', phone: '', gender: '', yob: '', state: '', lga: '', residence: '', agree: false })
 
   useEffect(() => {
-    if (user) setF((prev) => ({ ...prev, name: prev.name || user.full_name || '' }))
+    let stash: { full_name?: string; mobile?: string; state?: string } = {}
+    try {
+      stash = JSON.parse(localStorage.getItem('n2_interested') || '{}')
+    } catch {
+      /* ignore */
+    }
+    setF((prev) => ({
+      ...prev,
+      name: prev.name || user?.full_name || stash.full_name || '',
+      phone: prev.phone || user?.phone || stash.mobile || '',
+      state: prev.state || user?.home_state || stash.state || '',
+      lga: prev.lga || user?.home_lga || '',
+      residence: prev.residence || user?.residence_state || '',
+    }))
   }, [user])
 
   const setField = (k: keyof Form, v: string | boolean) => {
@@ -132,6 +145,11 @@ function Onboarding() {
           }),
         })
         if (!res.ok) throw new Error('save failed')
+        try {
+          localStorage.removeItem('n2_interested')
+        } catch {
+          /* ignore */
+        }
         await refresh()
         navigate({ to: '/dashboard' })
       } catch {

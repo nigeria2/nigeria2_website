@@ -47,6 +47,11 @@ export function JoinForm() {
           res.status === 422 ? 'Please check your details and try again.' : `Something went wrong (${res.status}).`,
         )
       }
+      try {
+        localStorage.setItem('n2_interested', JSON.stringify(payload))
+      } catch {
+        /* ignore */
+      }
       setJoined(true)
     } catch (err) {
       setError(err instanceof Error && err.message ? err.message : 'Could not submit — please try again.')
@@ -58,10 +63,16 @@ export function JoinForm() {
   if (joined) {
     return (
       <div style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '6px', padding: '32px', textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#ffe14d', marginBottom: '8px' }}>YOU'RE IN 🎉</div>
-        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.55, color: '#eafaf0', margin: 0 }}>
-          Thank you for joining the movement. We'll be in touch with ways to help build a better Nigeria.
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#ffe14d', marginBottom: '8px' }}>ALMOST THERE 🎉</div>
+        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.55, color: '#eafaf0', margin: '0 0 20px' }}>
+          Your details are saved. Finish creating your account with Google — we'll pre-fill everything you just entered.
         </p>
+        <Link
+          to="/signup"
+          style={{ display: 'inline-block', width: '100%', boxSizing: 'border-box', border: 'none', borderRadius: '2px', background: '#ffe14d', color: '#0f4a2c', fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', letterSpacing: '0.02em', padding: '17px', textDecoration: 'none' }}
+        >
+          COMPLETE SIGN-UP WITH GOOGLE →
+        </Link>
       </div>
     )
   }

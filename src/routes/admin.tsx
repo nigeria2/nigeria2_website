@@ -14,7 +14,7 @@ export const Route = createFileRoute('/admin')({
 type View = 'users' | 'experts' | 'traces' | 'predictions' | 'ballots'
 
 const NAV: { id: View; label: string; icon: string }[] = [
-  { id: 'users', label: 'Signed Up Users', icon: '👥' },
+  { id: 'users', label: 'Interested Users', icon: '👥' },
   { id: 'experts', label: 'Experts', icon: '🎓' },
   { id: 'traces', label: 'Traces', icon: '🧭' },
   { id: 'predictions', label: 'Predictions', icon: '🎯' },
@@ -118,7 +118,7 @@ function SignedUpUsers() {
     let active = true
     setError('')
     setRows(null)
-    apiFetch('/api/admin/signups', token)
+    apiFetch('/api/admin/interested-users', token)
       .then((r) => {
         if (!r.ok) throw new Error(String(r.status))
         return r.json()
@@ -149,7 +149,7 @@ function SignedUpUsers() {
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
     const a = document.createElement('a')
     a.href = url
-    a.download = 'n2-signed-up-users.csv'
+    a.download = 'n2-interested-users.csv'
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 2000)
   }
@@ -158,9 +158,9 @@ function SignedUpUsers() {
     <div>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '18px' }}>
         <div>
-          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#0f2a1c', margin: '0 0 4px' }}>Signed-up users</h1>
+          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#0f2a1c', margin: '0 0 4px' }}>Interested users</h1>
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: 0 }}>
-            {rows === null ? 'Loading…' : `${rows.length} ${rows.length === 1 ? 'person has' : 'people have'} joined the movement.`}
+            {rows === null ? 'Loading…' : `${rows.length} ${rows.length === 1 ? 'person has' : 'people have'} registered interest — awaiting Google sign-up. Once they sign in they move to Experts.`}
           </p>
         </div>
         {rows && rows.length > 0 && (
