@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { TrendChart } from '../components/TrendChart'
+import { NIGERIA_STATES } from '../nigeriaStates'
 import { API_BASE } from '../config'
 import { colorOf, RACES, RACE_PATH, TYPE_LABEL, weekLabel, type Row } from '../components/Race2027'
 
@@ -181,8 +182,29 @@ function Overview2027() {
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '20px 40px 40px' }}>
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#9fd9b8', margin: 0 }}>
-          Figures are national roll-ups. State-level maps and the per-state zone breakdown live on each race page.
+          Figures are national roll-ups. Open a race for the full state-by-state map, or jump to a state below.
         </p>
+      </div>
+
+      <div style={{ background: '#f4f7f2' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '34px 40px 56px' }}>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '22px', color: '#0f2a1c', margin: '0 0 16px' }}>Browse by state</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '8px' }}>
+            {[...NIGERIA_STATES]
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((s) => (
+                <Link
+                  key={s.name}
+                  to="/states/$state"
+                  params={{ state: s.name }}
+                  className="nav-underline"
+                  style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c', textDecoration: 'none', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '8px', padding: '11px 14px' }}
+                >
+                  {s.name} →
+                </Link>
+              ))}
+          </div>
+        </div>
       </div>
 
       <HomeFooter />

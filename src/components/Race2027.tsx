@@ -217,7 +217,7 @@ export function Race2027({ race }: { race: string }) {
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
                           {states.map((st) => (
-                            <div key={st.name} style={{ background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
+                            <Link key={st.name} to="/states/$state" params={{ state: st.name }} style={{ display: 'block', textDecoration: 'none', background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
                               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
                                 <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{st.name}</span>
                                 {!noData && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px' }}>{Math.round(st.score)}%</span>}
@@ -229,7 +229,7 @@ export function Race2027({ race }: { race: string }) {
                                   2nd · {st.second.party} {Math.round(st.second.score)}%
                                 </div>
                               ) : null}
-                            </div>
+                            </Link>
                           ))}
                         </div>
                       </div>
