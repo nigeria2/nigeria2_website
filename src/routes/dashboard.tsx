@@ -165,6 +165,7 @@ function Dashboard() {
           N<span style={{ color: '#ffe14d' }}>2.0</span>
         </Link>
         <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', letterSpacing: '0.14em', color: '#9fd9b8', textTransform: 'uppercase' }}>Contributor Dashboard</span>
+        <Link to="/predictions" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', letterSpacing: '0.04em', color: '#eafaf0', textDecoration: 'none', textTransform: 'uppercase', borderBottom: '2px solid rgba(255,255,255,0.3)', paddingBottom: '2px' }}>Predictions Board</Link>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '14px' }}>
           <div style={{ textAlign: 'right', lineHeight: 1.15 }}>
             <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#fff' }}>{profile.name}</div>

@@ -13,6 +13,7 @@ import { Route as TeamRouteImport } from './routes/team'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProblemUnitsRouteImport } from './routes/problem-units'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PredictionsRouteImport } from './routes/predictions'
 import { Route as PartiesRouteImport } from './routes/parties'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MethodologyRouteImport } from './routes/methodology'
@@ -46,6 +47,11 @@ const ProblemUnitsRoute = ProblemUnitsRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PredictionsRoute = PredictionsRouteImport.update({
+  id: '/predictions',
+  path: '/predictions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartiesRoute = PartiesRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
+  '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/predictions'
     | '/privacy'
     | '/problem-units'
     | '/signup'
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/predictions'
     | '/privacy'
     | '/problem-units'
     | '/signup'
@@ -231,6 +242,7 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
+    | '/predictions'
     | '/privacy'
     | '/problem-units'
     | '/signup'
@@ -252,6 +264,7 @@ export interface RootRouteChildren {
   MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
   PartiesRoute: typeof PartiesRoute
+  PredictionsRoute: typeof PredictionsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProblemUnitsRoute: typeof ProblemUnitsRoute
   SignupRoute: typeof SignupRoute
@@ -286,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/predictions': {
+      id: '/predictions'
+      path: '/predictions'
+      fullPath: '/predictions'
+      preLoaderRoute: typeof PredictionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parties': {
@@ -416,6 +436,7 @@ const rootRouteChildren: RootRouteChildren = {
   MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
   PartiesRoute: PartiesRoute,
+  PredictionsRoute: PredictionsRoute,
   PrivacyRoute: PrivacyRoute,
   ProblemUnitsRoute: ProblemUnitsRoute,
   SignupRoute: SignupRoute,
