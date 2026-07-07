@@ -11,13 +11,14 @@ export const Route = createFileRoute('/admin')({
   ),
 })
 
-type View = 'users' | 'experts' | 'traces' | 'predictions'
+type View = 'users' | 'experts' | 'traces' | 'predictions' | 'ballots'
 
 const NAV: { id: View; label: string; icon: string }[] = [
   { id: 'users', label: 'Signed Up Users', icon: '👥' },
   { id: 'experts', label: 'Experts', icon: '🎓' },
   { id: 'traces', label: 'Traces', icon: '🧭' },
   { id: 'predictions', label: 'Predictions', icon: '🎯' },
+  { id: 'ballots', label: 'Party Ballots', icon: '🗳️' },
 ]
 
 const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governor', senate: 'Senate' }
@@ -84,7 +85,7 @@ function Admin() {
 
         {/* main */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : <Traces />}
+          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : view === 'ballots' ? <PartyBallots /> : <Traces />}
         </div>
       </div>
     </div>
@@ -521,6 +522,80 @@ function Predictions() {
             </tbody>
           </table>
         </div>
+      )}
+    </div>
+  )
+}
+
+type PartyRow = { acronym: string; name: string }
+
+function PartyBallots() {
+  const { token } = useAuth()
+  const [parties, setParties] = useState<PartyRow[] | null>(null)
+  const [rel, setRel] = useState<Record<string, string[]>>({})
+  const [etype, setEtype] = useState('presidential')
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    apiFetch('/api/parties', token).then((r) => r.json()).then((d: PartyRow[]) => setParties(d)).catch(() => setParties([]))
+    apiFetch('/api/parties/elections', token).then((r) => r.json()).then((d: Record<string, string[]>) => setRel(d)).catch(() => {})
+  }, [token])
+
+  const selected = new Set(rel[etype] ?? [])
+  const toggle = (acr: string) => {
+    setSaved(false)
+    setRel((r) => {
+      const cur = new Set(r[etype] ?? [])
+      if (cur.has(acr)) cur.delete(acr)
+      else cur.add(acr)
+      return { ...r, [etype]: [...cur] }
+    })
+  }
+  const save = async () => {
+    const res = await apiFetch('/api/admin/parties/elections', token, {
+      method: 'PUT',
+      body: JSON.stringify({ election_type: etype, acronyms: rel[etype] ?? [] }),
+    })
+    if (res.ok) setSaved(true)
+  }
+
+  const tabStyle = (active: boolean): React.CSSProperties => ({ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', padding: '9px 18px', borderRadius: '30px', cursor: 'pointer', border: '2px solid #0f8a4a', background: active ? '#0f8a4a' : '#fff', color: active ? '#fff' : '#0f8a4a' })
+
+  return (
+    <div>
+      <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#0f2a1c', margin: '0 0 4px' }}>Party ballots</h1>
+      <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 20px' }}>
+        Choose which parties appear on the ballot for each race. This controls the sliders contributors see and the columns in the predictions editor.
+      </p>
+
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '18px' }}>
+        {['presidential', 'governor', 'senate'].map((t) => (
+          <button key={t} onClick={() => { setEtype(t); setSaved(false) }} style={tabStyle(etype === t)}>{TYPE_LABEL[t]}</button>
+        ))}
+        <span style={{ marginLeft: 'auto', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#5c6b60' }}>{selected.size} selected</span>
+      </div>
+
+      {!parties ? (
+        <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '44px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Loading…</div>
+      ) : (
+        <>
+          <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '10px' }}>
+            {parties.map((p) => {
+              const on = selected.has(p.acronym)
+              return (
+                <label key={p.acronym} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px', cursor: 'pointer', border: `2px solid ${on ? '#0f8a4a' : '#e4ebe5'}`, background: on ? '#eef7f1' : '#fff' }}>
+                  <input type="checkbox" checked={on} onChange={() => toggle(p.acronym)} style={{ width: '17px', height: '17px', accentColor: '#0f8a4a', flex: 'none' }} />
+                  <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: on ? '#0f8a4a' : '#5c6b60', minWidth: '42px', flex: 'none' }}>{p.acronym}</span>
+                  <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#5c6b60', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                </label>
+              )
+            })}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginTop: '18px' }}>
+            <button onClick={save} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '12px 26px', cursor: 'pointer' }}>Save {TYPE_LABEL[etype]} ballot</button>
+            {saved && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f8a4a' }}>✓ Saved</span>}
+          </div>
+        </>
       )}
     </div>
   )

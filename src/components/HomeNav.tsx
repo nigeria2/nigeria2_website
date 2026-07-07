@@ -17,6 +17,7 @@ export function HomeNav() {
   const { user } = useAuth()
   const pathname = useLocation({ select: (l) => l.pathname })
   const on2027 = pathname === '/2027'
+  const onProblem = pathname === '/problem-units'
   return (
     <div
       style={{
@@ -43,6 +44,9 @@ export function HomeNav() {
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '34px' }}>
         <Link to="/2027" className="nav-underline" style={{ ...navLink, borderBottom: on2027 ? '2px solid #ffe14d' : '2px solid transparent' }}>
           2027 Prediction
+        </Link>
+        <Link to="/problem-units" className="nav-underline" style={{ ...navLink, borderBottom: onProblem ? '2px solid #ffe14d' : '2px solid transparent' }}>
+          Problem Polling Units
         </Link>
         <a href="https://forensic.nigeria2.com/" className="nav-underline" style={{ ...navLink, borderBottom: '2px solid transparent' }}>
           2023 Vote Counting

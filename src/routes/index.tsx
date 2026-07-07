@@ -56,11 +56,11 @@ function Home() {
         }}
         className="home-main"
       >
-        <div style={{ width: '100%', aspectRatio: '4 / 3', overflow: 'hidden' }}>
+        <div style={{ width: '100%', aspectRatio: '4 / 3', overflow: 'hidden', background: '#1e8b3f', borderRadius: '6px' }}>
           <img
-            src="/team.png"
+            src="/fpimg.jpg"
             alt="Nigeria 2.0 team"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center', display: 'block' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
           />
         </div>
 
@@ -68,14 +68,14 @@ function Home() {
           <h1
             style={{
               fontFamily: "'Archivo Black', sans-serif",
-              fontSize: '38px',
-              lineHeight: 0.9,
+              fontSize: '34px',
+              lineHeight: 1.04,
               color: '#ffffff',
               margin: '0 0 18px',
               letterSpacing: '-0.01em',
             }}
           >
-            JOIN <span style={{ color: '#ffe14d' }}>US</span>
+            Our goal is to make the election honest. <span style={{ color: '#ffe14d' }}>Join Us.</span>
           </h1>
           <JoinForm />
         </div>

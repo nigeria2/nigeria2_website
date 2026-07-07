@@ -41,8 +41,6 @@ const TIPS = [
 const lblStyle: React.CSSProperties = { display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', letterSpacing: '0.06em', color: '#0f2a1c', textTransform: 'uppercase', marginBottom: '6px' }
 const inputStyle: React.CSSProperties = { width: '100%', border: '2px solid #d7e0d9', borderRadius: '4px', background: '#f9fbf8', padding: '13px 14px', fontFamily: "'Archivo', sans-serif", fontSize: '16px', color: '#0f2a1c' }
 const textareaStyle: React.CSSProperties = { ...inputStyle, resize: 'vertical', lineHeight: 1.5 }
-const chipBase: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', padding: '10px 18px', borderRadius: '30px', cursor: 'pointer', border: '2px solid #cdd8cf', background: '#fff', color: '#33413a' }
-const chipOn: React.CSSProperties = { ...chipBase, background: '#0f8a4a', color: '#fff', border: '2px solid #0f8a4a' }
 
 type Analysis = { id?: number; election_type: string; state: string; lga: string; senatorial_district?: string; leading_party?: string; scores?: Record<string, number>; notes: string; measurement_week?: string; created_at?: string }
 // Parties on the ballot per election type (presidential differs from state races).
@@ -202,12 +200,25 @@ function Dashboard() {
                 <form onSubmit={submitAnalysis} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                   <div>
                     <label style={lblStyle}>What are you predicting?</label>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {RACES.map((r) => (
-                        <button key={r.value} type="button" onClick={() => { setF({ election_type: r.value }); setScores(zeroScores(r.value)) }} style={form.election_type === r.value ? chipOn : chipBase}>
-                          {r.label}
-                        </button>
-                      ))}
+                    <div style={{ display: 'flex', gap: '2px', borderBottom: '2px solid #e4ebe5' }}>
+                      {RACES.map((r) => {
+                        const active = form.election_type === r.value
+                        return (
+                          <button
+                            key={r.value}
+                            type="button"
+                            onClick={() => { setF({ election_type: r.value }); setScores(zeroScores(r.value)) }}
+                            style={{
+                              fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '15px', padding: '12px 22px',
+                              background: 'transparent', border: 'none', cursor: 'pointer', marginBottom: '-2px',
+                              color: active ? '#0f8a4a' : '#5c6b60',
+                              borderBottom: active ? '3px solid #0f8a4a' : '3px solid transparent',
+                            }}
+                          >
+                            {r.label}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
 

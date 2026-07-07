@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProblemUnitsRouteImport } from './routes/problem-units'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PartiesRouteImport } from './routes/parties'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -31,6 +32,11 @@ const TeamRoute = TeamRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProblemUnitsRoute = ProblemUnitsRouteImport.update({
+  id: '/problem-units',
+  path: '/problem-units',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
   '/privacy': typeof PrivacyRoute
+  '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
 }
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
   '/privacy': typeof PrivacyRoute
+  '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
 }
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
   '/privacy': typeof PrivacyRoute
+  '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
 }
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/parties'
     | '/privacy'
+    | '/problem-units'
     | '/signup'
     | '/team'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/parties'
     | '/privacy'
+    | '/problem-units'
     | '/signup'
     | '/team'
   id:
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/parties'
     | '/privacy'
+    | '/problem-units'
     | '/signup'
     | '/team'
   fileRoutesById: FileRoutesById
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PartiesRoute: typeof PartiesRoute
   PrivacyRoute: typeof PrivacyRoute
+  ProblemUnitsRoute: typeof ProblemUnitsRoute
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
 }
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/problem-units': {
+      id: '/problem-units'
+      path: '/problem-units'
+      fullPath: '/problem-units'
+      preLoaderRoute: typeof ProblemUnitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -307,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PartiesRoute: PartiesRoute,
   PrivacyRoute: PrivacyRoute,
+  ProblemUnitsRoute: ProblemUnitsRoute,
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
 }
