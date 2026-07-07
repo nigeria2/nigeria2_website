@@ -19,9 +19,17 @@ type BoardPrediction = {
 type Heavyweight = { name: string; title: string; party: string; note: string }
 type LgaShape = { lga: string; leader: string; pct: number; cx: number; cy: number; d: string }
 type LgaGeo = { viewBox: string; lgas: LgaShape[] }
+type Facts = {
+  code: string; capital: string; area_sq_km: number | null; census_1991: number | null; census_2006: number | null; population_projection: number | null
+  active_phone_2021: number | null; active_phone_2020: number | null; newly_registered_voters_2022: number | null
+  voters_presidential_2019: number | null; buhari_votes_2019: number | null; atiku_votes_2019: number | null
+  total_votes_2019: number | null; votes_2023: number | null; nin_total: number | null; nin_male: number | null; nin_female: number | null
+}
+type GovCand = { name: string; party: string; votes: number; position: number }
 type LoaderData = {
   state: string; week: string; byRace: Record<string, PartyScore[]>
   predictions: BoardPrediction[]; politicians: Heavyweight[]; lga: LgaGeo | null
+  facts: Facts | null; governor: GovCand[]
 }
 
 export const Route = createFileRoute('/states/$state')({
@@ -50,10 +58,14 @@ export const Route = createFileRoute('/states/$state')({
     }
     let predictions: BoardPrediction[] = []
     let politicians: Heavyweight[] = []
+    let facts: Facts | null = null
+    let governor: GovCand[] = []
     try {
       const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(state)}`).then((r) => r.json())
       predictions = detail.predictions ?? []
       politicians = detail.politicians ?? []
+      facts = detail.facts ?? null
+      governor = detail.governor_2019 ?? []
     } catch {
       /* leave empty */
     }
@@ -63,7 +75,7 @@ export const Route = createFileRoute('/states/$state')({
     } catch {
       lga = null
     }
-    return { state, week, byRace, predictions, politicians, lga }
+    return { state, week, byRace, predictions, politicians, lga, facts, governor }
   },
   head: ({ params }) => {
     const s = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
@@ -87,7 +99,8 @@ function weekLabel(iso: string): string {
 }
 
 function StatePage() {
-  const { state, week, byRace, predictions, politicians, lga } = Route.useLoaderData()
+  const { state, week, byRace, predictions, politicians, lga, facts, governor } = Route.useLoaderData()
+  const fmt = (n: number | null | undefined) => (n == null ? '—' : n.toLocaleString())
   const shape = NIGERIA_STATES.find((s) => s.name === state)
   const bounds = STATE_BOUNDS[state]
   const pres = byRace.presidential ?? []
@@ -123,6 +136,51 @@ function StatePage() {
       </div>
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 72px' }}>
+        {/* key statistics */}
+        {facts && (
+          <div style={{ marginBottom: '30px' }}>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '22px', color: '#0f2a1c', margin: '0 0 14px' }}>Key statistics</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: '12px' }}>
+              {([
+                ['Capital', facts.capital || '—'],
+                ['State code', facts.code || '—'],
+                ['Active phone lines · 2021', fmt(facts.active_phone_2021)],
+                ['Active phone lines · 2020', fmt(facts.active_phone_2020)],
+                ['Newly registered voters · 2022', fmt(facts.newly_registered_voters_2022)],
+                ['Presidential voters · 2019', fmt(facts.voters_presidential_2019)],
+                ['NIN enrolments', fmt(facts.nin_total)],
+                ['Total votes · 2023', fmt(facts.votes_2023)],
+              ] as [string, string][]).map(([label, value]) => (
+                <div key={label} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px' }}>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', lineHeight: 1.1 }}>{value}</div>
+                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#8aa093', marginTop: '5px' }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            {(facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
+              const b = facts.buhari_votes_2019 ?? 0
+              const a = facts.atiku_votes_2019 ?? 0
+              const m = Math.max(1, b, a)
+              const row = (label: string, v: number, color: string) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px' }}>
+                  <span style={{ width: '190px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>{label}</span>
+                  <div style={{ flex: 1, height: '18px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
+                  </div>
+                  <span style={{ width: '90px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
+                </div>
+              )
+              return (
+                <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', marginTop: '14px' }}>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginBottom: '4px' }}>2019 Presidential result</div>
+                  {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
+                  {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
         <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.1fr', gap: '28px', alignItems: 'start' }}>
           {/* state map — segmented by LGA, coloured by verified 2023 winner */}
           <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px' }}>
@@ -203,6 +261,30 @@ function StatePage() {
             })}
           </div>
         </div>
+
+        {/* 2019 governorship — party history & votes vs contenders */}
+        {governor.length > 0 && (() => {
+          const gmax = Math.max(1, ...governor.map((g) => g.votes))
+          return (
+            <div style={{ marginTop: '38px' }}>
+              <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2019 Governorship</h2>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Each candidate's party and the votes they won against their contenders.</p>
+              <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {governor.map((g) => (
+                  <div key={g.name + g.position} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <span style={{ width: '22px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: g.position === 1 ? '#0f8a4a' : '#b3c2b8', textAlign: 'center' }}>{g.position}</span>
+                    <span style={{ width: '180px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{g.name}</span>
+                    <span style={{ flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(g.party), padding: '3px 10px', borderRadius: '20px', minWidth: '54px', textAlign: 'center' }}>{g.party}</span>
+                    <div style={{ flex: 1, minWidth: '120px', height: '16px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${Math.round((g.votes / gmax) * 100)}%`, background: colorOf(g.party) }} />
+                    </div>
+                    <span style={{ width: '92px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{g.votes.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Predictions on record for this state */}
         <div style={{ marginTop: '38px' }}>
