@@ -23,6 +23,10 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R2027IndexRouteImport } from './routes/2027.index'
+import { Route as R2027SenateRouteImport } from './routes/2027.senate'
+import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
+import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -94,10 +98,30 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const R2027IndexRoute = R2027IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => R2027Route,
+} as any)
+const R2027SenateRoute = R2027SenateRouteImport.update({
+  id: '/senate',
+  path: '/senate',
+  getParentRoute: () => R2027Route,
+} as any)
+const R2027PresidentialRoute = R2027PresidentialRouteImport.update({
+  id: '/presidential',
+  path: '/presidential',
+  getParentRoute: () => R2027Route,
+} as any)
+const R2027GovernorRoute = R2027GovernorRouteImport.update({
+  id: '/governor',
+  path: '/governor',
+  getParentRoute: () => R2027Route,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/2027': typeof R2027Route
+  '/2027': typeof R2027RouteWithChildren
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/contribute': typeof ContributeRoute
@@ -110,10 +134,13 @@ export interface FileRoutesByFullPath {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/2027/governor': typeof R2027GovernorRoute
+  '/2027/presidential': typeof R2027PresidentialRoute
+  '/2027/senate': typeof R2027SenateRoute
+  '/2027/': typeof R2027IndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/2027': typeof R2027Route
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/contribute': typeof ContributeRoute
@@ -126,11 +153,15 @@ export interface FileRoutesByTo {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/2027/governor': typeof R2027GovernorRoute
+  '/2027/presidential': typeof R2027PresidentialRoute
+  '/2027/senate': typeof R2027SenateRoute
+  '/2027': typeof R2027IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/2027': typeof R2027Route
+  '/2027': typeof R2027RouteWithChildren
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/contribute': typeof ContributeRoute
@@ -143,6 +174,10 @@ export interface FileRoutesById {
   '/problem-units': typeof ProblemUnitsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/2027/governor': typeof R2027GovernorRoute
+  '/2027/presidential': typeof R2027PresidentialRoute
+  '/2027/senate': typeof R2027SenateRoute
+  '/2027/': typeof R2027IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,10 +196,13 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/2027/governor'
+    | '/2027/presidential'
+    | '/2027/senate'
+    | '/2027/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/2027'
     | '/admin'
     | '/contact'
     | '/contribute'
@@ -177,6 +215,10 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/2027/governor'
+    | '/2027/presidential'
+    | '/2027/senate'
+    | '/2027'
   id:
     | '__root__'
     | '/'
@@ -193,11 +235,15 @@ export interface FileRouteTypes {
     | '/problem-units'
     | '/signup'
     | '/team'
+    | '/2027/governor'
+    | '/2027/presidential'
+    | '/2027/senate'
+    | '/2027/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  R2027Route: typeof R2027Route
+  R2027Route: typeof R2027RouteWithChildren
   AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
   ContributeRoute: typeof ContributeRoute
@@ -312,12 +358,56 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/2027/': {
+      id: '/2027/'
+      path: '/'
+      fullPath: '/2027/'
+      preLoaderRoute: typeof R2027IndexRouteImport
+      parentRoute: typeof R2027Route
+    }
+    '/2027/senate': {
+      id: '/2027/senate'
+      path: '/senate'
+      fullPath: '/2027/senate'
+      preLoaderRoute: typeof R2027SenateRouteImport
+      parentRoute: typeof R2027Route
+    }
+    '/2027/presidential': {
+      id: '/2027/presidential'
+      path: '/presidential'
+      fullPath: '/2027/presidential'
+      preLoaderRoute: typeof R2027PresidentialRouteImport
+      parentRoute: typeof R2027Route
+    }
+    '/2027/governor': {
+      id: '/2027/governor'
+      path: '/governor'
+      fullPath: '/2027/governor'
+      preLoaderRoute: typeof R2027GovernorRouteImport
+      parentRoute: typeof R2027Route
+    }
   }
 }
 
+interface R2027RouteChildren {
+  R2027GovernorRoute: typeof R2027GovernorRoute
+  R2027PresidentialRoute: typeof R2027PresidentialRoute
+  R2027SenateRoute: typeof R2027SenateRoute
+  R2027IndexRoute: typeof R2027IndexRoute
+}
+
+const R2027RouteChildren: R2027RouteChildren = {
+  R2027GovernorRoute: R2027GovernorRoute,
+  R2027PresidentialRoute: R2027PresidentialRoute,
+  R2027SenateRoute: R2027SenateRoute,
+  R2027IndexRoute: R2027IndexRoute,
+}
+
+const R2027RouteWithChildren = R2027Route._addFileChildren(R2027RouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  R2027Route: R2027Route,
+  R2027Route: R2027RouteWithChildren,
   AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
   ContributeRoute: ContributeRoute,
