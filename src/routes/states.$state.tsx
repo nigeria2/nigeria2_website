@@ -241,88 +241,93 @@ function StatePage() {
           )}
         </div>
 
-        {/* 2019 presidential result — moved below the state */}
-        {facts && (facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
-          const b = facts.buhari_votes_2019 ?? 0
-          const a = facts.atiku_votes_2019 ?? 0
-          const m = Math.max(1, b, a)
-          const row = (label: string, v: number, color: string) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-              <span style={{ width: '210px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>{label}</span>
-              <div style={{ flex: 1, minWidth: '140px', height: '20px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
-              </div>
-              <span style={{ width: '100px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
-            </div>
-          )
-          return (
-            <div style={{ marginTop: '38px' }}>
-              <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>2019 Presidential result</h2>
-              <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
-                {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
-                {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
-              </div>
-            </div>
-          )
-        })()}
-
-        {/* 2027 projection (crowd-sourced forecast) */}
+        {/* all elections under one panel */}
         <div style={{ marginTop: '38px' }}>
-          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2027 projection</h2>
-          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Our crowd-sourced forecast for {state}{week ? ` · ${weekLabel(week)}` : ''}.</p>
-          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-            {RACES.map((et) => {
-              const rows = byRace[et] ?? []
-              return (
-                <div key={et} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
-                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c' }}>{TYPE_LABEL[et]}</div>
-                    {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party}</div>}
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>Elections</h2>
+          <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+            {/* 2019 Presidential */}
+            {facts && (facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
+              const b = facts.buhari_votes_2019 ?? 0
+              const a = facts.atiku_votes_2019 ?? 0
+              const m = Math.max(1, b, a)
+              const row = (label: string, v: number, color: string) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                  <span style={{ width: '210px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>{label}</span>
+                  <div style={{ flex: 1, minWidth: '140px', height: '20px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
                   </div>
-                  {rows.length === 0 ? (
-                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data.</div>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-                      {rows.map((r) => (
-                        <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '44px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
-                          <div style={{ flex: 1, height: '7px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${Math.min(100, Math.round(r.score))}%`, background: colorOf(r.party) }} />
-                          </div>
-                          <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <span style={{ width: '100px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
                 </div>
               )
-            })}
-          </div>
-        </div>
+              return (
+                <div>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '6px' }}>2019 Presidential</div>
+                  {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
+                  {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
+                </div>
+              )
+            })()}
 
-        {/* 2019 governorship — party history & votes vs contenders */}
-        {governor.length > 0 && (() => {
-          const gmax = Math.max(1, ...governor.map((g) => g.votes))
-          return (
-            <div style={{ marginTop: '38px' }}>
-              <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2019 Governorship</h2>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Each candidate's party and the votes they won against their contenders.</p>
-              <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {governor.map((g) => (
-                  <div key={g.name + g.position} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                    <span style={{ width: '22px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: g.position === 1 ? '#0f8a4a' : '#b3c2b8', textAlign: 'center' }}>{g.position}</span>
-                    <span style={{ width: '180px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{g.name}</span>
-                    <span style={{ flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(g.party), padding: '3px 10px', borderRadius: '20px', minWidth: '54px', textAlign: 'center' }}>{g.party}</span>
-                    <div style={{ flex: 1, minWidth: '120px', height: '16px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${Math.round((g.votes / gmax) * 100)}%`, background: colorOf(g.party) }} />
-                    </div>
-                    <span style={{ width: '92px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{g.votes.toLocaleString()}</span>
+            {/* 2019 Governorship */}
+            {governor.length > 0 && (() => {
+              const gmax = Math.max(1, ...governor.map((g) => g.votes))
+              return (
+                <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '22px' }}>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '14px' }}>2019 Governorship</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {governor.map((g) => (
+                      <div key={g.name + g.position} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <span style={{ width: '22px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: g.position === 1 ? '#0f8a4a' : '#b3c2b8', textAlign: 'center' }}>{g.position}</span>
+                        <span style={{ width: '180px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{g.name}</span>
+                        <span style={{ flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(g.party), padding: '3px 10px', borderRadius: '20px', minWidth: '54px', textAlign: 'center' }}>{g.party}</span>
+                        <div style={{ flex: 1, minWidth: '120px', height: '16px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${Math.round((g.votes / gmax) * 100)}%`, background: colorOf(g.party) }} />
+                        </div>
+                        <span style={{ width: '92px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{g.votes.toLocaleString()}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )
+            })()}
+
+            {/* 2027 projection */}
+            <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '22px' }}>
+              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '2px' }}>2027 projection</div>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 14px' }}>Our crowd-sourced forecast{week ? ` · ${weekLabel(week)}` : ''}.</p>
+              <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {RACES.map((et) => {
+                  const rows = byRace[et] ?? []
+                  return (
+                    <div key={et} style={{ background: '#f4f7f2', borderRadius: '10px', padding: '16px 18px' }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
+                        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c' }}>{TYPE_LABEL[et]}</div>
+                        {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party}</div>}
+                      </div>
+                      {rows.length === 0 ? (
+                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data.</div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                          {rows.map((r) => (
+                            <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ width: '44px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
+                              <div style={{ flex: 1, height: '7px', borderRadius: '4px', background: '#e4ebe5', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${Math.min(100, Math.round(r.score))}%`, background: colorOf(r.party) }} />
+                              </div>
+                              <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
-          )
-        })()}
+
+          </div>
+        </div>
 
         {/* Predictions on record for this state */}
         <div style={{ marginTop: '38px' }}>
