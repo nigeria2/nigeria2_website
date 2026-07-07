@@ -1,7 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { JoinForm } from '../components/JoinForm'
-import { HomePolls } from '../components/HomePolls'
 import { HomeFooter } from '../components/HomeFooter'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -56,11 +55,11 @@ function Home() {
         }}
         className="home-main"
       >
-        <div style={{ width: '100%', overflow: 'hidden', borderRadius: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <img
             src="/fpimg.jpg"
             alt="Nigeria 2.0 team"
-            style={{ width: '100%', height: 'auto', display: 'block' }}
+            style={{ width: '100%', maxWidth: '480px', height: 'auto', display: 'block', borderRadius: '8px' }}
           />
         </div>
 
@@ -113,7 +112,34 @@ function Home() {
         </div>
       </div>
 
-      <HomePolls />
+      {/* what we're doing — links into each project */}
+      <div style={{ background: '#f4f7f2', padding: '60px 40px' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '34px', lineHeight: 1.05, color: '#0f2a1c', margin: '0 0 10px', textAlign: 'center' }}>What we're doing</h2>
+          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '17px', lineHeight: 1.6, color: '#5c6b60', margin: '0 auto 34px', maxWidth: '760px', textAlign: 'center' }}>
+            We turn civic energy into credible electoral data: a crowd-sourced 2027 forecast, a public record of the polling
+            units that failed in 2023, and an independent count of the last election. Explore each below.
+          </p>
+          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
+            {[
+              { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', to: '/2027' as const, cta: 'View the forecast' },
+              { title: '2027 Problem Polling Units', desc: 'The polling units that showed strong anomalies in 2023 — the places to watch in 2027.', to: '/problem-units' as const, cta: 'See the units' },
+              { title: 'Predictions Board', desc: 'The verified 2023 result and expert calls for every state. Add your own once you sign in.', to: '/predictions' as const, cta: 'Open the board' },
+            ].map((c) => (
+              <div key={c.title} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '26px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '19px', color: '#0f2a1c', marginBottom: '10px' }}>{c.title}</div>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', lineHeight: 1.55, color: '#5c6b60', margin: '0 0 20px', flex: 1 }}>{c.desc}</p>
+                <Link to={c.to} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', letterSpacing: '0.02em', color: '#fff', background: '#0f8a4a', textDecoration: 'none', padding: '11px 16px', borderRadius: '4px', textAlign: 'center' }}>{c.cta} →</Link>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <a href="https://forensic.nigeria2.com/" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '15px', color: '#0f8a4a', textDecoration: 'none' }}>
+              Or explore our 2023 parallel vote count →
+            </a>
+          </div>
+        </div>
+      </div>
 
       <HomeFooter />
     </div>

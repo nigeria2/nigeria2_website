@@ -12,14 +12,24 @@ const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', gover
 const RACES = ['presidential', 'governor', 'senate'] as const
 
 type PartyScore = { party: string; score: number }
-type LoaderData = { state: string; week: string; byRace: Record<string, PartyScore[]> }
+type BoardPrediction = {
+  id: number; source: string; label: string; author_name: string; election_type: string
+  leading_party: string; scores: Record<string, number>; notes: string; year: string
+}
+type Heavyweight = { name: string; title: string; party: string; note: string }
+type LoaderData = {
+  state: string; week: string; byRace: Record<string, PartyScore[]>
+  predictions: BoardPrediction[]; politicians: Heavyweight[]
+}
 
 export const Route = createFileRoute('/states/$state')({
   loader: async ({ params }): Promise<LoaderData> => {
     const state = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
+    let week = ''
+    let byRace: Record<string, PartyScore[]> = {}
     try {
       const meta = await fetch(`${API_BASE}/api/predictions/meta`).then((r) => r.json())
-      const week: string = meta.weeks?.[0] ?? ''
+      week = meta.weeks?.[0] ?? ''
       const entries = await Promise.all(
         RACES.map(async (et) => {
           const rows: { state: string; party: string; score: number }[] = await fetch(
@@ -32,10 +42,20 @@ export const Route = createFileRoute('/states/$state')({
           return [et, forState] as const
         }),
       )
-      return { state, week, byRace: Object.fromEntries(entries) }
+      byRace = Object.fromEntries(entries)
     } catch {
-      return { state, week: '', byRace: {} }
+      /* leave empty */
     }
+    let predictions: BoardPrediction[] = []
+    let politicians: Heavyweight[] = []
+    try {
+      const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(state)}`).then((r) => r.json())
+      predictions = detail.predictions ?? []
+      politicians = detail.politicians ?? []
+    } catch {
+      /* leave empty */
+    }
+    return { state, week, byRace, predictions, politicians }
   },
   head: ({ params }) => {
     const s = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
@@ -59,7 +79,7 @@ function weekLabel(iso: string): string {
 }
 
 function StatePage() {
-  const { state, week, byRace } = Route.useLoaderData()
+  const { state, week, byRace, predictions, politicians } = Route.useLoaderData()
   const shape = NIGERIA_STATES.find((s) => s.name === state)
   const bounds = STATE_BOUNDS[state]
   const pres = byRace.presidential ?? []
@@ -78,14 +98,19 @@ function StatePage() {
       <HomeNav />
 
       <div style={{ background: '#0d8244' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 26px' }}>
-          <Link to="/2027/presidential" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
-            ← Back to the map
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 26px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap' }}>
+          <div>
+            <Link to="/2027/presidential" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
+              ← Back to the map
+            </Link>
+            <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 6px', letterSpacing: '-0.01em' }}>{state} State</h1>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', color: '#c7e7d4', margin: 0 }}>
+              Projected 2027 results for {state}{week ? ` · ${weekLabel(week)}` : ''}.
+            </p>
+          </div>
+          <Link to="/predictions" style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f4a2c', background: '#ffe14d', textDecoration: 'none', padding: '13px 22px', borderRadius: '4px', marginTop: '4px' }}>
+            + Add Your Prediction
           </Link>
-          <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 6px', letterSpacing: '-0.01em' }}>{state} State</h1>
-          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', color: '#c7e7d4', margin: 0 }}>
-            Projected 2027 results for {state}{week ? ` · ${weekLabel(week)}` : ''}.
-          </p>
         </div>
       </div>
 
@@ -141,7 +166,71 @@ function StatePage() {
           </div>
         </div>
 
-        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '24px 0 0' }}>
+        {/* Predictions on record for this state */}
+        <div style={{ marginTop: '38px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: 0 }}>Predictions</h2>
+            <Link to="/predictions" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f8a4a', textDecoration: 'none' }}>+ Add your prediction</Link>
+          </div>
+          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>
+            Every prediction on record for {state} — the verified past result and contributor calls.
+          </p>
+          {predictions.length === 0 ? (
+            <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '36px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No predictions yet for {state}.</div>
+          ) : (
+            <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              {predictions.map((p) => {
+                const pastPerf = p.source === 'past_performance'
+                const entries = Object.entries(p.scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
+                return (
+                  <div key={p.id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: pastPerf ? '#8a6d3b' : '#0f8a4a', padding: '3px 9px', borderRadius: '20px' }}>{pastPerf ? 'Past performance' : 'Expert'}</span>
+                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#5c6b60', background: '#f2f5f1', padding: '3px 9px', borderRadius: '20px' }}>{TYPE_LABEL[p.election_type] ?? p.election_type}</span>
+                    </div>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginTop: '4px' }}>{p.label || p.author_name}</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{p.label ? p.author_name : (pastPerf ? p.year : `by ${p.author_name}`)} · leads {p.leading_party}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
+                      {entries.map(([party, v]) => (
+                        <div key={party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '46px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(party), padding: '2px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{party}</span>
+                          <div style={{ flex: 1, height: '6px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${Math.min(100, Math.round(v))}%`, background: colorOf(party) }} />
+                          </div>
+                          <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(v)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                    {p.notes && <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', lineHeight: 1.5, margin: '12px 0 0' }}>{p.notes}</p>}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Political heavyweights (only shown when we have them) */}
+        {politicians.length > 0 && (
+          <div style={{ marginTop: '38px' }}>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>Political Heavyweights</h2>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Key political figures from {state}.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+              {politicians.map((pol) => (
+                <div key={pol.name} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '44px', height: '44px', flex: 'none', borderRadius: '50%', background: colorOf(pol.party), color: '#fff', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {pol.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', lineHeight: 1.15 }}>{pol.name}</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{[pol.title, pol.party].filter(Boolean).join(' · ')}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '32px 0 0' }}>
           Illustrative projections aggregated from contributor traces. See our{' '}
           <Link to="/methodology" style={{ color: '#0f8a4a', fontWeight: 800 }}>methodology</Link>.
         </p>
