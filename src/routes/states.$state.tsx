@@ -18,7 +18,8 @@ type BoardPrediction = {
 }
 type Heavyweight = { name: string; title: string; party: string; note: string }
 type LgaShape = { lga: string; leader: string; pct: number; cx: number; cy: number; d: string }
-type LgaGeo = { viewBox: string; lgas: LgaShape[] }
+type WardPoint = { n: string; l: string; x: number; y: number }
+type LgaGeo = { viewBox: string; lgas: LgaShape[]; wards?: WardPoint[] }
 type Facts = {
   code: string; capital: string; area_sq_km: number | null; census_1991: number | null; census_2006: number | null; population_projection: number | null
   active_phone_2021: number | null; active_phone_2020: number | null; newly_registered_voters_2022: number | null
@@ -174,6 +175,11 @@ function StatePage() {
                       </text>
                     )
                   })}
+                  {(lga.wards ?? []).map((w, i) => (
+                    <circle key={`w-${i}`} cx={w.x} cy={w.y} r={2.8} fill="#0f2a1c" fillOpacity={0.5} stroke="#ffffff" strokeWidth={0.6}>
+                      <title>{w.n} · {w.l}</title>
+                    </circle>
+                  ))}
                 </svg>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 16px', justifyContent: 'center', marginTop: '12px' }}>
                   {[...new Set(lga.lgas.map((l) => l.leader).filter(Boolean))].map((p) => (
@@ -182,9 +188,15 @@ function StatePage() {
                       <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>{p}</span>
                     </div>
                   ))}
+                  {(lga.wards?.length ?? 0) > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#0f2a1c', opacity: 0.5, border: '1px solid #fff', display: 'inline-block' }} />
+                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>Wards</span>
+                    </div>
+                  )}
                 </div>
                 <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', textAlign: 'center', margin: '8px 0 0' }}>
-                  Each local government coloured by its verified 2023 presidential winner. Hover for details.
+                  {lga.lgas.length} local governments{(lga.wards?.length ?? 0) > 0 ? ` · ${lga.wards!.length} wards` : ''} — coloured by the verified 2023 presidential winner. Hover for details.
                 </p>
               </>
             ) : shape ? (
