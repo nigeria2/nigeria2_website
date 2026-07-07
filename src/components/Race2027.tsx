@@ -177,11 +177,21 @@ export function Race2027({ race }: { race: string }) {
           ) : (
             (() => {
               // Group states by their projected winning party.
-              const groups: Record<string, { name: string; score: number }[]> = {}
+              type Cell = { name: string; score: number; second: { party: string; score: number } | null }
+              const groups: Record<string, Cell[]> = {}
               NIGERIA_STATES.forEach((s) => {
-                const l = model.leader[s.name]
-                const key = l ? l.party : '—'
-                ;(groups[key] ??= []).push({ name: s.name, score: l ? l.score : 0 })
+                const rows = (model.byState[s.name] ?? []).slice().sort((a, b) => b.score - a.score)
+                if (rows.length === 0) {
+                  ;(groups['—'] ??= []).push({ name: s.name, score: 0, second: null })
+                  return
+                }
+                const win = rows[0]
+                const sec = rows[1]
+                ;(groups[win.party] ??= []).push({
+                  name: s.name,
+                  score: win.score,
+                  second: sec ? { party: sec.party, score: sec.score } : null,
+                })
               })
               const order = Object.keys(groups)
                 .filter((k) => k !== '—')
@@ -193,7 +203,8 @@ export function Race2027({ race }: { race: string }) {
                     const noData = party === '—'
                     const bg = noData ? NO_DATA_FILL : colorOf(party)
                     const fg = textOn(bg)
-                    const states = groups[party].slice().sort((a, b) => a.name.localeCompare(b.name))
+                    // Highest confidence for this party first.
+                    const states = groups[party].slice().sort((a, b) => b.score - a.score)
                     return (
                       <div key={party}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -207,12 +218,17 @@ export function Race2027({ race }: { race: string }) {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
                           {states.map((st) => (
                             <div key={st.name} style={{ background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
-                              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{st.name}</div>
+                              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px' }}>
+                                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{st.name}</span>
+                                {!noData && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px' }}>{Math.round(st.score)}%</span>}
+                              </div>
                               {noData ? (
                                 <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', marginTop: '9px', opacity: 0.85 }}>No data</div>
-                              ) : (
-                                <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', marginTop: '9px', textAlign: 'right' }}>{Math.round(st.score)}%</div>
-                              )}
+                              ) : st.second ? (
+                                <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', marginTop: '8px', opacity: 0.85 }}>
+                                  2nd · {st.second.party} {Math.round(st.second.score)}%
+                                </div>
+                              ) : null}
                             </div>
                           ))}
                         </div>
