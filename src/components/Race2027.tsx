@@ -82,10 +82,24 @@ export function Race2027({ race }: { race: string }) {
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
 
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '34px 40px 0' }}>
-        <Link to="/2027" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '14px' }}>
-          ← All races
-        </Link>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
+          <Link to="/2027" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>
+            ← All races
+          </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8' }}>Week</span>
+            <select
+              value={week}
+              onChange={(e) => setWeek(e.target.value)}
+              style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#0f2a1c', background: '#fff', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '6px', padding: '10px 14px', cursor: 'pointer' }}
+            >
+              {(meta?.weeks ?? []).map((w) => (
+                <option key={w} value={w}>{weekLabel(w)}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
           {TYPE_LABEL[race] ?? race} · 2027 Prediction
         </h1>
@@ -93,35 +107,6 @@ export function Race2027({ race }: { race: string }) {
           Projected leading party in every state for the {raceWord} race. Step through measurement weeks to see how the
           picture is moving.
         </p>
-
-        {/* controls */}
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {RACES.map((t) => (
-              <Link
-                key={t}
-                to={RACE_PATH[t]}
-                style={{
-                  fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.02em', padding: '9px 16px',
-                  borderRadius: '30px', textDecoration: 'none',
-                  border: t === race ? '2px solid #ffe14d' : '2px solid rgba(255,255,255,0.4)',
-                  background: t === race ? '#ffe14d' : 'transparent', color: t === race ? '#0f4a2c' : '#eafaf0',
-                }}
-              >
-                {TYPE_LABEL[t]}
-              </Link>
-            ))}
-          </div>
-          <select
-            value={week}
-            onChange={(e) => setWeek(e.target.value)}
-            style={{ marginLeft: 'auto', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#0f2a1c', background: '#fff', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '6px', padding: '10px 14px', cursor: 'pointer' }}
-          >
-            {(meta?.weeks ?? []).map((w) => (
-              <option key={w} value={w}>{weekLabel(w)}</option>
-            ))}
-          </select>
-        </div>
 
         {/* map */}
         <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '14px' }}>
