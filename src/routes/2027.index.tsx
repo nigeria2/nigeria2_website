@@ -80,26 +80,30 @@ function Overview2027() {
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
 
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '34px 40px 0' }}>
-        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9fd9b8', marginBottom: '10px' }}>
-          Aggregated from contributor traces · updated weekly
-        </div>
-        <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 8px', letterSpacing: '-0.01em' }}>2027 Election Prediction</h1>
-        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.5, color: '#c7e7d4', margin: '0 0 22px', maxWidth: '62ch' }}>
-          A national snapshot of the three races. Open a race to see the full state-by-state map and breakdown.
-        </p>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '34px 40px 22px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#9fd9b8', marginBottom: '10px' }}>
+              Aggregated from contributor traces · updated weekly
+            </div>
+            <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 8px', letterSpacing: '-0.01em' }}>2027 Election Prediction</h1>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.5, color: '#c7e7d4', margin: 0, maxWidth: '62ch' }}>
+              A national snapshot of the three races. Open a race to see the full state-by-state map and breakdown.
+            </p>
+          </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '22px' }}>
-          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#9fd9b8' }}>Measurement week</span>
-          <select
-            value={week}
-            onChange={(e) => setWeek(e.target.value)}
-            style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#0f2a1c', background: '#fff', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '6px', padding: '10px 14px', cursor: 'pointer' }}
-          >
-            {weeks.map((w) => (
-              <option key={w} value={w}>{weekLabel(w)}</option>
-            ))}
-          </select>
+          <div style={{ flex: 'none', textAlign: 'right' }}>
+            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9fd9b8', marginBottom: '6px' }}>Measurement week</div>
+            <select
+              value={week}
+              onChange={(e) => setWeek(e.target.value)}
+              style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#0f2a1c', background: '#fff', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '6px', padding: '10px 14px', cursor: 'pointer' }}
+            >
+              {weeks.map((w) => (
+                <option key={w} value={w}>{weekLabel(w)}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
