@@ -26,6 +26,8 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R2027IndexRouteImport } from './routes/2027.index'
+import { Route as WardsStateRouteImport } from './routes/wards.$state'
+import { Route as WardCodeRouteImport } from './routes/ward.$code'
 import { Route as StatesStateRouteImport } from './routes/states.$state'
 import { Route as R2027SenateRouteImport } from './routes/2027.senate'
 import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
@@ -116,6 +118,16 @@ const R2027IndexRoute = R2027IndexRouteImport.update({
   path: '/',
   getParentRoute: () => R2027Route,
 } as any)
+const WardsStateRoute = WardsStateRouteImport.update({
+  id: '/wards/$state',
+  path: '/wards/$state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WardCodeRoute = WardCodeRouteImport.update({
+  id: '/ward/$code',
+  path: '/ward/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatesStateRoute = StatesStateRouteImport.update({
   id: '/states/$state',
   path: '/states/$state',
@@ -158,6 +170,8 @@ export interface FileRoutesByFullPath {
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
+  '/ward/$code': typeof WardCodeRoute
+  '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
 }
 export interface FileRoutesByTo {
@@ -180,6 +194,8 @@ export interface FileRoutesByTo {
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
+  '/ward/$code': typeof WardCodeRoute
+  '/wards/$state': typeof WardsStateRoute
   '/2027': typeof R2027IndexRoute
 }
 export interface FileRoutesById {
@@ -204,6 +220,8 @@ export interface FileRoutesById {
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
   '/states/$state': typeof StatesStateRoute
+  '/ward/$code': typeof WardCodeRoute
+  '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +247,8 @@ export interface FileRouteTypes {
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
+    | '/ward/$code'
+    | '/wards/$state'
     | '/2027/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,6 +271,8 @@ export interface FileRouteTypes {
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
+    | '/ward/$code'
+    | '/wards/$state'
     | '/2027'
   id:
     | '__root__'
@@ -274,6 +296,8 @@ export interface FileRouteTypes {
     | '/2027/presidential'
     | '/2027/senate'
     | '/states/$state'
+    | '/ward/$code'
+    | '/wards/$state'
     | '/2027/'
   fileRoutesById: FileRoutesById
 }
@@ -295,6 +319,8 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
   StatesStateRoute: typeof StatesStateRoute
+  WardCodeRoute: typeof WardCodeRoute
+  WardsStateRoute: typeof WardsStateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -418,6 +444,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R2027IndexRouteImport
       parentRoute: typeof R2027Route
     }
+    '/wards/$state': {
+      id: '/wards/$state'
+      path: '/wards/$state'
+      fullPath: '/wards/$state'
+      preLoaderRoute: typeof WardsStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ward/$code': {
+      id: '/ward/$code'
+      path: '/ward/$code'
+      fullPath: '/ward/$code'
+      preLoaderRoute: typeof WardCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/states/$state': {
       id: '/states/$state'
       path: '/states/$state'
@@ -483,6 +523,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
   StatesStateRoute: StatesStateRoute,
+  WardCodeRoute: WardCodeRoute,
+  WardsStateRoute: WardsStateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

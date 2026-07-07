@@ -3,7 +3,7 @@ import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { NIGERIA_STATES } from '../nigeriaStates'
 import { STATE_BOUNDS } from '../stateBounds'
-import { STATE_BY_SLUG } from '../stateSlug'
+import { STATE_BY_SLUG, stateSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -195,9 +195,14 @@ function StatePage() {
                     </div>
                   )}
                 </div>
-                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', textAlign: 'center', margin: '8px 0 0' }}>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', textAlign: 'center', margin: '8px 0 10px' }}>
                   {lga.lgas.length} local governments{(lga.wards?.length ?? 0) > 0 ? ` · ${lga.wards!.length} wards` : ''} — coloured by the verified 2023 presidential winner. Hover for details.
                 </p>
+                <div style={{ textAlign: 'center' }}>
+                  <Link to="/wards/$state" params={{ state: stateSlug(state) }} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#fff', background: '#0f8a4a', textDecoration: 'none', padding: '10px 18px', borderRadius: '6px', display: 'inline-block' }}>
+                    View all wards &amp; polling units →
+                  </Link>
+                </div>
               </>
             ) : shape ? (
               <svg viewBox={viewBox} width="100%" style={{ display: 'block', maxHeight: '460px' }} role="img" aria-label={`Map of ${state} State`}>
