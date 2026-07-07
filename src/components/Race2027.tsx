@@ -13,13 +13,13 @@ export const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential'
 export const RACES = ['presidential', 'governor', 'senate'] as const
 export const RACE_PATH = { presidential: '/2027/presidential', governor: '/2027/governor', senate: '/2027/senate' } as const
 
-const ZONES: Record<string, string[]> = {
-  'North-West': ['Sokoto', 'Zamfara', 'Kebbi', 'Katsina', 'Kano', 'Jigawa', 'Kaduna'],
-  'North-East': ['Borno', 'Yobe', 'Bauchi', 'Gombe', 'Adamawa', 'Taraba'],
-  'North-Central': ['Niger', 'Kwara', 'Kogi', 'Nasarawa', 'Plateau', 'Benue', 'FCT'],
-  'South-West': ['Oyo', 'Osun', 'Ekiti', 'Ogun', 'Ondo', 'Lagos'],
-  'South-East': ['Enugu', 'Anambra', 'Ebonyi', 'Imo', 'Abia'],
-  'South-South': ['Edo', 'Delta', 'Bayelsa', 'Rivers', 'Akwa Ibom', 'Cross River'],
+// Pick readable text (dark on light backgrounds, e.g. NNPP yellow; white otherwise).
+function textOn(hex: string): string {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? '#0f2a1c' : '#ffffff'
 }
 
 export type Row = { state: string; party: string; score: number }
@@ -167,44 +167,35 @@ export function Race2027({ race }: { race: string }) {
       {/* zone breakdown */}
       <div style={{ background: '#f4f7f2' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '40px 40px 72px' }}>
-          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '26px', color: '#0f2a1c', margin: '0 0 6px' }}>How each state goes</h2>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '26px', color: '#0f2a1c', margin: '0 0 6px' }}>Projected winner by state</h2>
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 26px' }}>
-            Top three projected parties per state in the {raceWord} race, grouped by geopolitical zone.
+            The leading party in every state for the {raceWord} race. Each box is coloured by its projected winner.
           </p>
 
           {!model ? (
             <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Loading…</div>
           ) : (
-            <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              {Object.entries(ZONES).map(([zone, states]) => (
-                <div key={zone} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '8px', padding: '22px 24px' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', marginBottom: '14px' }}>{zone}</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 22px' }}>
-                    {states.map((st) => {
-                      const rs = (model.byState[st] ?? []).slice().sort((a, b) => b.score - a.score).slice(0, 3)
-                      return (
-                        <div key={st}>
-                          <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', marginBottom: '8px' }}>{st}</div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {rs.length === 0 && (
-                              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#b3c2b8' }}>No data</span>
-                            )}
-                            {rs.map((p) => (
-                              <div key={p.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(p.party), padding: '2px 0', borderRadius: '4px', width: '44px', textAlign: 'center', flex: 'none' }}>{p.party}</span>
-                                <div style={{ flex: 1, height: '6px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                                  <div style={{ height: '100%', width: `${Math.round(p.score)}%`, background: colorOf(p.party) }} />
-                                </div>
-                                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', width: '32px', textAlign: 'right', flex: 'none' }}>{Math.round(p.score)}%</span>
-                              </div>
-                            ))}
-                          </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '12px' }}>
+              {[...NIGERIA_STATES]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((s) => {
+                  const l = model.leader[s.name]
+                  const bg = l ? colorOf(l.party) : NO_DATA_FILL
+                  const fg = textOn(bg)
+                  return (
+                    <div key={s.name} style={{ background: bg, borderRadius: '10px', padding: '15px 17px', color: fg, boxShadow: '0 6px 16px rgba(15,42,28,0.10)' }}>
+                      <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', lineHeight: 1.15 }}>{s.name}</div>
+                      {l ? (
+                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '8px', marginTop: '9px' }}>
+                          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px' }}>{l.party}</span>
+                          <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px' }}>{Math.round(l.score)}%</span>
                         </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
+                      ) : (
+                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', marginTop: '9px', opacity: 0.85 }}>No data</div>
+                      )}
+                    </div>
+                  )
+                })}
             </div>
           )}
 
