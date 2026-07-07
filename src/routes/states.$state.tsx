@@ -17,9 +17,11 @@ type BoardPrediction = {
   leading_party: string; scores: Record<string, number>; notes: string; year: string
 }
 type Heavyweight = { name: string; title: string; party: string; note: string }
+type LgaShape = { lga: string; leader: string; pct: number; d: string }
+type LgaGeo = { viewBox: string; lgas: LgaShape[] }
 type LoaderData = {
   state: string; week: string; byRace: Record<string, PartyScore[]>
-  predictions: BoardPrediction[]; politicians: Heavyweight[]
+  predictions: BoardPrediction[]; politicians: Heavyweight[]; lga: LgaGeo | null
 }
 
 export const Route = createFileRoute('/states/$state')({
@@ -55,7 +57,13 @@ export const Route = createFileRoute('/states/$state')({
     } catch {
       /* leave empty */
     }
-    return { state, week, byRace, predictions, politicians }
+    let lga: LgaGeo | null = null
+    try {
+      lga = (await import(`../data/lga/${params.state}.json`)).default as LgaGeo
+    } catch {
+      lga = null
+    }
+    return { state, week, byRace, predictions, politicians, lga }
   },
   head: ({ params }) => {
     const s = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
@@ -79,7 +87,7 @@ function weekLabel(iso: string): string {
 }
 
 function StatePage() {
-  const { state, week, byRace, predictions, politicians } = Route.useLoaderData()
+  const { state, week, byRace, predictions, politicians, lga } = Route.useLoaderData()
   const shape = NIGERIA_STATES.find((s) => s.name === state)
   const bounds = STATE_BOUNDS[state]
   const pres = byRace.presidential ?? []
@@ -116,22 +124,35 @@ function StatePage() {
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 72px' }}>
         <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.1fr', gap: '28px', alignItems: 'start' }}>
-          {/* state map */}
+          {/* state map — segmented by LGA, coloured by verified 2023 winner */}
           <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px' }}>
-            {shape ? (
+            {lga && lga.lgas.length > 0 ? (
+              <>
+                <svg viewBox={lga.viewBox} width="100%" style={{ display: 'block', maxHeight: '540px' }} role="img" aria-label={`Local governments of ${state} State`}>
+                  {lga.lgas.map((l) => (
+                    <path key={l.lga} d={l.d} fill={l.leader ? colorOf(l.leader) : '#cdd8cf'} stroke="#ffffff" strokeWidth={0.5} strokeLinejoin="round">
+                      <title>{l.lga}{l.leader ? ` — ${l.leader} led with ${l.pct}%` : ' — no verified data'}</title>
+                    </path>
+                  ))}
+                </svg>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 16px', justifyContent: 'center', marginTop: '12px' }}>
+                  {[...new Set(lga.lgas.map((l) => l.leader).filter(Boolean))].map((p) => (
+                    <div key={p} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: colorOf(p), display: 'inline-block' }} />
+                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>{p}</span>
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', textAlign: 'center', margin: '8px 0 0' }}>
+                  Each local government coloured by its verified 2023 presidential winner. Hover for details.
+                </p>
+              </>
+            ) : shape ? (
               <svg viewBox={viewBox} width="100%" style={{ display: 'block', maxHeight: '460px' }} role="img" aria-label={`Map of ${state} State`}>
                 <path d={shape.d} fill={fill} stroke="#ffffff" strokeWidth={1.2} strokeLinejoin="round" />
               </svg>
             ) : (
               <div style={{ padding: '60px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Map unavailable for this state.</div>
-            )}
-            {winner && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center', marginTop: '10px' }}>
-                <span style={{ width: '14px', height: '14px', borderRadius: '3px', background: fill, display: 'inline-block' }} />
-                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>
-                  {winner} projected to lead the presidential vote
-                </span>
-              </div>
             )}
           </div>
 
