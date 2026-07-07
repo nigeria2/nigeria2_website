@@ -17,7 +17,7 @@ type BoardPrediction = {
   leading_party: string; scores: Record<string, number>; notes: string; year: string
 }
 type Heavyweight = { name: string; title: string; party: string; note: string }
-type LgaShape = { lga: string; leader: string; pct: number; d: string }
+type LgaShape = { lga: string; leader: string; pct: number; cx: number; cy: number; d: string }
 type LgaGeo = { viewBox: string; lgas: LgaShape[] }
 type LoaderData = {
   state: string; week: string; byRace: Record<string, PartyScore[]>
@@ -128,12 +128,29 @@ function StatePage() {
           <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px' }}>
             {lga && lga.lgas.length > 0 ? (
               <>
-                <svg viewBox={lga.viewBox} width="100%" style={{ display: 'block', maxHeight: '540px' }} role="img" aria-label={`Local governments of ${state} State`}>
+                <svg viewBox={lga.viewBox} width="100%" style={{ display: 'block', maxHeight: '620px' }} role="img" aria-label={`Local governments of ${state} State`}>
                   {lga.lgas.map((l) => (
-                    <path key={l.lga} d={l.d} fill={l.leader ? colorOf(l.leader) : '#cdd8cf'} stroke="#ffffff" strokeWidth={0.5} strokeLinejoin="round">
+                    <path key={l.lga} d={l.d} fill={l.leader ? colorOf(l.leader) : '#cdd8cf'} stroke="#111111" strokeWidth={0.7} strokeLinejoin="round">
                       <title>{l.lga}{l.leader ? ` — ${l.leader} led with ${l.pct}%` : ' — no verified data'}</title>
                     </path>
                   ))}
+                  {lga.lgas.map((l) => {
+                    const words = l.lga.split(/\s+/)
+                    const lines = words.length <= 1 ? [l.lga] : [words[0], words.slice(1).join(' ')]
+                    const FS = 12
+                    return (
+                      <text key={`t-${l.lga}`} textAnchor="middle" fontFamily="'Archivo', sans-serif" fontWeight={700} fontSize={FS} fill="#111111" style={{ paintOrder: 'stroke', stroke: '#ffffff', strokeWidth: 1.1, pointerEvents: 'none' }}>
+                        {lines.length === 1 ? (
+                          <tspan x={l.cx} y={l.cy + FS * 0.34}>{lines[0]}</tspan>
+                        ) : (
+                          <>
+                            <tspan x={l.cx} y={l.cy - FS * 0.16}>{lines[0]}</tspan>
+                            <tspan x={l.cx} y={l.cy + FS * 1.02}>{lines[1]}</tspan>
+                          </>
+                        )}
+                      </text>
+                    )
+                  })}
                 </svg>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 16px', justifyContent: 'center', marginTop: '12px' }}>
                   {[...new Set(lga.lgas.map((l) => l.leader).filter(Boolean))].map((p) => (
