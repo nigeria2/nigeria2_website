@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
+import { AuthProvider } from '../auth'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -19,6 +20,11 @@ export const Route = createRootRoute({
       },
     ],
     links: [
+      {
+        rel: 'icon',
+        type: 'image/svg+xml',
+        href: '/favicon.svg',
+      },
       {
         rel: 'preconnect',
         href: 'https://fonts.googleapis.com',
@@ -48,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',

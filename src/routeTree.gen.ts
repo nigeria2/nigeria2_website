@@ -9,8 +9,80 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PartiesRouteImport } from './routes/parties'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MethodologyRouteImport } from './routes/methodology'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContributeRouteImport } from './routes/contribute'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartiesRoute = PartiesRouteImport.update({
+  id: '/parties',
+  path: '/parties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodologyRoute = MethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContributeRoute = ContributeRouteImport.update({
+  id: '/contribute',
+  path: '/contribute',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R2027Route = R2027RouteImport.update({
+  id: '/2027',
+  path: '/2027',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +91,200 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/2027': typeof R2027Route
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/contribute': typeof ContributeRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/methodology': typeof MethodologyRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parties': typeof PartiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/2027': typeof R2027Route
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/contribute': typeof ContributeRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/methodology': typeof MethodologyRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parties': typeof PartiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/2027': typeof R2027Route
+  '/admin': typeof AdminRoute
+  '/contact': typeof ContactRoute
+  '/contribute': typeof ContributeRoute
+  '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/methodology': typeof MethodologyRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parties': typeof PartiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/signup': typeof SignupRoute
+  '/team': typeof TeamRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/2027'
+    | '/admin'
+    | '/contact'
+    | '/contribute'
+    | '/dashboard'
+    | '/login'
+    | '/methodology'
+    | '/onboarding'
+    | '/parties'
+    | '/privacy'
+    | '/signup'
+    | '/team'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/2027'
+    | '/admin'
+    | '/contact'
+    | '/contribute'
+    | '/dashboard'
+    | '/login'
+    | '/methodology'
+    | '/onboarding'
+    | '/parties'
+    | '/privacy'
+    | '/signup'
+    | '/team'
+  id:
+    | '__root__'
+    | '/'
+    | '/2027'
+    | '/admin'
+    | '/contact'
+    | '/contribute'
+    | '/dashboard'
+    | '/login'
+    | '/methodology'
+    | '/onboarding'
+    | '/parties'
+    | '/privacy'
+    | '/signup'
+    | '/team'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R2027Route: typeof R2027Route
+  AdminRoute: typeof AdminRoute
+  ContactRoute: typeof ContactRoute
+  ContributeRoute: typeof ContributeRoute
+  DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
+  MethodologyRoute: typeof MethodologyRoute
+  OnboardingRoute: typeof OnboardingRoute
+  PartiesRoute: typeof PartiesRoute
+  PrivacyRoute: typeof PrivacyRoute
+  SignupRoute: typeof SignupRoute
+  TeamRoute: typeof TeamRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parties': {
+      id: '/parties'
+      path: '/parties'
+      fullPath: '/parties'
+      preLoaderRoute: typeof PartiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/methodology': {
+      id: '/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof MethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contribute': {
+      id: '/contribute'
+      path: '/contribute'
+      fullPath: '/contribute'
+      preLoaderRoute: typeof ContributeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/2027': {
+      id: '/2027'
+      path: '/2027'
+      fullPath: '/2027'
+      preLoaderRoute: typeof R2027RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +297,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R2027Route: R2027Route,
+  AdminRoute: AdminRoute,
+  ContactRoute: ContactRoute,
+  ContributeRoute: ContributeRoute,
+  DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
+  MethodologyRoute: MethodologyRoute,
+  OnboardingRoute: OnboardingRoute,
+  PartiesRoute: PartiesRoute,
+  PrivacyRoute: PrivacyRoute,
+  SignupRoute: SignupRoute,
+  TeamRoute: TeamRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

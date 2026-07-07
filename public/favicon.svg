@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="10" fill="#0d8244" />
+  <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle"
+    font-family="Archivo Black, Arial, sans-serif" font-size="30" font-weight="900" fill="#ffffff">N</text>
+  <text x="50%" y="80%" dominant-baseline="middle" text-anchor="middle"
+    font-family="Archivo Black, Arial, sans-serif" font-size="14" font-weight="900" fill="#ffe14d">2.0</text>
+</svg>
