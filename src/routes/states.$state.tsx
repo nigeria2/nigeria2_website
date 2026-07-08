@@ -296,7 +296,7 @@ function StatePage() {
             <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Key political figures in {state} — tap for their party history and profile.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '12px' }}>
               {politicians.map((pol) => (
-                <Link key={pol.id} to="/politician" search={{ id: String(pol.id) }} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px', textDecoration: 'none' }}>
+                <Link key={pol.id} to="/politician" search={{ id: pol.id }} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px', textDecoration: 'none' }}>
                   {pol.photo ? (
                     <img src={pol.photo} alt={pol.name} style={{ width: '46px', height: '46px', flex: 'none', borderRadius: '50%', objectFit: 'cover' }} />
                   ) : (

@@ -7,7 +7,7 @@ import { stateSlug } from '../stateSlug'
 
 export const Route = createFileRoute('/politician')({
   component: PoliticianPage,
-  validateSearch: (s: Record<string, unknown>): { id: string } => ({ id: String(s.id ?? '') }),
+  validateSearch: (s: Record<string, unknown>): { id: number } => ({ id: Number(s.id) || 0 }),
 })
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
