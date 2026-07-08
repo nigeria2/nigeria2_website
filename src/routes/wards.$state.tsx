@@ -13,7 +13,10 @@ export const Route = createFileRoute('/wards/$state')({
   },
 })
 
-type W = { lga: string; ward: string; ward_code: string; pu_count: number; registered_voters: number | null }
+type W = { lga: string; ward: string; ward_code: string; pu_count: number; registered_voters: number | null; winner: string; runner_up: string }
+
+const COLORS: Record<string, string> = { APC: '#1f6fd6', LP: '#e05a1f', PDP: '#c0392b', NNPP: '#f0b429' }
+const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
 
 function WardsPage() {
   const { state: slug } = Route.useParams()
@@ -70,10 +73,13 @@ function WardsPage() {
                 <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', margin: '0 0 10px' }}>{lga}</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
                   {byLga[lga].map((w) => (
-                    <Link key={w.ward_code} to="/ward" search={{ ward: w.ward_code.replace(/\//g, '-') }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '9px', padding: '13px 16px', textDecoration: 'none' }}>
+                    <Link key={w.ward_code} to="/ward" search={{ ward: w.ward_code.replace(/\//g, '-') }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: '#fff', border: '1px solid #dbe4dc', borderLeft: `4px solid ${w.winner ? colorOf(w.winner) : '#dbe4dc'}`, borderRadius: '9px', padding: '13px 16px', textDecoration: 'none' }}>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.ward}</div>
-                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{w.registered_voters ? `${w.registered_voters.toLocaleString()} registered` : ''}</div>
+                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093', display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
+                          {w.winner && <span style={{ fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(w.winner), padding: '1px 7px', borderRadius: '20px' }}>{w.winner}</span>}
+                          {w.registered_voters ? `${w.registered_voters.toLocaleString()} reg.` : (w.winner ? '' : '2023 —')}
+                        </div>
                       </div>
                       <span style={{ flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f8a4a', background: '#e7f3ec', padding: '4px 10px', borderRadius: '20px' }}>{w.pu_count} PUs</span>
                     </Link>
