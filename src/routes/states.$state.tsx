@@ -124,6 +124,8 @@ function StatePage() {
       <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{value}</span>
     </div>
   )
+  const ptTh: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#7a8a99', padding: '8px 12px', whiteSpace: 'nowrap' }
+  const ptTd: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#33414f', padding: '9px 12px', verticalAlign: 'top' }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>
@@ -229,10 +231,9 @@ function StatePage() {
 
               <div style={panelStyle}>
                 <div style={panelTitle}>Voters &amp; votes</div>
-                {statRow('Registered voters · 2019', fmt(facts.voters_presidential_2019))}
-                {statRow('Newly registered · 2022', fmt(facts.newly_registered_voters_2022))}
-                {statRow('Presidential votes · 2019', fmt(facts.total_votes_2019 ?? (((facts.buhari_votes_2019 ?? 0) + (facts.atiku_votes_2019 ?? 0)) || null)))}
                 {statRow('Presidential votes · 2023', fmt(facts.votes_2023))}
+                {statRow('Registered voters · 2019', fmt(facts.voters_presidential_2019))}
+                {statRow('Presidential votes · 2019', fmt(facts.total_votes_2019 ?? (((facts.buhari_votes_2019 ?? 0) + (facts.atiku_votes_2019 ?? 0)) || null)))}
                 {statRow('Governorship votes · 2019', govTotal ? govTotal.toLocaleString() : '—')}
               </div>
 
@@ -240,9 +241,13 @@ function StatePage() {
                 <div style={panelTitle}>Population statistics</div>
                 {statRow('Active phone lines · 2021', fmt(facts.active_phone_2021))}
                 {statRow('Active phone lines · 2020', fmt(facts.active_phone_2020))}
-                {statRow('NIN enrolment · total', fmt(facts.nin_total))}
-                {statRow('NIN enrolment · male', fmt(facts.nin_male))}
-                {statRow('NIN enrolment · female', fmt(facts.nin_female))}
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', padding: '8px 0', borderTop: '1px solid #f2f5f1' }}>
+                  <div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#5c6b60' }}>NIN enrolment</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10px', color: '#b3c2b8' }}>Male {fmt(facts.nin_male)} · Female {fmt(facts.nin_female)}</div>
+                  </div>
+                  <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{fmt(facts.nin_total)}</span>
+                </div>
               </div>
             </div>
           ) : (
@@ -284,10 +289,14 @@ function StatePage() {
           </div>
         </div>
 
-        {/* Political data for the state */}
-        <div style={{ marginTop: '44px' }}>
-          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>Political Data for {state} State</h2>
-          <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* Political data — the source data our prediction is built from */}
+        <div style={{ marginTop: '44px', background: '#e9eef3', border: '1px solid #d3dce5', borderRadius: '14px', padding: '20px 22px' }}>
+          <div style={{ marginBottom: '14px' }}>
+            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7a8a99' }}>Underlying source data</div>
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#33414f', margin: '2px 0 2px' }}>Political Data for {state} State</div>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#7a8a99', margin: 0 }}>The past results and contributor inputs the 2027 prediction above is built from.</p>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid #d3dce5', borderRadius: '10px', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
             {/* 2019 Presidential */}
             {facts && (facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
@@ -305,7 +314,7 @@ function StatePage() {
               )
               return (
                 <div>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '6px' }}>2019 Presidential</div>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '6px' }}>2019 Presidential</div>
                   {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
                   {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
                 </div>
@@ -317,7 +326,7 @@ function StatePage() {
               const gmax = Math.max(1, ...governor.map((g) => g.votes))
               return (
                 <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '22px' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '14px' }}>2019 Governorship</div>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '14px' }}>2019 Governorship</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {governor.map((g) => (
                       <div key={g.name + g.position} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -337,54 +346,50 @@ function StatePage() {
 
           </div>
 
-        {/* Predictions on record for this state */}
-        <div style={{ marginTop: '38px' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '6px' }}>
-            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: 0 }}>Predictions</h2>
-            <Link to="/predictions" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f8a4a', textDecoration: 'none' }}>+ Add your prediction</Link>
+        {/* Predictions on record — compact table */}
+        <div style={{ marginTop: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#33414f' }}>Predictions on record</div>
+            <Link to="/predictions" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f8a4a', textDecoration: 'none' }}>+ Add your prediction</Link>
           </div>
-          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>
-            Every prediction on record for {state} — the verified past result and contributor calls.
-          </p>
           {predictions.length === 0 ? (
-            <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '36px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No predictions yet for {state}.</div>
+            <div style={{ background: '#fff', border: '1px solid #d3dce5', borderRadius: '8px', padding: '20px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>No predictions yet for {state}.</div>
           ) : (
-            <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              {predictions.map((p) => {
-                const pastPerf = p.source === 'past_performance'
-                const entries = Object.entries(p.scores).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1])
-                return (
-                  <div key={p.id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: pastPerf ? '#8a6d3b' : '#0f8a4a', padding: '3px 9px', borderRadius: '20px' }}>{pastPerf ? 'Past performance' : 'Expert'}</span>
-                      <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#5c6b60', background: '#f2f5f1', padding: '3px 9px', borderRadius: '20px' }}>{TYPE_LABEL[p.election_type] ?? p.election_type}</span>
-                    </div>
-                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginTop: '4px' }}>{p.label || p.author_name}</div>
-                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{p.label ? p.author_name : (pastPerf ? p.year : `by ${p.author_name}`)} · leads {p.leading_party}</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-                      {entries.map(([party, v]) => (
-                        <div key={party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ width: '46px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(party), padding: '2px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{party}</span>
-                          <div style={{ flex: 1, height: '6px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${Math.min(100, Math.round(v))}%`, background: colorOf(party) }} />
-                          </div>
-                          <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(v)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                    {p.notes && <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', lineHeight: 1.5, margin: '12px 0 0' }}>{p.notes}</p>}
-                  </div>
-                )
-              })}
+            <div style={{ background: '#fff', border: '1px solid #d3dce5', borderRadius: '8px', overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '580px' }}>
+                <thead>
+                  <tr style={{ background: '#f4f7fa' }}>
+                    <th style={ptTh}>Source</th>
+                    <th style={ptTh}>Race</th>
+                    <th style={ptTh}>By</th>
+                    <th style={{ ...ptTh, textAlign: 'center' }}>Leads</th>
+                    <th style={ptTh}>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {predictions.map((p) => {
+                    const pastPerf = p.source === 'past_performance'
+                    return (
+                      <tr key={p.id} style={{ borderTop: '1px solid #eef2f5' }}>
+                        <td style={ptTd}><span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: pastPerf ? '#8a6d3b' : '#0f8a4a', padding: '2px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{pastPerf ? 'Past perf.' : 'Expert'}</span></td>
+                        <td style={ptTd}>{TYPE_LABEL[p.election_type] ?? p.election_type}</td>
+                        <td style={ptTd}>{p.label || p.author_name}</td>
+                        <td style={{ ...ptTd, textAlign: 'center' }}>{p.leading_party ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(p.leading_party), padding: '2px 8px', borderRadius: '20px' }}>{p.leading_party}</span> : '—'}</td>
+                        <td style={{ ...ptTd, color: '#8aa093', fontWeight: 600, maxWidth: '280px' }}>{p.notes || '—'}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
 
         {/* Political heavyweights (only shown when we have them) */}
         {politicians.length > 0 && (
-          <div style={{ marginTop: '38px' }}>
-            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>Politicians</h2>
-            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Political figures from {state}, including 2019 governorship candidates.</p>
+          <div style={{ marginTop: '20px' }}>
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#33414f', margin: '0 0 2px' }}>Politicians</div>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#7a8a99', margin: '0 0 12px' }}>Political figures from {state}, including 2019 governorship candidates.</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
               {politicians.map((pol) => (
                 <div key={pol.name} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
