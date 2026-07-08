@@ -16,7 +16,7 @@ type BoardPrediction = {
   id: number; source: string; label: string; author_name: string; election_type: string
   leading_party: string; scores: Record<string, number>; notes: string; year: string
 }
-type Heavyweight = { name: string; title: string; party: string; note: string }
+type Heavyweight = { id: number; name: string; title: string; party: string; note: string; photo: string; avg_electoral_value: number | null }
 type LgaShape = { lga: string; leader: string; pct: number; cx: number; cy: number; d: string }
 type WardPoint = { n: string; l: string; x: number; y: number }
 type LgaGeo = { viewBox: string; lgas: LgaShape[]; wards?: WardPoint[] }
@@ -289,6 +289,29 @@ function StatePage() {
           </div>
         </div>
 
+        {/* 2027 Heavyweight Politicians */}
+        {politicians.length > 0 && (
+          <div style={{ marginTop: '38px' }}>
+            <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2027 Heavyweight Politicians</h2>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Key political figures in {state} — tap for their party history and profile.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: '12px' }}>
+              {politicians.map((pol) => (
+                <Link key={pol.id} to="/politician" search={{ id: String(pol.id) }} style={{ display: 'flex', alignItems: 'center', gap: '14px', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '16px 18px', textDecoration: 'none' }}>
+                  {pol.photo ? (
+                    <img src={pol.photo} alt={pol.name} style={{ width: '46px', height: '46px', flex: 'none', borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '46px', height: '46px', flex: 'none', borderRadius: '50%', background: colorOf(pol.party), color: '#fff', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{pol.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join('')}</div>
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pol.name}</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{[pol.title, pol.party].filter(Boolean).join(' · ')}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Political data — the source data our prediction is built from */}
         <div style={{ marginTop: '44px', background: '#e9eef3', border: '1px solid #d3dce5', borderRadius: '14px', padding: '20px 22px' }}>
           <div style={{ marginBottom: '14px' }}>
@@ -298,51 +321,54 @@ function StatePage() {
           </div>
           <div style={{ background: '#fff', border: '1px solid #d3dce5', borderRadius: '10px', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* 2019 Presidential */}
+            {/* 2019 Presidential — table */}
             {facts && (facts.buhari_votes_2019 != null || facts.atiku_votes_2019 != null) && (() => {
-              const b = facts.buhari_votes_2019 ?? 0
-              const a = facts.atiku_votes_2019 ?? 0
-              const m = Math.max(1, b, a)
-              const row = (label: string, v: number, color: string) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
-                  <span style={{ width: '210px', flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>{label}</span>
-                  <div style={{ flex: 1, minWidth: '140px', height: '20px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.round((v / m) * 100)}%`, background: color }} />
-                  </div>
-                  <span style={{ width: '100px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#5c6b60' }}>{v.toLocaleString()}</span>
-                </div>
-              )
+              const rows = [
+                { name: 'Buhari / Osinbajo', party: 'APC', votes: facts.buhari_votes_2019 ?? 0 },
+                { name: 'Atiku / Obi', party: 'PDP', votes: facts.atiku_votes_2019 ?? 0 },
+              ].sort((x, y) => y.votes - x.votes)
               return (
                 <div>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '6px' }}>2019 Presidential</div>
-                  {row('Buhari / Osinbajo (APC)', b, colorOf('APC'))}
-                  {row('Atiku / Obi (PDP)', a, colorOf('PDP'))}
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '8px' }}>2019 Presidential</div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '340px' }}>
+                      <thead><tr style={{ background: '#f4f7fa' }}><th style={ptTh}>Candidate</th><th style={{ ...ptTh, textAlign: 'center' }}>Party</th><th style={{ ...ptTh, textAlign: 'right' }}>Votes</th></tr></thead>
+                      <tbody>
+                        {rows.map((r) => (
+                          <tr key={r.party} style={{ borderTop: '1px solid #eef2f5' }}>
+                            <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif" }}>{r.name}</td>
+                            <td style={{ ...ptTd, textAlign: 'center' }}><span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '2px 9px', borderRadius: '20px' }}>{r.party}</span></td>
+                            <td style={{ ...ptTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{r.votes.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )
             })()}
 
-            {/* 2019 Governorship */}
-            {governor.length > 0 && (() => {
-              const gmax = Math.max(1, ...governor.map((g) => g.votes))
-              return (
-                <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '22px' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '14px' }}>2019 Governorship</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {governor.map((g) => (
-                      <div key={g.name + g.position} style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        <span style={{ width: '22px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: g.position === 1 ? '#0f8a4a' : '#b3c2b8', textAlign: 'center' }}>{g.position}</span>
-                        <span style={{ width: '180px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{g.name}</span>
-                        <span style={{ flex: 'none', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(g.party), padding: '3px 10px', borderRadius: '20px', minWidth: '54px', textAlign: 'center' }}>{g.party}</span>
-                        <div style={{ flex: 1, minWidth: '120px', height: '16px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${Math.round((g.votes / gmax) * 100)}%`, background: colorOf(g.party) }} />
-                        </div>
-                        <span style={{ width: '92px', textAlign: 'right', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#5c6b60' }}>{g.votes.toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
+            {/* 2019 Governorship — table */}
+            {governor.length > 0 && (
+              <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '16px' }}>
+                <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#33414f', marginBottom: '8px' }}>2019 Governorship</div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '380px' }}>
+                    <thead><tr style={{ background: '#f4f7fa' }}><th style={{ ...ptTh, width: '28px' }}>#</th><th style={ptTh}>Candidate</th><th style={{ ...ptTh, textAlign: 'center' }}>Party</th><th style={{ ...ptTh, textAlign: 'right' }}>Votes</th></tr></thead>
+                    <tbody>
+                      {governor.map((g) => (
+                        <tr key={g.name + g.position} style={{ borderTop: '1px solid #eef2f5' }}>
+                          <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif", color: g.position === 1 ? '#0f8a4a' : '#b3c2b8' }}>{g.position}</td>
+                          <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif" }}>{g.name}</td>
+                          <td style={{ ...ptTd, textAlign: 'center' }}><span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(g.party), padding: '2px 9px', borderRadius: '20px' }}>{g.party}</span></td>
+                          <td style={{ ...ptTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{g.votes.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )
-            })()}
+              </div>
+            )}
 
           </div>
 
@@ -384,27 +410,6 @@ function StatePage() {
             </div>
           )}
         </div>
-
-        {/* Political heavyweights (only shown when we have them) */}
-        {politicians.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#33414f', margin: '0 0 2px' }}>Politicians</div>
-            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#7a8a99', margin: '0 0 12px' }}>Political figures from {state}, including 2019 governorship candidates.</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {politicians.map((pol) => (
-                <div key={pol.name} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '44px', height: '44px', flex: 'none', borderRadius: '50%', background: colorOf(pol.party), color: '#fff', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {pol.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}
-                  </div>
-                  <div>
-                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', lineHeight: 1.15 }}>{pol.name}</div>
-                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{[pol.title, pol.party].filter(Boolean).join(' · ')}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         </div>
 
