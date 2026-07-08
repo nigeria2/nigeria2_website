@@ -135,7 +135,7 @@ function StatePage() {
             <Link to="/2027/presidential" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
               ← Back to the map
             </Link>
-            <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 6px', letterSpacing: '-0.01em' }}>{state} State</h1>
+            <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '38px', color: '#fff', margin: '0 0 6px', letterSpacing: '-0.01em' }}>{state} State 2027 Election Analysis</h1>
             <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', color: '#c7e7d4', margin: 0 }}>
               Projected 2027 results for {state}{week ? ` · ${weekLabel(week)}` : ''}.
             </p>
@@ -228,29 +228,21 @@ function StatePage() {
               </div>
 
               <div style={panelStyle}>
-                <div style={panelTitle}>Voters</div>
-                {statRow('Presidential voters · 2019', fmt(facts.voters_presidential_2019))}
+                <div style={panelTitle}>Voters &amp; votes</div>
+                {statRow('Registered voters · 2019', fmt(facts.voters_presidential_2019))}
                 {statRow('Newly registered · 2022', fmt(facts.newly_registered_voters_2022))}
+                {statRow('Presidential votes · 2019', fmt(facts.total_votes_2019 ?? (((facts.buhari_votes_2019 ?? 0) + (facts.atiku_votes_2019 ?? 0)) || null)))}
+                {statRow('Presidential votes · 2023', fmt(facts.votes_2023))}
+                {statRow('Governorship votes · 2019', govTotal ? govTotal.toLocaleString() : '—')}
               </div>
 
               <div style={panelStyle}>
-                <div style={panelTitle}>Votes</div>
-                {statRow('Presidential · 2019', fmt(facts.total_votes_2019 ?? (((facts.buhari_votes_2019 ?? 0) + (facts.atiku_votes_2019 ?? 0)) || null)))}
-                {statRow('Presidential · 2023', fmt(facts.votes_2023))}
-                {statRow('Governorship · 2019', govTotal ? govTotal.toLocaleString() : '—')}
-              </div>
-
-              <div style={panelStyle}>
-                <div style={panelTitle}>Active phone lines</div>
-                {statRow('2021', fmt(facts.active_phone_2021))}
-                {statRow('2020', fmt(facts.active_phone_2020))}
-              </div>
-
-              <div style={panelStyle}>
-                <div style={panelTitle}>NIN enrolment</div>
-                {statRow('Total', fmt(facts.nin_total))}
-                {statRow('Male', fmt(facts.nin_male))}
-                {statRow('Female', fmt(facts.nin_female))}
+                <div style={panelTitle}>Population statistics</div>
+                {statRow('Active phone lines · 2021', fmt(facts.active_phone_2021))}
+                {statRow('Active phone lines · 2020', fmt(facts.active_phone_2020))}
+                {statRow('NIN enrolment · total', fmt(facts.nin_total))}
+                {statRow('NIN enrolment · male', fmt(facts.nin_male))}
+                {statRow('NIN enrolment · female', fmt(facts.nin_female))}
               </div>
             </div>
           ) : (
@@ -258,9 +250,43 @@ function StatePage() {
           )}
         </div>
 
-        {/* all elections under one panel */}
+        {/* 2027 Election Trend — our prediction */}
         <div style={{ marginTop: '38px' }}>
-          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>Elections</h2>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2027 Election Trend</h2>
+          <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Our crowd-sourced prediction for {state}{week ? ` · ${weekLabel(week)}` : ''}.</p>
+          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            {RACES.map((et) => {
+              const rows = byRace[et] ?? []
+              return (
+                <div key={et} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c' }}>{TYPE_LABEL[et]}</div>
+                    {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party}</div>}
+                  </div>
+                  {rows.length === 0 ? (
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data.</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                      {rows.map((r) => (
+                        <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ width: '44px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
+                          <div style={{ flex: 1, height: '7px', borderRadius: '4px', background: '#eef2ee', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${Math.min(100, Math.round(r.score))}%`, background: colorOf(r.party) }} />
+                          </div>
+                          <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Political data for the state */}
+        <div style={{ marginTop: '44px' }}>
+          <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 14px' }}>Political Data for {state} State</h2>
           <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
             {/* 2019 Presidential */}
@@ -309,42 +335,7 @@ function StatePage() {
               )
             })()}
 
-            {/* 2027 projection */}
-            <div style={{ borderTop: '1px solid #eef2ee', paddingTop: '22px' }}>
-              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c', marginBottom: '2px' }}>2027 projection</div>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 14px' }}>Our crowd-sourced forecast{week ? ` · ${weekLabel(week)}` : ''}.</p>
-              <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-                {RACES.map((et) => {
-                  const rows = byRace[et] ?? []
-                  return (
-                    <div key={et} style={{ background: '#f4f7f2', borderRadius: '10px', padding: '16px 18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '12px' }}>
-                        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c' }}>{TYPE_LABEL[et]}</div>
-                        {rows[0] && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#fff', background: colorOf(rows[0].party), padding: '3px 10px', borderRadius: '20px' }}>{rows[0].party}</div>}
-                      </div>
-                      {rows.length === 0 ? (
-                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#b3c2b8' }}>No data.</div>
-                      ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
-                          {rows.map((r) => (
-                            <div key={r.party} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ width: '44px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '3px 0', borderRadius: '4px', textAlign: 'center', flex: 'none' }}>{r.party}</span>
-                              <div style={{ flex: 1, height: '7px', borderRadius: '4px', background: '#e4ebe5', overflow: 'hidden' }}>
-                                <div style={{ height: '100%', width: `${Math.min(100, Math.round(r.score))}%`, background: colorOf(r.party) }} />
-                              </div>
-                              <span style={{ width: '34px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#5c6b60', flex: 'none' }}>{Math.round(r.score)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
           </div>
-        </div>
 
         {/* Predictions on record for this state */}
         <div style={{ marginTop: '38px' }}>
@@ -409,6 +400,8 @@ function StatePage() {
             </div>
           </div>
         )}
+
+        </div>
 
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '32px 0 0' }}>
           Illustrative projections aggregated from contributor traces. See our{' '}

@@ -2,15 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
-import { TrendChart } from '../components/TrendChart'
 import { NIGERIA_STATES } from '../nigeriaStates'
 import { stateSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 import { colorOf, RACES, RACE_PATH, TYPE_LABEL, weekLabel, type Row } from '../components/Race2027'
 
 export const Route = createFileRoute('/2027/')({ component: Overview2027 })
-
-type TrendPoint = { week: string; shares: Record<string, number> }
 
 type Summary = {
   topParty: string
@@ -43,7 +40,6 @@ function Overview2027() {
   const [weeks, setWeeks] = useState<string[]>([])
   const [week, setWeek] = useState('')
   const [data, setData] = useState<Record<string, Row[]> | null>(null)
-  const [trend, setTrend] = useState<Record<string, TrendPoint[]>>({})
 
   useEffect(() => {
     fetch(`${API_BASE}/api/predictions/meta`)
@@ -53,10 +49,6 @@ function Overview2027() {
         if (m.weeks?.length) setWeek(m.weeks[0])
       })
       .catch(() => setWeeks([]))
-    fetch(`${API_BASE}/api/predictions/trend`)
-      .then((r) => r.json())
-      .then((t: Record<string, TrendPoint[]>) => setTrend(t))
-      .catch(() => setTrend({}))
   }, [])
 
   useEffect(() => {
@@ -147,28 +139,6 @@ function Overview2027() {
                         </div>
                       ))}
                     </div>
-
-                    {(() => {
-                      const pts = trend[race] ?? []
-                      if (pts.length < 2) return null
-                      const chartSeries = s.shares.map((b) => ({
-                        party: b.party,
-                        color: colorOf(b.party),
-                        values: pts.map((pt) => pt.shares[b.party] ?? 0),
-                      }))
-                      return (
-                        <div style={{ marginTop: '18px', borderTop: '1px solid #eef2ee', paddingTop: '14px' }}>
-                          <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', marginBottom: '6px' }}>
-                            National share trend
-                          </div>
-                          <TrendChart series={chartSeries} height={110} />
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10px', color: '#b3c2b8', marginTop: '2px' }}>
-                            <span>{weekLabel(pts[0].week).replace('Week of ', '')}</span>
-                            <span>{weekLabel(pts[pts.length - 1].week).replace('Week of ', '')}</span>
-                          </div>
-                        </div>
-                      )
-                    })()}
 
                     <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.02em', color: '#0f8a4a', marginTop: '18px' }}>
                       View full map &amp; breakdown →
