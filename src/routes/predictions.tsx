@@ -243,24 +243,27 @@ function PredictionsBoard() {
             ) : (
               <div className="two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 {preds.map((p) => {
-                  const pastPerf = p.source === 'past_performance'
+                  const isModel = p.source === 'model'
                   return (
                     <div key={p.id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px 22px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: pastPerf ? '#8a6d3b' : '#0f8a4a', padding: '3px 9px', borderRadius: '20px' }}>
-                          {pastPerf ? 'Past performance' : 'Expert'}
-                        </span>
-                        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#5c6b60', background: '#f2f5f1', padding: '3px 9px', borderRadius: '20px' }}>{TYPE_LABEL[p.election_type] ?? p.election_type}</span>
-                        {p.is_mine && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f4a2c', background: '#ffe14d', padding: '3px 9px', borderRadius: '20px' }}>Yours</span>}
-                      </div>
-                      <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginTop: '6px' }}>
-                        {p.label || p.author_name}
-                      </div>
-                      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>
-                        {p.label ? p.author_name : (pastPerf ? p.year : `by ${p.author_name}`)} · leads {p.leading_party}
-                      </div>
-                      <ScoreBars scores={p.scores} />
-                      {p.notes && <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', lineHeight: 1.5, margin: '12px 0 0' }}>{p.notes}</p>}
+                      <Link to="/prediction/$id" params={{ id: String(p.id) }} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: isModel ? '#1f6fd6' : '#0f8a4a', padding: '3px 9px', borderRadius: '20px' }}>
+                            {isModel ? 'Model' : 'Expert'}
+                          </span>
+                          <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#5c6b60', background: '#f2f5f1', padding: '3px 9px', borderRadius: '20px' }}>{TYPE_LABEL[p.election_type] ?? p.election_type}</span>
+                          {p.is_mine && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f4a2c', background: '#ffe14d', padding: '3px 9px', borderRadius: '20px' }}>Yours</span>}
+                        </div>
+                        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginTop: '6px' }}>
+                          {p.label || p.author_name}
+                        </div>
+                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>
+                          {p.label ? p.author_name : `by ${p.author_name}`} · leads {p.leading_party}
+                        </div>
+                        <ScoreBars scores={p.scores} />
+                        {p.notes && <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', lineHeight: 1.5, margin: '12px 0 0' }}>{p.notes}</p>}
+                        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f8a4a', marginTop: '12px' }}>View details →</div>
+                      </Link>
                       {p.can_edit && (
                         <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
                           <button onClick={() => openEdit(p)} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f8a4a', background: '#fff', border: '2px solid #0f8a4a', borderRadius: '5px', padding: '6px 14px', cursor: 'pointer' }}>Edit</button>

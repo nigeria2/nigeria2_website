@@ -11,13 +11,14 @@ export const Route = createFileRoute('/admin')({
   ),
 })
 
-type View = 'users' | 'experts' | 'traces' | 'predictions' | 'ballots' | 'politicians'
+type View = 'users' | 'experts' | 'traces' | 'predictions' | 'model' | 'ballots' | 'politicians'
 
 const NAV: { id: View; label: string; icon: string }[] = [
   { id: 'users', label: 'Interested Users', icon: '👥' },
   { id: 'experts', label: 'Experts', icon: '🎓' },
   { id: 'traces', label: 'Traces', icon: '🧭' },
   { id: 'predictions', label: 'Predictions', icon: '🎯' },
+  { id: 'model', label: 'Prediction Model', icon: '⚙️' },
   { id: 'ballots', label: 'Party Ballots', icon: '🗳️' },
   { id: 'politicians', label: 'Politicians', icon: '🏛️' },
 ]
@@ -86,7 +87,7 @@ function Admin() {
 
         {/* main */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : view === 'ballots' ? <PartyBallots /> : view === 'politicians' ? <PoliticiansAdmin /> : <Traces />}
+          {view === 'users' ? <SignedUpUsers /> : view === 'experts' ? <Experts /> : view === 'predictions' ? <Predictions /> : view === 'model' ? <ModelScenarios /> : view === 'ballots' ? <PartyBallots /> : view === 'politicians' ? <PoliticiansAdmin /> : <Traces />}
         </div>
       </div>
     </div>
@@ -672,6 +673,305 @@ function PoliticiansAdmin() {
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// ============================================================================
+// Prediction Model — build a scenario, then run a resumable background job that
+// generates a projection for every state.
+// ============================================================================
+const MODEL_PARTIES = ['APC', 'PDP', 'LP', 'NNPP', 'APGA', 'ADC', 'SDP', 'NDC']
+const SCOPES: { id: string; label: string; hint: string }[] = [
+  { id: 'local', label: 'Local', hint: 'His home state only' },
+  { id: 'national', label: 'National', hint: 'Every state' },
+  { id: 'election', label: 'Election', hint: 'Wherever he ran this race' },
+]
+
+type Scenario = { id: number; name: string; description: string; election_type: string; target_year: string; status: string; cursor: number; total: number; percent: number; message: string; log: string[] }
+type SPol = { id: number; politician_id: number; politician_name: string; new_party: string; delta_popularity: number; influence_pct: number; scope: string; home_state: string }
+type STrend = { id: number; name: string; shift_pct: number; target_party: string; scope_states: string[] }
+type ScenarioFull = Scenario & { politicians: SPol[]; trends: STrend[] }
+type PolSearchRow = { id: number; name: string; state: string; party: string; title: string }
+type PolInfo = { id: number; name: string; state: string; party: string; title: string; runs: { year: string; election_type: string; party: string; state: string; votes: number; percent: number | null }[]; suggested_influence_pct: number; current_party: string }
+
+const statusColor: Record<string, string> = { draft: '#8aa093', running: '#1f6fd6', paused: '#b8860b', done: '#0f8a4a', error: '#c0392b' }
+
+function ModelScenarios() {
+  const { token } = useAuth()
+  const [list, setList] = useState<Scenario[] | null>(null)
+  const [selId, setSelId] = useState<number | null>(null)
+  const [sel, setSel] = useState<ScenarioFull | null>(null)
+  const [newName, setNewName] = useState('')
+
+  const loadList = () => apiFetch('/api/admin/scenarios', token).then((r) => (r.ok ? r.json() : [])).then(setList).catch(() => setList([]))
+  const loadSel = (id: number) => apiFetch(`/api/admin/scenarios/${id}`, token).then((r) => (r.ok ? r.json() : null)).then(setSel).catch(() => setSel(null))
+
+  useEffect(() => { if (token) loadList() /* eslint-disable-next-line */ }, [token])
+  useEffect(() => { if (selId != null) loadSel(selId) /* eslint-disable-next-line */ }, [selId])
+
+  // live progress polling while a selected scenario is running
+  useEffect(() => {
+    if (selId == null || !sel || sel.status !== 'running') return
+    const t = setInterval(async () => {
+      const r = await apiFetch(`/api/admin/scenarios/${selId}/status`, token)
+      if (r.ok) {
+        const st: Scenario = await r.json()
+        setSel((s) => (s ? { ...s, ...st } : s))
+        if (st.status !== 'running') { loadSel(selId); loadList() }
+      }
+    }, 1200)
+    return () => clearInterval(t)
+    // eslint-disable-next-line
+  }, [selId, sel?.status])
+
+  const create = async () => {
+    if (!newName.trim()) return
+    const r = await apiFetch('/api/admin/scenarios', token, { method: 'POST', body: JSON.stringify({ name: newName.trim() }) })
+    if (r.ok) { const s: ScenarioFull = await r.json(); setNewName(''); await loadList(); setSelId(s.id) }
+  }
+  const del = async (id: number) => {
+    if (!window.confirm('Delete this scenario and all its generated predictions?')) return
+    const r = await apiFetch(`/api/admin/scenarios/${id}`, token, { method: 'DELETE' })
+    if (r.ok) { setSelId(null); setSel(null); loadList() }
+  }
+  const run = async (restart = false) => {
+    if (selId == null) return
+    const r = await apiFetch(`/api/admin/scenarios/${selId}/run${restart ? '?restart=true' : ''}`, token, { method: 'POST' })
+    if (r.ok) { const st = await r.json(); setSel((s) => (s ? { ...s, ...st } : s)) }
+  }
+  const pause = async () => {
+    if (selId == null) return
+    const r = await apiFetch(`/api/admin/scenarios/${selId}/pause`, token, { method: 'POST' })
+    if (r.ok) { const st = await r.json(); setSel((s) => (s ? { ...s, ...st } : s)) }
+  }
+
+  const lbl2: React.CSSProperties = { display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', color: '#0f2a1c', textTransform: 'uppercase', marginBottom: '5px' }
+  const inp2: React.CSSProperties = { width: '100%', border: '2px solid #d7e0d9', borderRadius: '4px', background: '#f9fbf8', padding: '10px 12px', fontFamily: "'Archivo', sans-serif", fontSize: '14px', color: '#0f2a1c' }
+
+  return (
+    <div>
+      <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '28px', color: '#0f2a1c', margin: '0 0 4px' }}>Prediction model</h1>
+      <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 20px', maxWidth: '70ch' }}>
+        Build a scenario from politician swings and popularity trends, then run it. The job generates a projection for every state in the background, is resumable if it dies, and shows live progress.
+      </p>
+
+      {/* create + list */}
+      <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px', marginBottom: '18px' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'end', flexWrap: 'wrap', marginBottom: list && list.length ? '16px' : '0' }}>
+          <div style={{ flex: 1, minWidth: '220px' }}><label style={lbl2}>New scenario name</label><input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Obi defects to APGA + Christian swing" style={inp2} /></div>
+          <button onClick={create} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '11px 20px', cursor: 'pointer' }}>Create</button>
+        </div>
+        {list && list.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {list.map((s) => (
+              <div key={s.id} onClick={() => setSelId(s.id)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', borderRadius: '8px', cursor: 'pointer', border: `2px solid ${selId === s.id ? '#0f8a4a' : '#e4ebe5'}`, background: selId === s.id ? '#eef7f1' : '#fff' }}>
+                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', flex: 1 }}>{s.name}</span>
+                {s.status === 'running' && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{s.cursor}/{s.total}</span>}
+                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', textTransform: 'uppercase', color: '#fff', background: statusColor[s.status] ?? '#8aa093', padding: '3px 9px', borderRadius: '20px' }}>{s.status}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {sel && <ScenarioEditor key={sel.id} scenario={sel} reload={() => loadSel(sel.id)} onRun={run} onPause={pause} onDelete={() => del(sel.id)} />}
+    </div>
+  )
+}
+
+function ScenarioEditor({ scenario, reload, onRun, onPause, onDelete }: { scenario: ScenarioFull; reload: () => void; onRun: (restart?: boolean) => void; onPause: () => void; onDelete: () => void }) {
+  const { token } = useAuth()
+  const sid = scenario.id
+  const running = scenario.status === 'running'
+
+  // politician picker
+  const [q, setQ] = useState('')
+  const [results, setResults] = useState<PolSearchRow[]>([])
+  const [info, setInfo] = useState<PolInfo | null>(null)
+  const [pForm, setPForm] = useState({ new_party: 'APC', delta_popularity: 0, influence_pct: 0, scope: 'local' })
+
+  // trend form
+  const [tForm, setTForm] = useState({ name: '', shift_pct: 10, target_party: 'APC' })
+
+  useEffect(() => {
+    if (q.trim().length < 2) { setResults([]); return }
+    const t = setTimeout(() => {
+      apiFetch(`/api/admin/politician-search?q=${encodeURIComponent(q.trim())}`, token).then((r) => (r.ok ? r.json() : [])).then(setResults).catch(() => setResults([]))
+    }, 250)
+    return () => clearTimeout(t)
+  }, [q, token])
+
+  const pick = async (id: number) => {
+    const r = await apiFetch(`/api/admin/politician-info/${id}`, token)
+    if (r.ok) {
+      const d: PolInfo = await r.json()
+      setInfo(d)
+      setResults([])
+      setQ(d.name)
+      setPForm({ new_party: d.current_party || 'APC', delta_popularity: 0, influence_pct: d.suggested_influence_pct || 0, scope: 'local' })
+    }
+  }
+  const addPol = async () => {
+    if (!info) return
+    const r = await apiFetch(`/api/admin/scenarios/${sid}/politicians`, token, { method: 'POST', body: JSON.stringify({ politician_id: info.id, ...pForm }) })
+    if (r.ok) { setInfo(null); setQ(''); reload() }
+  }
+  const removePol = async (rid: number) => { const r = await apiFetch(`/api/admin/scenario-politicians/${rid}`, token, { method: 'DELETE' }); if (r.ok) reload() }
+  const addTrend = async () => {
+    if (!tForm.name.trim()) return
+    const r = await apiFetch(`/api/admin/scenarios/${sid}/trends`, token, { method: 'POST', body: JSON.stringify({ ...tForm, scope_states: [] }) })
+    if (r.ok) { setTForm({ name: '', shift_pct: 10, target_party: 'APC' }); reload() }
+  }
+  const removeTrend = async (rid: number) => { const r = await apiFetch(`/api/admin/scenario-trends/${rid}`, token, { method: 'DELETE' }); if (r.ok) reload() }
+
+  const lbl2: React.CSSProperties = { display: 'block', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', color: '#0f2a1c', textTransform: 'uppercase', marginBottom: '5px' }
+  const inp2: React.CSSProperties = { width: '100%', border: '2px solid #d7e0d9', borderRadius: '4px', background: '#f9fbf8', padding: '10px 12px', fontFamily: "'Archivo', sans-serif", fontSize: '14px', color: '#0f2a1c' }
+  const card: React.CSSProperties = { background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '20px', marginBottom: '16px' }
+  const chip = (p: string): React.CSSProperties => ({ fontFamily: "'Archivo Black', sans-serif", fontSize: '11px', color: '#fff', background: PARTY_COLORS[p] ?? '#8aa093', padding: '3px 9px', borderRadius: '4px' })
+
+  return (
+    <div>
+      {/* run controls + progress */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px' }}>
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c' }}>{scenario.name}</div>
+            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{scenario.politicians.length} politician(s) · {scenario.trends.length} trend(s) · target {scenario.target_year}</div>
+          </div>
+          {running ? (
+            <button onClick={onPause} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#fff', background: '#b8860b', border: 'none', borderRadius: '6px', padding: '10px 18px', cursor: 'pointer' }}>❚❚ Pause</button>
+          ) : (
+            <button onClick={() => onRun(false)} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '10px 18px', cursor: 'pointer' }}>{scenario.status === 'paused' ? '▶ Resume' : '▶ Run'}</button>
+          )}
+          {(scenario.status === 'done' || scenario.status === 'error') && (
+            <button onClick={() => onRun(true)} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f8a4a', background: '#fff', border: '2px solid #0f8a4a', borderRadius: '6px', padding: '9px 16px', cursor: 'pointer' }}>↻ Re-run</button>
+          )}
+          <button onClick={onDelete} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#c0392b', background: '#fff', border: '2px solid #e3c4c0', borderRadius: '6px', padding: '9px 16px', cursor: 'pointer' }}>Delete</button>
+        </div>
+
+        {(running || scenario.cursor > 0 || scenario.status !== 'draft') && (
+          <div style={{ marginTop: '16px' }}>
+            <div style={{ height: '10px', borderRadius: '6px', background: '#eef2ee', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${scenario.percent}%`, background: statusColor[scenario.status] ?? '#0f8a4a', transition: 'width .3s' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '7px' }}>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{scenario.message || '—'}</span>
+              <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: statusColor[scenario.status] }}>{scenario.percent}%</span>
+            </div>
+            {scenario.log && scenario.log.length > 0 && (
+              <div style={{ marginTop: '10px', maxHeight: '130px', overflowY: 'auto', background: '#0f2a1c', borderRadius: '8px', padding: '10px 12px', fontFamily: 'monospace', fontSize: '11px', color: '#9fd9b8', lineHeight: 1.7 }}>
+                {scenario.log.slice(-40).map((l, i) => <div key={i}>{l}</div>)}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* politicians */}
+      <div style={card}>
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c', marginBottom: '4px' }}>Politician swings</div>
+        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 14px' }}>Each politician re-allocates a bloc of votes to his new party, scaled by his influence and popularity delta.</p>
+
+        {scenario.politicians.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            {scenario.politicians.map((p) => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '10px 12px', border: '1px solid #eef2ee', borderRadius: '8px', background: '#f9fbf8' }}>
+                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{p.politician_name}</span>
+                <span style={chip(p.new_party)}>{p.new_party}</span>
+                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{p.influence_pct}% influence · {p.delta_popularity >= 0 ? '+' : ''}{p.delta_popularity}% pop · {p.scope}</span>
+                <button onClick={() => removePol(p.id)} style={{ marginLeft: 'auto', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#c0392b', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* search */}
+        <div style={{ position: 'relative' }}>
+          <label style={lbl2}>Find a politician</label>
+          <input value={q} onChange={(e) => { setQ(e.target.value); setInfo(null) }} placeholder="Search by name…" style={inp2} />
+          {results.length > 0 && (
+            <div style={{ position: 'absolute', zIndex: 5, left: 0, right: 0, background: '#fff', border: '1px solid #dbe4dc', borderRadius: '8px', marginTop: '4px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', maxHeight: '240px', overflowY: 'auto' }}>
+              {results.map((r) => (
+                <div key={r.id} onClick={() => pick(r.id)} className="n2row" style={{ padding: '10px 12px', cursor: 'pointer', borderBottom: '1px solid #f2f5f1' }}>
+                  <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#0f2a1c' }}>{r.name}</span>
+                  <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093' }}> · {r.state}{r.party ? ` · ${r.party}` : ''}{r.title ? ` · ${r.title}` : ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {info && (
+          <div style={{ marginTop: '14px', border: '2px solid #d7f0e0', borderRadius: '10px', padding: '16px', background: '#f4fbf6' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+              <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c' }}>{info.name}</span>
+              <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{info.state} · {info.title || 'politician'} · currently {info.current_party || '—'}</span>
+            </div>
+            {info.runs.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                {info.runs.slice(0, 8).map((r, i) => (
+                  <span key={i} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#33413a', background: '#fff', border: '1px solid #dbe4dc', borderRadius: '20px', padding: '3px 10px' }}>
+                    {r.year} {TYPE_LABEL[r.election_type] ?? r.election_type} {r.party}{r.votes ? ` · ${r.votes.toLocaleString()}` : ''}{r.percent ? ` (${r.percent}%)` : ''}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', marginBottom: '12px' }}>No recorded election runs.</div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', alignItems: 'end' }}>
+              <div>
+                <label style={lbl2}>New party</label>
+                <select value={pForm.new_party} onChange={(e) => setPForm({ ...pForm, new_party: e.target.value })} style={inp2}>
+                  {MODEL_PARTIES.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={lbl2}>Influence %</label>
+                <input type="number" min={0} max={100} value={pForm.influence_pct} onChange={(e) => setPForm({ ...pForm, influence_pct: Number(e.target.value) })} style={inp2} />
+              </div>
+              <div>
+                <label style={lbl2}>Δ Popularity %</label>
+                <input type="number" value={pForm.delta_popularity} onChange={(e) => setPForm({ ...pForm, delta_popularity: Number(e.target.value) })} style={inp2} />
+              </div>
+              <div>
+                <label style={lbl2}>Influence scope</label>
+                <select value={pForm.scope} onChange={(e) => setPForm({ ...pForm, scope: e.target.value })} style={inp2}>
+                  {SCOPES.map((s) => <option key={s.id} value={s.id}>{s.label} — {s.hint}</option>)}
+                </select>
+              </div>
+              <button onClick={addPol} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '11px 20px', cursor: 'pointer' }}>Add</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* trends */}
+      <div style={card}>
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c', marginBottom: '4px' }}>Popularity trends</div>
+        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 14px' }}>A free-form swing (e.g. “Christian vote”) that moves a share of every state’s votes toward one party.</p>
+
+        {scenario.trends.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            {scenario.trends.map((t) => (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', padding: '10px 12px', border: '1px solid #eef2ee', borderRadius: '8px', background: '#f9fbf8' }}>
+                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{t.name}</span>
+                <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>+{t.shift_pct}% →</span>
+                <span style={chip(t.target_party)}>{t.target_party}</span>
+                <button onClick={() => removeTrend(t.id)} style={{ marginLeft: 'auto', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#c0392b', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+          <div><label style={lbl2}>Trend name</label><input value={tForm.name} onChange={(e) => setTForm({ ...tForm, name: e.target.value })} placeholder="Christian vote" style={inp2} /></div>
+          <div><label style={lbl2}>Shift %</label><input type="number" min={0} max={100} value={tForm.shift_pct} onChange={(e) => setTForm({ ...tForm, shift_pct: Number(e.target.value) })} style={inp2} /></div>
+          <div><label style={lbl2}>Toward</label><select value={tForm.target_party} onChange={(e) => setTForm({ ...tForm, target_party: e.target.value })} style={inp2}>{MODEL_PARTIES.map((p) => <option key={p} value={p}>{p}</option>)}</select></div>
+          <button onClick={addTrend} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#fff', background: '#0f8a4a', border: 'none', borderRadius: '6px', padding: '11px 20px', cursor: 'pointer' }}>Add</button>
+        </div>
+      </div>
     </div>
   )
 }

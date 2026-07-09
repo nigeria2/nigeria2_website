@@ -73,7 +73,7 @@ function WardsPage() {
                 <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', margin: '0 0 10px' }}>{lga}</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '10px' }}>
                   {byLga[lga].map((w) => (
-                    <Link key={w.ward_code} to="/ward" search={{ ward: w.ward_code.replace(/\//g, '-') }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: '#fff', border: '1px solid #dbe4dc', borderLeft: `4px solid ${w.winner ? colorOf(w.winner) : '#dbe4dc'}`, borderRadius: '9px', padding: '13px 16px', textDecoration: 'none' }}>
+                    <Link key={w.ward_code} to="/ward/$ward" params={{ ward: w.ward_code.replace(/\//g, '-') }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', background: '#fff', border: '1px solid #dbe4dc', borderLeft: `4px solid ${w.winner ? colorOf(w.winner) : '#dbe4dc'}`, borderRadius: '9px', padding: '13px 16px', textDecoration: 'none' }}>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.ward}</div>
                         <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093', display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>

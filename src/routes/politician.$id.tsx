@@ -5,21 +5,22 @@ import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { stateSlug } from '../stateSlug'
 
-export const Route = createFileRoute('/politician')({
+export const Route = createFileRoute('/politician/$id')({
   component: PoliticianPage,
-  validateSearch: (s: Record<string, unknown>): { id: number } => ({ id: Number(s.id) || 0 }),
 })
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#5c6b60'
-const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', senate: 'Senate' }
+const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', senate: 'Senate', reps: 'House of Reps', primary: 'Primary' }
 
 type Assessment = { author_name: string; electoral_value: number; influential_lgas: string[]; reason: string; created_at: string | null }
-type PH = { party: string; state: string; year: string; election_type: string; votes: number; position: number }
+type PH = { party: string; state: string; year: string; election_type: string; votes: number; percent: number | null; position: number; running_mate: string | null; constituency: string | null }
 type TopLga = { lga: string; count: number }
+type BestRun = { year: string; election_type: string; votes: number; percent: number | null; party: string }
 type Detail = {
   id: number; name: string; state: string; title: string; party: string; note: string; photo: string
   avg_electoral_value: number | null; assessments: number; top_lgas: TopLga[]; assessment_list: Assessment[]; party_history: PH[]
+  max_votes: number | null; best_run: BestRun | null; runs_count: number; aka: string[]
 }
 
 const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '11px 14px', whiteSpace: 'nowrap' }
@@ -27,7 +28,7 @@ const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeigh
 const ord = (n: number) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`)
 
 function PoliticianPage() {
-  const { id } = Route.useSearch()
+  const { id } = Route.useParams()
   const [d, setD] = useState<Detail | null | 'error'>(null)
 
   useEffect(() => {
@@ -60,13 +61,26 @@ function PoliticianPage() {
               <div>
                 <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '34px', color: '#fff', margin: '0 0 4px' }}>{d.name}</h1>
                 <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '15px', color: '#c7e7d4' }}>{[d.title, d.party, `${d.state} State`].filter(Boolean).join(' · ')}</div>
+                {d.aka.length > 0 && (
+                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#9fd9b8', marginTop: '4px' }}>
+                    Also known as: {d.aka.join(' · ')}
+                  </div>
+                )}
               </div>
-              {d.avg_electoral_value != null && (
-                <div style={{ marginLeft: 'auto', textAlign: 'center', flex: 'none' }}>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '30px', color: '#ffe14d' }}>{d.avg_electoral_value}</div>
-                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#9fd9b8' }}>Electoral value{d.assessments ? ` · ${d.assessments}` : ''}</div>
-                </div>
-              )}
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '26px', flex: 'none' }}>
+                {d.max_votes != null && (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '30px', color: '#ffe14d' }}>{d.max_votes.toLocaleString()}</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#9fd9b8' }}>Votes can pull{d.best_run ? ` · ${d.best_run.year}` : ''}</div>
+                  </div>
+                )}
+                {d.avg_electoral_value != null && (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '30px', color: '#ffe14d' }}>{d.avg_electoral_value}</div>
+                    <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#9fd9b8' }}>Electoral value{d.assessments ? ` · ${d.assessments}` : ''}</div>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '30px', color: '#fff', margin: 0 }}>{d === 'error' ? 'Politician not found' : 'Loading…'}</h1>
@@ -76,6 +90,33 @@ function PoliticianPage() {
 
       {d && d !== 'error' && (
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 72px', display: 'flex', flexDirection: 'column', gap: '26px' }}>
+          {/* vote-pulling history — how many votes they could pull over time */}
+          {(() => {
+            const runs = d.party_history.filter((h) => h.votes && h.election_type !== 'primary')
+            if (runs.length === 0) return null
+            const chron = [...runs].sort((a, b) => Number(a.year) - Number(b.year))
+            const peak = Math.max(...runs.map((h) => h.votes))
+            return (
+              <div>
+                <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>Votes pulled over time</h2>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>Each bar is one election — how many votes {d.name.split(/\s+/)[0]} drew.</p>
+                <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {chron.map((h, i) => (
+                    <div key={i}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '4px' }}>
+                        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f2a1c' }}>{h.year} · {TYPE_LABEL[h.election_type] ?? h.election_type}{h.constituency ? ` · ${h.constituency}` : ''}<span style={{ color: '#8aa093', fontWeight: 700 }}> · {h.party}</span></span>
+                        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{h.votes.toLocaleString()}{h.percent != null ? <span style={{ color: '#8aa093', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px' }}> · {h.percent}%</span> : null}{h.position === 1 ? <span style={{ color: '#0f8a4a', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px' }}> · Won</span> : null}</span>
+                      </div>
+                      <div style={{ height: '12px', borderRadius: '6px', background: '#eef2ee', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${Math.max(3, Math.round((h.votes / peak) * 100))}%`, background: colorOf(h.party), borderRadius: '6px' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
           {/* party history */}
           {d.party_history.length > 0 && (
             <div>
@@ -95,7 +136,7 @@ function PoliticianPage() {
                     {d.party_history.map((h, i) => (
                       <tr key={i} style={{ borderTop: '1px solid #eef2ee' }}>
                         <td style={{ ...td, fontWeight: 800 }}>{h.year}</td>
-                        <td style={td}>{TYPE_LABEL[h.election_type] ?? h.election_type}</td>
+                        <td style={td}>{TYPE_LABEL[h.election_type] ?? h.election_type}{h.constituency ? <span style={{ color: '#8aa093' }}> · {h.constituency}</span> : null}</td>
                         <td style={td}><span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(h.party), padding: '2px 10px', borderRadius: '20px' }}>{h.party}</span></td>
                         <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{h.votes ? h.votes.toLocaleString() : '—'}</td>
                         <td style={{ ...td, textAlign: 'right', fontWeight: 800, color: h.position === 1 ? '#0f8a4a' : '#5c6b60' }}>{h.position ? (h.position === 1 ? 'Won' : ord(h.position)) : '—'}</td>

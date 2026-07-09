@@ -16,7 +16,7 @@ const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e
 const colorOf = (p: string) => COLORS[p] ?? '#5c6b60'
 
 type TopLga = { lga: string; count: number }
-type Pol = { id: number; name: string; state: string; title: string; party: string; note: string; photo: string; avg_electoral_value: number | null; assessments: number; top_lgas: TopLga[] }
+type Pol = { id: number; name: string; state: string; title: string; party: string; note: string; photo: string; avg_electoral_value: number | null; assessments: number; top_lgas: TopLga[]; aka: string[] }
 type Assessment = { author_name: string; electoral_value: number; influential_lgas: string[]; reason: string; created_at: string | null }
 type PolDetail = Pol & { assessment_list: Assessment[] }
 
@@ -63,6 +63,7 @@ function Avatar({ p, size = 56 }: { p: { name: string; party: string; photo: str
 function PoliticiansPage() {
   const { token } = useAuth()
   const [pols, setPols] = useState<Pol[] | null>(null)
+  const [query, setQuery] = useState('')
   const [selId, setSelId] = useState<number | null>(null)
   const [detail, setDetail] = useState<PolDetail | null>(null)
   const [lgaOptions, setLgaOptions] = useState<string[]>([])
@@ -144,8 +145,12 @@ function PoliticiansPage() {
   }
 
   const selected = pols?.find((p) => p.id === selId) || null
+  const q = query.trim().toLowerCase()
+  const visible = (pols || []).filter((p) =>
+    !q || [p.name, p.state, p.title, p.party, ...(p.aka || [])].join(' ').toLowerCase().includes(q),
+  )
   const byState: Record<string, Pol[]> = {}
-  ;(pols || []).forEach((p) => (byState[p.state] ??= []).push(p))
+  visible.forEach((p) => (byState[p.state] ??= []).push(p))
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>
@@ -265,6 +270,15 @@ function PoliticiansPage() {
         ) : (
           // ---- list grouped by state ----
           <div style={{ display: 'flex', flexDirection: 'column', gap: '26px' }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or alias (e.g. Udom, El-Rufai, Wamakko)…"
+              style={{ ...inputStyle, maxWidth: '440px' }}
+            />
+            {Object.keys(byState).length === 0 && (
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No politicians match “{query}”.</div>
+            )}
             {Object.keys(byState).sort().map((state) => (
               <div key={state}>
                 <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 12px' }}>{state}</h2>

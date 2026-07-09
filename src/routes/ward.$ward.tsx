@@ -5,9 +5,8 @@ import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { stateSlug } from '../stateSlug'
 
-export const Route = createFileRoute('/ward')({
+export const Route = createFileRoute('/ward/$ward')({
   component: WardPage,
-  validateSearch: (s: Record<string, unknown>): { ward: string } => ({ ward: String(s.ward ?? '') }),
 })
 
 type PU = { pu_name: string; pu_code: string; registered_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null> }
@@ -22,7 +21,7 @@ const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', san
 const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '11px 14px' }
 
 function WardPage() {
-  const { ward: code } = Route.useSearch()
+  const { ward: code } = Route.useParams()
   const [d, setD] = useState<Detail | null>(null)
 
   useEffect(() => {

@@ -66,6 +66,14 @@ export function HomeFooter() {
             </div>
           </div>
           <div>
+            <div style={colTitle}>Data</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+              <Link to="/senators" className="footer-link" style={colLink}>Senators</Link>
+              <Link to="/reps" className="footer-link" style={colLink}>House of Reps</Link>
+              <Link to="/politicians" className="footer-link" style={colLink}>Politicians</Link>
+            </div>
+          </div>
+          <div>
             <div style={colTitle}>About Us</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
               <Link to="/contact" className="footer-link" style={colLink}>Contact</Link>

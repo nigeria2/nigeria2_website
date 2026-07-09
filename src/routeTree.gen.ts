@@ -9,14 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WardRouteImport } from './routes/ward'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SenatorsRouteImport } from './routes/senators'
+import { Route as RepsRouteImport } from './routes/reps'
 import { Route as ProblemUnitsRouteImport } from './routes/problem-units'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PredictionsRouteImport } from './routes/predictions'
 import { Route as PoliticiansRouteImport } from './routes/politicians'
-import { Route as PoliticianRouteImport } from './routes/politician'
 import { Route as PartiesRouteImport } from './routes/parties'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MethodologyRouteImport } from './routes/methodology'
@@ -29,16 +29,16 @@ import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as R2027IndexRouteImport } from './routes/2027.index'
 import { Route as WardsStateRouteImport } from './routes/wards.$state'
+import { Route as WardWardRouteImport } from './routes/ward.$ward'
 import { Route as StatesStateRouteImport } from './routes/states.$state'
+import { Route as PredictionIdRouteImport } from './routes/prediction.$id'
+import { Route as PoliticianIdRouteImport } from './routes/politician.$id'
+import { Route as PartyAcronymRouteImport } from './routes/party.$acronym'
 import { Route as R2027SenateRouteImport } from './routes/2027.senate'
 import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
 import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
+import { Route as StatesStatePoliticiansRouteImport } from './routes/states.$state.politicians'
 
-const WardRoute = WardRouteImport.update({
-  id: '/ward',
-  path: '/ward',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -47,6 +47,16 @@ const TeamRoute = TeamRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SenatorsRoute = SenatorsRouteImport.update({
+  id: '/senators',
+  path: '/senators',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RepsRoute = RepsRouteImport.update({
+  id: '/reps',
+  path: '/reps',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProblemUnitsRoute = ProblemUnitsRouteImport.update({
@@ -67,11 +77,6 @@ const PredictionsRoute = PredictionsRouteImport.update({
 const PoliticiansRoute = PoliticiansRouteImport.update({
   id: '/politicians',
   path: '/politicians',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticianRoute = PoliticianRouteImport.update({
-  id: '/politician',
-  path: '/politician',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartiesRoute = PartiesRouteImport.update({
@@ -134,9 +139,29 @@ const WardsStateRoute = WardsStateRouteImport.update({
   path: '/wards/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WardWardRoute = WardWardRouteImport.update({
+  id: '/ward/$ward',
+  path: '/ward/$ward',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatesStateRoute = StatesStateRouteImport.update({
   id: '/states/$state',
   path: '/states/$state',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PredictionIdRoute = PredictionIdRouteImport.update({
+  id: '/prediction/$id',
+  path: '/prediction/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticianIdRoute = PoliticianIdRouteImport.update({
+  id: '/politician/$id',
+  path: '/politician/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartyAcronymRoute = PartyAcronymRouteImport.update({
+  id: '/party/$acronym',
+  path: '/party/$acronym',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R2027SenateRoute = R2027SenateRouteImport.update({
@@ -154,6 +179,11 @@ const R2027GovernorRoute = R2027GovernorRouteImport.update({
   path: '/governor',
   getParentRoute: () => R2027Route,
 } as any)
+const StatesStatePoliticiansRoute = StatesStatePoliticiansRouteImport.update({
+  id: '/politicians',
+  path: '/politicians',
+  getParentRoute: () => StatesStateRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -166,20 +196,25 @@ export interface FileRoutesByFullPath {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
-  '/politician': typeof PoliticianRoute
   '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
+  '/reps': typeof RepsRoute
+  '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
-  '/states/$state': typeof StatesStateRoute
+  '/party/$acronym': typeof PartyAcronymRoute
+  '/politician/$id': typeof PoliticianIdRoute
+  '/prediction/$id': typeof PredictionIdRoute
+  '/states/$state': typeof StatesStateRouteWithChildren
+  '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
+  '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -191,20 +226,25 @@ export interface FileRoutesByTo {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
-  '/politician': typeof PoliticianRoute
   '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
+  '/reps': typeof RepsRoute
+  '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
-  '/states/$state': typeof StatesStateRoute
+  '/party/$acronym': typeof PartyAcronymRoute
+  '/politician/$id': typeof PoliticianIdRoute
+  '/prediction/$id': typeof PredictionIdRoute
+  '/states/$state': typeof StatesStateRouteWithChildren
+  '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027': typeof R2027IndexRoute
+  '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -218,20 +258,25 @@ export interface FileRoutesById {
   '/methodology': typeof MethodologyRoute
   '/onboarding': typeof OnboardingRoute
   '/parties': typeof PartiesRoute
-  '/politician': typeof PoliticianRoute
   '/politicians': typeof PoliticiansRoute
   '/predictions': typeof PredictionsRoute
   '/privacy': typeof PrivacyRoute
   '/problem-units': typeof ProblemUnitsRoute
+  '/reps': typeof RepsRoute
+  '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/ward': typeof WardRoute
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
-  '/states/$state': typeof StatesStateRoute
+  '/party/$acronym': typeof PartyAcronymRoute
+  '/politician/$id': typeof PoliticianIdRoute
+  '/prediction/$id': typeof PredictionIdRoute
+  '/states/$state': typeof StatesStateRouteWithChildren
+  '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
+  '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -246,20 +291,25 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
-    | '/politician'
     | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
+    | '/reps'
+    | '/senators'
     | '/signup'
     | '/team'
-    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/party/$acronym'
+    | '/politician/$id'
+    | '/prediction/$id'
     | '/states/$state'
+    | '/ward/$ward'
     | '/wards/$state'
     | '/2027/'
+    | '/states/$state/politicians'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -271,20 +321,25 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
-    | '/politician'
     | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
+    | '/reps'
+    | '/senators'
     | '/signup'
     | '/team'
-    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/party/$acronym'
+    | '/politician/$id'
+    | '/prediction/$id'
     | '/states/$state'
+    | '/ward/$ward'
     | '/wards/$state'
     | '/2027'
+    | '/states/$state/politicians'
   id:
     | '__root__'
     | '/'
@@ -297,20 +352,25 @@ export interface FileRouteTypes {
     | '/methodology'
     | '/onboarding'
     | '/parties'
-    | '/politician'
     | '/politicians'
     | '/predictions'
     | '/privacy'
     | '/problem-units'
+    | '/reps'
+    | '/senators'
     | '/signup'
     | '/team'
-    | '/ward'
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/party/$acronym'
+    | '/politician/$id'
+    | '/prediction/$id'
     | '/states/$state'
+    | '/ward/$ward'
     | '/wards/$state'
     | '/2027/'
+    | '/states/$state/politicians'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -324,27 +384,24 @@ export interface RootRouteChildren {
   MethodologyRoute: typeof MethodologyRoute
   OnboardingRoute: typeof OnboardingRoute
   PartiesRoute: typeof PartiesRoute
-  PoliticianRoute: typeof PoliticianRoute
   PoliticiansRoute: typeof PoliticiansRoute
   PredictionsRoute: typeof PredictionsRoute
   PrivacyRoute: typeof PrivacyRoute
   ProblemUnitsRoute: typeof ProblemUnitsRoute
+  RepsRoute: typeof RepsRoute
+  SenatorsRoute: typeof SenatorsRoute
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
-  WardRoute: typeof WardRoute
-  StatesStateRoute: typeof StatesStateRoute
+  PartyAcronymRoute: typeof PartyAcronymRoute
+  PoliticianIdRoute: typeof PoliticianIdRoute
+  PredictionIdRoute: typeof PredictionIdRoute
+  StatesStateRoute: typeof StatesStateRouteWithChildren
+  WardWardRoute: typeof WardWardRoute
   WardsStateRoute: typeof WardsStateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/ward': {
-      id: '/ward'
-      path: '/ward'
-      fullPath: '/ward'
-      preLoaderRoute: typeof WardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -357,6 +414,20 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/senators': {
+      id: '/senators'
+      path: '/senators'
+      fullPath: '/senators'
+      preLoaderRoute: typeof SenatorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reps': {
+      id: '/reps'
+      path: '/reps'
+      fullPath: '/reps'
+      preLoaderRoute: typeof RepsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/problem-units': {
@@ -385,13 +456,6 @@ declare module '@tanstack/react-router' {
       path: '/politicians'
       fullPath: '/politicians'
       preLoaderRoute: typeof PoliticiansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politician': {
-      id: '/politician'
-      path: '/politician'
-      fullPath: '/politician'
-      preLoaderRoute: typeof PoliticianRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parties': {
@@ -478,11 +542,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WardsStateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ward/$ward': {
+      id: '/ward/$ward'
+      path: '/ward/$ward'
+      fullPath: '/ward/$ward'
+      preLoaderRoute: typeof WardWardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/states/$state': {
       id: '/states/$state'
       path: '/states/$state'
       fullPath: '/states/$state'
       preLoaderRoute: typeof StatesStateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prediction/$id': {
+      id: '/prediction/$id'
+      path: '/prediction/$id'
+      fullPath: '/prediction/$id'
+      preLoaderRoute: typeof PredictionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politician/$id': {
+      id: '/politician/$id'
+      path: '/politician/$id'
+      fullPath: '/politician/$id'
+      preLoaderRoute: typeof PoliticianIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/party/$acronym': {
+      id: '/party/$acronym'
+      path: '/party/$acronym'
+      fullPath: '/party/$acronym'
+      preLoaderRoute: typeof PartyAcronymRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/2027/senate': {
@@ -506,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R2027GovernorRouteImport
       parentRoute: typeof R2027Route
     }
+    '/states/$state/politicians': {
+      id: '/states/$state/politicians'
+      path: '/politicians'
+      fullPath: '/states/$state/politicians'
+      preLoaderRoute: typeof StatesStatePoliticiansRouteImport
+      parentRoute: typeof StatesStateRoute
+    }
   }
 }
 
@@ -525,6 +624,18 @@ const R2027RouteChildren: R2027RouteChildren = {
 
 const R2027RouteWithChildren = R2027Route._addFileChildren(R2027RouteChildren)
 
+interface StatesStateRouteChildren {
+  StatesStatePoliticiansRoute: typeof StatesStatePoliticiansRoute
+}
+
+const StatesStateRouteChildren: StatesStateRouteChildren = {
+  StatesStatePoliticiansRoute: StatesStatePoliticiansRoute,
+}
+
+const StatesStateRouteWithChildren = StatesStateRoute._addFileChildren(
+  StatesStateRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R2027Route: R2027RouteWithChildren,
@@ -536,15 +647,19 @@ const rootRouteChildren: RootRouteChildren = {
   MethodologyRoute: MethodologyRoute,
   OnboardingRoute: OnboardingRoute,
   PartiesRoute: PartiesRoute,
-  PoliticianRoute: PoliticianRoute,
   PoliticiansRoute: PoliticiansRoute,
   PredictionsRoute: PredictionsRoute,
   PrivacyRoute: PrivacyRoute,
   ProblemUnitsRoute: ProblemUnitsRoute,
+  RepsRoute: RepsRoute,
+  SenatorsRoute: SenatorsRoute,
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
-  WardRoute: WardRoute,
-  StatesStateRoute: StatesStateRoute,
+  PartyAcronymRoute: PartyAcronymRoute,
+  PoliticianIdRoute: PoliticianIdRoute,
+  PredictionIdRoute: PredictionIdRoute,
+  StatesStateRoute: StatesStateRouteWithChildren,
+  WardWardRoute: WardWardRoute,
   WardsStateRoute: WardsStateRoute,
 }
 export const routeTree = rootRouteImport
