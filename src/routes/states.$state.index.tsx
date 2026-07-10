@@ -474,6 +474,12 @@ function StatePage() {
         <div style={{ marginTop: '38px' }}>
           <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '24px', color: '#0f2a1c', margin: '0 0 4px' }}>2027 Election Trend</h2>
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#5c6b60', margin: '0 0 18px' }}>Our crowd-sourced prediction for {state}{week ? ` · ${weekLabel(week)}` : ''}.</p>
+          {!RACES.some((et) => (byRace[et] ?? []).length > 0) ? (
+            <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', padding: '28px 22px', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', marginBottom: '4px' }}>No forecast published yet</div>
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093' }}>A {state} projection will show here once contributor analyses are aggregated.</div>
+            </div>
+          ) : (
           <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {RACES.map((et) => {
               const rows = byRace[et] ?? []
@@ -502,6 +508,7 @@ function StatePage() {
               )
             })}
           </div>
+          )}
         </div>
 
         {/* 2027 — declared candidates (not results; nothing has happened yet). Shown

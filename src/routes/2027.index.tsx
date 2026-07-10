@@ -39,7 +39,9 @@ function summarise(rows: Row[]): Summary {
 function Overview2027() {
   const [weeks, setWeeks] = useState<string[]>([])
   const [week, setWeek] = useState('')
+  const [metaLoaded, setMetaLoaded] = useState(false)
   const [data, setData] = useState<Record<string, Row[]> | null>(null)
+  const noForecast = metaLoaded && weeks.length === 0
 
   useEffect(() => {
     fetch(`${API_BASE}/api/predictions/meta`)
@@ -49,6 +51,7 @@ function Overview2027() {
         if (m.weeks?.length) setWeek(m.weeks[0])
       })
       .catch(() => setWeeks([]))
+      .finally(() => setMetaLoaded(true))
   }, [])
 
   useEffect(() => {
@@ -113,7 +116,9 @@ function Overview2027() {
                 style={{ display: 'block', textDecoration: 'none', background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 30px rgba(0,0,0,0.14)' }}
               >
                 <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', marginBottom: '4px' }}>{TYPE_LABEL[race]}</div>
-                {!s ? (
+                {noForecast ? (
+                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#8aa093', padding: '24px 0' }}>No forecast published yet.</div>
+                ) : !s ? (
                   <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#8aa093', padding: '24px 0' }}>Loading…</div>
                 ) : s.total === 0 ? (
                   <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '14px', color: '#8aa093', padding: '24px 0' }}>No data yet.</div>

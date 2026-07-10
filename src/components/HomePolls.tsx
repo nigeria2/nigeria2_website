@@ -18,6 +18,8 @@ export function HomePolls() {
   const [selectedState, setSelectedState] = useState('')
   const [rows, setRows] = useState<Row[] | null>(null)
   const [states, setStates] = useState<string[]>([])
+  const [metaLoaded, setMetaLoaded] = useState(false)
+  const noForecast = metaLoaded && !week
 
   useEffect(() => {
     fetch(`${API_BASE}/api/predictions/meta`)
@@ -26,6 +28,7 @@ export function HomePolls() {
         if (m.weeks?.length) setWeek(m.weeks[0])
       })
       .catch(() => {})
+      .finally(() => setMetaLoaded(true))
   }, [])
 
   useEffect(() => {
@@ -99,7 +102,12 @@ export function HomePolls() {
         </div>
 
         <div style={{ background: '#fff', border: '1px solid #e2e8dd', borderRadius: '6px', padding: '26px 22px 22px', boxShadow: '0 10px 30px rgba(15,42,28,0.06)' }}>
-          {!bars ? (
+          {noForecast ? (
+            <div style={{ height: '312px', display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px' }}>
+              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c' }}>No 2027 forecast published yet</div>
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '14px', color: '#8aa093', maxWidth: '44ch' }}>Projections will appear here once contributor analyses are aggregated.</div>
+            </div>
+          ) : !bars ? (
             <div style={{ height: '312px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#8aa093' }}>Loading…</div>
           ) : (
             <>

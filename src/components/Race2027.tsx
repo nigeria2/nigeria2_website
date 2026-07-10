@@ -78,6 +78,7 @@ export function Race2027({ race }: { race: string }) {
   }, [rows])
 
   const raceWord = TYPE_LABEL[race]?.toLowerCase() ?? race
+  const noForecast = !!meta && meta.weeks.length === 0
 
   return (
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif" }}>
@@ -111,7 +112,12 @@ export function Race2027({ race }: { race: string }) {
 
         {/* map */}
         <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '14px' }}>
-          {!model ? (
+          {noForecast ? (
+            <div style={{ padding: '72px 24px', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#fff', marginBottom: '8px' }}>No 2027 forecast published yet</div>
+              <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#c7e7d4', maxWidth: '46ch', margin: '0 auto' }}>Once contributor projections are aggregated for this race, the state-by-state map will appear here.</div>
+            </div>
+          ) : !model ? (
             <div style={{ padding: '80px', textAlign: 'center', fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#eafaf0' }}>Loading projections…</div>
           ) : model.total === 0 ? (
             <div style={{ padding: '80px', textAlign: 'center', fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#eafaf0' }}>No data for this selection.</div>
@@ -173,7 +179,9 @@ export function Race2027({ race }: { race: string }) {
             The leading party in every state for the {raceWord} race. Each box is coloured by its projected winner.
           </p>
 
-          {!model ? (
+          {noForecast ? (
+            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No projections have been published for this race yet.</div>
+          ) : !model ? (
             <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>Loading…</div>
           ) : (
             (() => {
