@@ -6,6 +6,7 @@ import { NIGERIA_STATES } from '../nigeriaStates'
 import { STATE_BOUNDS } from '../stateBounds'
 import { STATE_BY_SLUG, stateSlug, stateGeoId, geoIdFromSlug } from '../stateSlug'
 import { politicianSlug } from '../politicianSlug'
+import { lgaSlug } from '../lgaSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -126,7 +127,7 @@ type SenateRace = { district: string; district_short: string; candidates: Senate
 type Pres23 = { APC: number; PDP: number; LP: number; NNPP: number; others: number; total: number; turnout: number | null; winner: string; politician_ids?: Record<string, number> }
 type ModelPred = { id: number; party: string; scores: Record<string, number> }
 type DeclaredCand = { id: number; state: string; election_type: string; year: string; party: string; politician_name: string; politician_id: number | null; running_mate: string | null }
-type LgaVotes = { lga: string; leading_party: string; scores: Record<string, number>; total_votes: number; year: string }
+type LgaVotes = { lga: string; lga_id: number | null; leading_party: string; scores: Record<string, number>; total_votes: number; year: string }
 type LoaderData = {
   state: string; week: string; byRace: Record<string, PartyScore[]>
   predictions: BoardPrediction[]; politicians: Heavyweight[]; lga: LgaGeo | null
@@ -300,8 +301,11 @@ function StatePage() {
             {/* Biggest LGAs by vote (2023 presidential) — the only LGA-level vote data we have */}
             {top5Lgas.length > 0 && (
               <div style={{ marginBottom: '18px' }}>
-                <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', marginBottom: '8px' }}>
-                  Top 5 LGAs by Vote — 2023 Presidential
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', marginBottom: '8px' }}>
+                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093' }}>
+                    Top 5 LGAs by Vote — 2023 Presidential
+                  </div>
+                  <Link to="/states/$state/lgas" params={{ state: stateSlug(state) }} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f8a4a', textDecoration: 'none', whiteSpace: 'nowrap' }}>All LGAs →</Link>
                 </div>
                 <div style={{ border: '1px solid #eef2ee', borderRadius: '8px', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -318,7 +322,9 @@ function StatePage() {
                       {top5Lgas.map((l, i) => (
                         <tr key={l.lga} style={{ borderTop: '1px solid #eef2ee' }}>
                           <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif", color: '#b3c2b8' }}>{i + 1}</td>
-                          <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{l.lga}</td>
+                          <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>
+                            {l.lga_id ? <Link to="/lga/$id" params={{ id: lgaSlug(l.lga_id, l.lga) }} style={{ color: '#0f2a1c', textDecoration: 'none' }}>{l.lga}</Link> : l.lga}
+                          </td>
                           <td style={{ ...ptTd, textAlign: 'center' }}><PartyPill party={l.leading_party} /></td>
                           <td style={{ ...ptTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: '#0f2a1c' }}>{l.total_votes.toLocaleString()}</td>
                           <td style={{ ...ptTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: '#0f8a4a' }}>

@@ -34,10 +34,12 @@ import { Route as StatesStateRouteImport } from './routes/states.$state'
 import { Route as PredictionIdRouteImport } from './routes/prediction.$id'
 import { Route as PoliticianIdRouteImport } from './routes/politician.$id'
 import { Route as PartyAcronymRouteImport } from './routes/party.$acronym'
+import { Route as LgaIdRouteImport } from './routes/lga.$id'
 import { Route as R2027SenateRouteImport } from './routes/2027.senate'
 import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
 import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
 import { Route as StatesStatePoliticiansRouteImport } from './routes/states.$state.politicians'
+import { Route as StatesStateLgasRouteImport } from './routes/states.$state.lgas'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -164,6 +166,11 @@ const PartyAcronymRoute = PartyAcronymRouteImport.update({
   path: '/party/$acronym',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LgaIdRoute = LgaIdRouteImport.update({
+  id: '/lga/$id',
+  path: '/lga/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const R2027SenateRoute = R2027SenateRouteImport.update({
   id: '/senate',
   path: '/senate',
@@ -182,6 +189,11 @@ const R2027GovernorRoute = R2027GovernorRouteImport.update({
 const StatesStatePoliticiansRoute = StatesStatePoliticiansRouteImport.update({
   id: '/politicians',
   path: '/politicians',
+  getParentRoute: () => StatesStateRoute,
+} as any)
+const StatesStateLgasRoute = StatesStateLgasRouteImport.update({
+  id: '/lgas',
+  path: '/lgas',
   getParentRoute: () => StatesStateRoute,
 } as any)
 
@@ -207,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
+  '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
   '/prediction/$id': typeof PredictionIdRoute
@@ -214,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
+  '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRoutesByTo {
@@ -237,6 +251,7 @@ export interface FileRoutesByTo {
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
+  '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
   '/prediction/$id': typeof PredictionIdRoute
@@ -244,6 +259,7 @@ export interface FileRoutesByTo {
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027': typeof R2027IndexRoute
+  '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRoutesById {
@@ -269,6 +285,7 @@ export interface FileRoutesById {
   '/2027/governor': typeof R2027GovernorRoute
   '/2027/presidential': typeof R2027PresidentialRoute
   '/2027/senate': typeof R2027SenateRoute
+  '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
   '/prediction/$id': typeof PredictionIdRoute
@@ -276,6 +293,7 @@ export interface FileRoutesById {
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027/': typeof R2027IndexRoute
+  '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
 }
 export interface FileRouteTypes {
@@ -302,6 +320,7 @@ export interface FileRouteTypes {
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
     | '/prediction/$id'
@@ -309,6 +328,7 @@ export interface FileRouteTypes {
     | '/ward/$ward'
     | '/wards/$state'
     | '/2027/'
+    | '/states/$state/lgas'
     | '/states/$state/politicians'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -332,6 +352,7 @@ export interface FileRouteTypes {
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
     | '/prediction/$id'
@@ -339,6 +360,7 @@ export interface FileRouteTypes {
     | '/ward/$ward'
     | '/wards/$state'
     | '/2027'
+    | '/states/$state/lgas'
     | '/states/$state/politicians'
   id:
     | '__root__'
@@ -363,6 +385,7 @@ export interface FileRouteTypes {
     | '/2027/governor'
     | '/2027/presidential'
     | '/2027/senate'
+    | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
     | '/prediction/$id'
@@ -370,6 +393,7 @@ export interface FileRouteTypes {
     | '/ward/$ward'
     | '/wards/$state'
     | '/2027/'
+    | '/states/$state/lgas'
     | '/states/$state/politicians'
   fileRoutesById: FileRoutesById
 }
@@ -392,6 +416,7 @@ export interface RootRouteChildren {
   SenatorsRoute: typeof SenatorsRoute
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
+  LgaIdRoute: typeof LgaIdRoute
   PartyAcronymRoute: typeof PartyAcronymRoute
   PoliticianIdRoute: typeof PoliticianIdRoute
   PredictionIdRoute: typeof PredictionIdRoute
@@ -577,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PartyAcronymRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lga/$id': {
+      id: '/lga/$id'
+      path: '/lga/$id'
+      fullPath: '/lga/$id'
+      preLoaderRoute: typeof LgaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/2027/senate': {
       id: '/2027/senate'
       path: '/senate'
@@ -605,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatesStatePoliticiansRouteImport
       parentRoute: typeof StatesStateRoute
     }
+    '/states/$state/lgas': {
+      id: '/states/$state/lgas'
+      path: '/lgas'
+      fullPath: '/states/$state/lgas'
+      preLoaderRoute: typeof StatesStateLgasRouteImport
+      parentRoute: typeof StatesStateRoute
+    }
   }
 }
 
@@ -625,10 +664,12 @@ const R2027RouteChildren: R2027RouteChildren = {
 const R2027RouteWithChildren = R2027Route._addFileChildren(R2027RouteChildren)
 
 interface StatesStateRouteChildren {
+  StatesStateLgasRoute: typeof StatesStateLgasRoute
   StatesStatePoliticiansRoute: typeof StatesStatePoliticiansRoute
 }
 
 const StatesStateRouteChildren: StatesStateRouteChildren = {
+  StatesStateLgasRoute: StatesStateLgasRoute,
   StatesStatePoliticiansRoute: StatesStatePoliticiansRoute,
 }
 
@@ -655,6 +696,7 @@ const rootRouteChildren: RootRouteChildren = {
   SenatorsRoute: SenatorsRoute,
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
+  LgaIdRoute: LgaIdRoute,
   PartyAcronymRoute: PartyAcronymRoute,
   PoliticianIdRoute: PoliticianIdRoute,
   PredictionIdRoute: PredictionIdRoute,
