@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { stateSlug } from '../stateSlug'
+import { politicianSlug, politicianIdFromSlug } from '../politicianSlug'
 
 export const Route = createFileRoute('/politician/$id')({
   component: PoliticianPage,
@@ -31,7 +32,9 @@ const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeigh
 const ord = (n: number) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`)
 
 function PoliticianPage() {
-  const { id } = Route.useParams()
+  const { id: slug } = Route.useParams()
+  const id = politicianIdFromSlug(slug)
+  const navigate = useNavigate()
   const [d, setD] = useState<Detail | null | 'error'>(null)
 
   useEffect(() => {
@@ -42,6 +45,16 @@ function PoliticianPage() {
       .then((data: Detail) => setD(data))
       .catch(() => setD('error'))
   }, [id])
+
+  // Canonicalise the URL to `<id>-<name-slug>` once we know the name (e.g. when
+  // arriving at a bare /politician/302). Keeps shared links pretty and unique.
+  useEffect(() => {
+    if (!d || d === 'error') return
+    const canonical = politicianSlug(d.id, d.name)
+    if (canonical !== slug) {
+      navigate({ to: '/politician/$id', params: { id: canonical }, replace: true })
+    }
+  }, [d, slug, navigate])
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>

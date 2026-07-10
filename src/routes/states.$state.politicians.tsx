@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { STATE_BY_SLUG, stateSlug, geoIdFromSlug, stateGeoId } from '../stateSlug'
+import { politicianSlug } from '../politicianSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -95,7 +96,7 @@ function AllPoliticiansPage() {
               </thead>
               <tbody>
                 {shown.map((pol, i) => (
-                  <tr key={pol.id} onClick={() => navigate({ to: '/politician/$id', params: { id: String(pol.id) } })} className="n2row" style={{ borderTop: '1px solid #eef2ee', cursor: 'pointer' }}>
+                  <tr key={pol.id} onClick={() => navigate({ to: '/politician/$id', params: { id: politicianSlug(pol.id, pol.name) } })} className="n2row" style={{ borderTop: '1px solid #eef2ee', cursor: 'pointer' }}>
                     <td style={{ ...rtd, fontFamily: "'Archivo Black', sans-serif", color: '#b3c2b8' }}>{i + 1}</td>
                     <td style={rtd}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

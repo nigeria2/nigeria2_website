@@ -5,6 +5,7 @@ import { HomeFooter } from '../components/HomeFooter'
 import { NIGERIA_STATES } from '../nigeriaStates'
 import { STATE_BOUNDS } from '../stateBounds'
 import { STATE_BY_SLUG, stateSlug, stateGeoId, geoIdFromSlug } from '../stateSlug'
+import { politicianSlug } from '../politicianSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -41,7 +42,7 @@ function CandidateGroup({ title, cands }: { title: string; cands: Cand[] }) {
             <div style={{ width: '18px', flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: i === 0 ? '#0f8a4a' : '#c3ccc6', textAlign: 'center' }}>{i + 1}</div>
             <div style={{ minWidth: 0, flex: 1 }}>
               {c.politician_id
-                ? <Link to="/politician/$id" params={{ id: String(c.politician_id) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: i === 0 ? '#0f8a4a' : '#0f2a1c', textDecoration: 'none' }}>{c.name}</Link>
+                ? <Link to="/politician/$id" params={{ id: politicianSlug(c.politician_id, c.name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: i === 0 ? '#0f8a4a' : '#0f2a1c', textDecoration: 'none' }}>{c.name}</Link>
                 : <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: i === 0 ? '#0f8a4a' : '#0f2a1c' }}>{c.name}</span>}
               {c.sub && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>{c.sub}</div>}
             </div>
@@ -84,7 +85,7 @@ function ResultTable({ title, note, rows, total }: { title: string; note?: React
                 <tr key={r.name + i} style={{ borderTop: '1px solid #eef2f5', background: i === 0 ? '#f2fbf5' : 'transparent' }}>
                   <td style={{ ...rtd, fontFamily: "'Archivo Black', sans-serif", color: i === 0 ? '#0f8a4a' : '#b3c2b8' }}>{i + 1}</td>
                   <td style={{ ...rtd, fontFamily: "'Archivo Black', sans-serif", color: i === 0 ? '#0f8a4a' : '#33414f' }}>
-                    {r.politician_id ? <Link to="/politician/$id" params={{ id: String(r.politician_id) }} style={{ color: 'inherit', textDecoration: 'none' }}>{r.name}</Link> : r.name}
+                    {r.politician_id ? <Link to="/politician/$id" params={{ id: politicianSlug(r.politician_id, r.name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{r.name}</Link> : r.name}
                   </td>
                   <td style={{ ...rtd, textAlign: 'center' }}><PartyPill party={r.party} /></td>
                   <td style={{ ...rtd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{r.votes ? r.votes.toLocaleString() : '—'}</td>
@@ -548,7 +549,7 @@ function StatePage() {
         {/* Incumbents — current office-holders, each expandable to that role's history */}
         {(incumbentGov || senators.length > 0) && (() => {
           const NameCell = ({ name, pid }: { name: string; pid: number | null }) =>
-            pid ? <Link to="/politician/$id" params={{ id: String(pid) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', textDecoration: 'none' }}>{name}</Link>
+            pid ? <Link to="/politician/$id" params={{ id: politicianSlug(pid, name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', textDecoration: 'none' }}>{name}</Link>
                 : <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{name}</span>
           const officeCell = (office: string, term: string) => (
             <td style={{ ...rtd, minWidth: '130px' }}>
@@ -660,7 +661,7 @@ function StatePage() {
                       <td style={ptTd}>{r.constituency}</td>
                       <td style={{ ...ptTd, fontFamily: "'Archivo Black', sans-serif" }}>
                         {r.politician_id
-                          ? <Link to="/politician/$id" params={{ id: String(r.politician_id) }} style={{ color: '#0f2a1c', textDecoration: 'none' }}>{r.name}</Link>
+                          ? <Link to="/politician/$id" params={{ id: politicianSlug(r.politician_id, r.name) }} style={{ color: '#0f2a1c', textDecoration: 'none' }}>{r.name}</Link>
                           : r.name}
                       </td>
                       <td style={{ ...ptTd, textAlign: 'center' }}>{r.party ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(r.party), padding: '2px 9px', borderRadius: '20px' }}>{r.party}</span> : '—'}</td>
@@ -697,7 +698,7 @@ function StatePage() {
                 </thead>
                 <tbody>
                   {[...politicians].sort((a, b) => (b.max_votes || 0) - (a.max_votes || 0)).map((pol, i) => (
-                    <tr key={pol.id} onClick={() => navigate({ to: '/politician/$id', params: { id: String(pol.id) } })} className="n2row" style={{ borderTop: '1px solid #eef2ee', cursor: 'pointer' }}>
+                    <tr key={pol.id} onClick={() => navigate({ to: '/politician/$id', params: { id: politicianSlug(pol.id, pol.name) } })} className="n2row" style={{ borderTop: '1px solid #eef2ee', cursor: 'pointer' }}>
                       <td style={{ ...rtd, fontFamily: "'Archivo Black', sans-serif", color: '#b3c2b8' }}>{i + 1}</td>
                       <td style={rtd}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

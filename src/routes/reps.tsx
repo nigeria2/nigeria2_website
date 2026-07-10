@@ -4,6 +4,7 @@ import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { stateSlug } from '../stateSlug'
+import { politicianSlug } from '../politicianSlug'
 
 export const Route = createFileRoute('/reps')({
   component: RepsPage,
@@ -82,7 +83,7 @@ function RepsPage() {
                   <tr key={r.id} style={{ borderTop: '1px solid #eef2ee' }}>
                     <td style={td}>
                       {r.politician_id ? (
-                        <Link to="/politician/$id" params={{ id: String(r.politician_id) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', textDecoration: 'none' }}>{r.name}</Link>
+                        <Link to="/politician/$id" params={{ id: politicianSlug(r.politician_id, r.name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', textDecoration: 'none' }}>{r.name}</Link>
                       ) : (
                         <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{r.name}</span>
                       )}
