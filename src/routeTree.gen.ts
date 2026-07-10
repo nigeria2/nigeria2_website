@@ -38,6 +38,7 @@ import { Route as LgaIdRouteImport } from './routes/lga.$id'
 import { Route as R2027SenateRouteImport } from './routes/2027.senate'
 import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
 import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
+import { Route as StatesStateIndexRouteImport } from './routes/states.$state.index'
 import { Route as StatesStatePoliticiansRouteImport } from './routes/states.$state.politicians'
 import { Route as StatesStateLgasRouteImport } from './routes/states.$state.lgas'
 
@@ -186,6 +187,11 @@ const R2027GovernorRoute = R2027GovernorRouteImport.update({
   path: '/governor',
   getParentRoute: () => R2027Route,
 } as any)
+const StatesStateIndexRoute = StatesStateIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StatesStateRoute,
+} as any)
 const StatesStatePoliticiansRoute = StatesStatePoliticiansRouteImport.update({
   id: '/politicians',
   path: '/politicians',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/2027/': typeof R2027IndexRoute
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
+  '/states/$state/': typeof StatesStateIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -255,12 +262,12 @@ export interface FileRoutesByTo {
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
   '/prediction/$id': typeof PredictionIdRoute
-  '/states/$state': typeof StatesStateRouteWithChildren
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
   '/2027': typeof R2027IndexRoute
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
+  '/states/$state': typeof StatesStateIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -295,6 +302,7 @@ export interface FileRoutesById {
   '/2027/': typeof R2027IndexRoute
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
+  '/states/$state/': typeof StatesStateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -330,6 +338,7 @@ export interface FileRouteTypes {
     | '/2027/'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
+    | '/states/$state/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -356,12 +365,12 @@ export interface FileRouteTypes {
     | '/party/$acronym'
     | '/politician/$id'
     | '/prediction/$id'
-    | '/states/$state'
     | '/ward/$ward'
     | '/wards/$state'
     | '/2027'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
+    | '/states/$state'
   id:
     | '__root__'
     | '/'
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/2027/'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
+    | '/states/$state/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -630,6 +640,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R2027GovernorRouteImport
       parentRoute: typeof R2027Route
     }
+    '/states/$state/': {
+      id: '/states/$state/'
+      path: '/'
+      fullPath: '/states/$state/'
+      preLoaderRoute: typeof StatesStateIndexRouteImport
+      parentRoute: typeof StatesStateRoute
+    }
     '/states/$state/politicians': {
       id: '/states/$state/politicians'
       path: '/politicians'
@@ -666,11 +683,13 @@ const R2027RouteWithChildren = R2027Route._addFileChildren(R2027RouteChildren)
 interface StatesStateRouteChildren {
   StatesStateLgasRoute: typeof StatesStateLgasRoute
   StatesStatePoliticiansRoute: typeof StatesStatePoliticiansRoute
+  StatesStateIndexRoute: typeof StatesStateIndexRoute
 }
 
 const StatesStateRouteChildren: StatesStateRouteChildren = {
   StatesStateLgasRoute: StatesStateLgasRoute,
   StatesStatePoliticiansRoute: StatesStatePoliticiansRoute,
+  StatesStateIndexRoute: StatesStateIndexRoute,
 }
 
 const StatesStateRouteWithChildren = StatesStateRoute._addFileChildren(
