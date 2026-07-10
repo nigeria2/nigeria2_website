@@ -122,7 +122,7 @@ type GovHistItem = { name: string; party: string; term_start: string | null; ter
 type RepRow = { id: number; state: string; constituency: string; name: string; party: string; politician_id: number | null }
 type SenateCand = { name: string; party: string; votes: number | null; position: number; politician_id: number | null }
 type SenateRace = { district: string; district_short: string; candidates: SenateCand[] }
-type Pres23 = { APC: number; PDP: number; LP: number; NNPP: number; others: number; total: number; turnout: number | null; winner: string }
+type Pres23 = { APC: number; PDP: number; LP: number; NNPP: number; others: number; total: number; turnout: number | null; winner: string; politician_ids?: Record<string, number> }
 type ModelPred = { id: number; party: string; scores: Record<string, number> }
 type DeclaredCand = { id: number; state: string; election_type: string; year: string; party: string; politician_name: string; politician_id: number | null; running_mate: string | null }
 type LgaVotes = { lga: string; leading_party: string; scores: Record<string, number>; total_votes: number; year: string }
@@ -520,7 +520,7 @@ function StatePage() {
         {/* Candidates — the leading contenders for each office, from the last election */}
         {(pres2023 || governor2023.length > 0 || senate2023.length > 0) && (() => {
           const presCands: Cand[] = pres2023
-            ? PRES_2023.map((p) => ({ name: p.name, party: p.party, votes: (pres2023 as Pres23)[p.party as 'APC' | 'PDP' | 'LP' | 'NNPP'] }))
+            ? PRES_2023.map((p) => ({ name: p.name, party: p.party, votes: (pres2023 as Pres23)[p.party as 'APC' | 'PDP' | 'LP' | 'NNPP'], politician_id: pres2023.politician_ids?.[p.party] }))
                 .sort((a, b) => (b.votes || 0) - (a.votes || 0))
             : []
           const govCands: Cand[] = [...governor2023]

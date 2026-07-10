@@ -17,10 +17,13 @@ type Assessment = { author_name: string; electoral_value: number; influential_lg
 type PH = { party: string; state: string; year: string; election_type: string; votes: number; percent: number | null; position: number; running_mate: string | null; constituency: string | null }
 type TopLga = { lga: string; count: number }
 type BestRun = { year: string; election_type: string; votes: number; percent: number | null; party: string }
+type StateVote = { state: string; votes: number; total: number; won: boolean }
+type PresStateVotes = { year: string; party: string; states: StateVote[] }
 type Detail = {
   id: number; name: string; state: string; title: string; party: string; note: string; photo: string
   avg_electoral_value: number | null; assessments: number; top_lgas: TopLga[]; assessment_list: Assessment[]; party_history: PH[]
   max_votes: number | null; best_run: BestRun | null; runs_count: number; aka: string[]
+  presidential_state_votes: PresStateVotes[]
 }
 
 const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '11px 14px', whiteSpace: 'nowrap' }
@@ -116,6 +119,52 @@ function PoliticianPage() {
               </div>
             )
           })()}
+
+          {/* by-state vote breakdown — where this presidential candidate polled,
+              strongest state first */}
+          {(d.presidential_state_votes ?? []).map((psv) => {
+            const peak = Math.max(1, ...psv.states.map((s) => s.votes))
+            const first = d.name.split(/\s+/)[0]
+            return (
+              <div key={psv.year}>
+                <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>Where {first} polled votes · {psv.year}</h2>
+                <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>{first}'s {psv.party} presidential vote in every state, strongest first — tap a state for its full breakdown.</p>
+                <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
+                    <thead>
+                      <tr style={{ background: '#f4f7f2' }}>
+                        <th style={{ ...th, width: '34px' }}>#</th>
+                        <th style={th}>State</th>
+                        <th style={{ ...th, textAlign: 'right' }}>Votes</th>
+                        <th style={{ ...th, textAlign: 'right' }}>% of state</th>
+                        <th style={th}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {psv.states.map((s, i) => (
+                        <tr key={s.state} style={{ borderTop: '1px solid #eef2ee' }}>
+                          <td style={{ ...td, fontFamily: "'Archivo Black', sans-serif", color: i === 0 ? '#0f8a4a' : '#b3c2b8' }}>{i + 1}</td>
+                          <td style={td}>
+                            <Link to="/states/$state" params={{ state: stateSlug(s.state) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', textDecoration: 'none' }}>{s.state}</Link>
+                          </td>
+                          <td style={{ ...td, textAlign: 'right' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                              <div style={{ flex: '0 1 120px', height: '8px', borderRadius: '5px', background: '#eef2ee', overflow: 'hidden' }}>
+                                <div style={{ height: '100%', width: `${Math.max(3, Math.round((s.votes / peak) * 100))}%`, background: colorOf(psv.party), borderRadius: '5px' }} />
+                              </div>
+                              <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', minWidth: '68px', textAlign: 'right' }}>{s.votes.toLocaleString()}</span>
+                            </div>
+                          </td>
+                          <td style={{ ...td, textAlign: 'right', color: '#5c6b60' }}>{s.total ? `${((s.votes / s.total) * 100).toFixed(1)}%` : '—'}</td>
+                          <td style={td}>{s.won && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#0f8a4a', background: '#e7f3ec', padding: '2px 8px', borderRadius: '20px' }}>Won state</span>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )
+          })}
 
           {/* party history */}
           {d.party_history.length > 0 && (
