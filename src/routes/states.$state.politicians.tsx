@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
-import { STATE_BY_SLUG, stateSlug } from '../stateSlug'
+import { STATE_BY_SLUG, stateSlug, geoIdFromSlug, stateGeoId } from '../stateSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -24,9 +24,10 @@ type LoaderData = { state: string; politicians: Pol[] }
 export const Route = createFileRoute('/states/$state/politicians')({
   loader: async ({ params }): Promise<LoaderData> => {
     const state = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
+    const geoId = geoIdFromSlug(params.state) ?? stateGeoId(state) ?? ''
     let politicians: Pol[] = []
     try {
-      const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(state)}/politicians`).then((r) => r.json())
+      const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(geoId)}/politicians`).then((r) => r.json())
       politicians = detail.politicians ?? []
     } catch {
       /* leave empty */

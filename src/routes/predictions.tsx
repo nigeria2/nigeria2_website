@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Protected } from '../components/Protected'
 import { apiFetch, useAuth } from '../auth'
 import { HomeNav } from '../components/HomeNav'
+import { stateGeoId } from '../stateSlug'
 
 export const Route = createFileRoute('/predictions')({
   component: () => (
@@ -72,7 +73,7 @@ function PredictionsBoard() {
     setPreds(null)
     setShowForm(false)
     setEditing(null)
-    apiFetch(`/api/board/states/${encodeURIComponent(st)}`, token).then((r) => r.json()).then(setPreds).catch(() => setPreds([]))
+    apiFetch(`/api/board/states/${encodeURIComponent(stateGeoId(st) ?? st)}`, token).then((r) => r.json()).then(setPreds).catch(() => setPreds([]))
   }
 
   const setEt = (et: string) => {

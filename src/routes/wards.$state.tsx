@@ -3,7 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
-import { STATE_BY_SLUG } from '../stateSlug'
+import { STATE_BY_SLUG, geoIdFromSlug, stateGeoId } from '../stateSlug'
 
 export const Route = createFileRoute('/wards/$state')({
   component: WardsPage,
@@ -21,16 +21,17 @@ const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
 function WardsPage() {
   const { state: slug } = Route.useParams()
   const state = STATE_BY_SLUG[slug] ?? slug
+  const geoId = geoIdFromSlug(slug) ?? stateGeoId(state) ?? ''
   const [wards, setWards] = useState<W[] | null>(null)
   const [q, setQ] = useState('')
 
   useEffect(() => {
     setWards(null)
-    fetch(`${API_BASE}/api/states/${encodeURIComponent(state)}/pu-wards`)
+    fetch(`${API_BASE}/api/states/${encodeURIComponent(geoId)}/pu-wards`)
       .then((r) => r.json())
       .then((d: W[]) => setWards(d))
       .catch(() => setWards([]))
-  }, [state])
+  }, [geoId])
 
   const byLga = useMemo(() => {
     if (!wards) return null

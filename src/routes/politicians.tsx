@@ -3,6 +3,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Protected } from '../components/Protected'
 import { apiFetch, useAuth } from '../auth'
 import { HomeNav } from '../components/HomeNav'
+import { stateGeoId } from '../stateSlug'
 
 export const Route = createFileRoute('/politicians')({
   component: () => (
@@ -93,7 +94,7 @@ function PoliticiansPage() {
     setReason('')
     setAssessMsg('')
     apiFetch(`/api/politicians/${p.id}`, token).then((r) => r.json()).then(setDetail).catch(() => {})
-    apiFetch(`/api/states/${encodeURIComponent(p.state)}`, token).then((r) => r.json()).then((d) => setLgaOptions(((d.lgas || []) as { lga: string }[]).map((x) => x.lga).sort())).catch(() => setLgaOptions([]))
+    apiFetch(`/api/states/${encodeURIComponent(stateGeoId(p.state) ?? p.state)}`, token).then((r) => r.json()).then((d) => setLgaOptions(((d.lgas || []) as { lga: string }[]).map((x) => x.lga).sort())).catch(() => setLgaOptions([]))
   }
 
   const onPickPhoto = async (file: File | undefined) => {

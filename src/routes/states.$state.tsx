@@ -4,7 +4,7 @@ import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
 import { NIGERIA_STATES } from '../nigeriaStates'
 import { STATE_BOUNDS } from '../stateBounds'
-import { STATE_BY_SLUG, stateSlug } from '../stateSlug'
+import { STATE_BY_SLUG, stateSlug, stateGeoId, geoIdFromSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
@@ -136,6 +136,7 @@ type LoaderData = {
 export const Route = createFileRoute('/states/$state')({
   loader: async ({ params }): Promise<LoaderData> => {
     const state = STATE_BY_SLUG[params.state] ?? decodeURIComponent(params.state)
+    const geoId = geoIdFromSlug(params.state) ?? stateGeoId(state) ?? ''
     let week = ''
     let byRace: Record<string, PartyScore[]> = {}
     try {
@@ -143,11 +144,11 @@ export const Route = createFileRoute('/states/$state')({
       week = meta.weeks?.[0] ?? ''
       const entries = await Promise.all(
         RACES.map(async (et) => {
-          const rows: { state: string; party: string; score: number }[] = await fetch(
+          const rows: { geo_id: string; party: string; score: number }[] = await fetch(
             `${API_BASE}/api/predictions?election_type=${et}&week=${encodeURIComponent(week)}`,
           ).then((r) => r.json())
           const forState = rows
-            .filter((r) => r.state === state)
+            .filter((r) => r.geo_id === geoId)
             .map((r) => ({ party: r.party, score: r.score }))
             .sort((a, b) => b.score - a.score)
           return [et, forState] as const
@@ -172,7 +173,7 @@ export const Route = createFileRoute('/states/$state')({
     let declaredCandidates2027: DeclaredCand[] = []
     let lgaVotes: LgaVotes[] = []
     try {
-      const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(state)}`).then((r) => r.json())
+      const detail = await fetch(`${API_BASE}/api/states/${encodeURIComponent(geoId)}`).then((r) => r.json())
       predictions = detail.predictions ?? []
       politicians = detail.politicians ?? []
       facts = detail.facts ?? null

@@ -21,7 +21,7 @@ type Unit = {
   votes_cast: number
   election_year: string
 }
-type Meta = { states: string[]; anomaly_types: string[]; total: number }
+type Meta = { states: { name: string; geo_id: string | null }[]; anomaly_types: string[]; total: number }
 
 const sevColor = (s: string) => (s === 'High' ? '#c0392b' : '#b8860b')
 
@@ -45,7 +45,7 @@ function ProblemUnitsPage() {
   useEffect(() => {
     setUnits(null)
     const params = new URLSearchParams()
-    if (state) params.set('state', state)
+    if (state) params.set('geo_id', state)
     if (atype) params.set('anomaly_type', atype)
     fetch(`${API_BASE}/api/problem-units?${params.toString()}`)
       .then((r) => r.json())
@@ -75,7 +75,7 @@ function ProblemUnitsPage() {
           <select value={state} onChange={(e) => setState(e.target.value)} style={selStyle}>
             <option value="">All states</option>
             {(meta?.states ?? []).map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s.geo_id ?? s.name} value={s.geo_id ?? ''}>{s.name}</option>
             ))}
           </select>
           <select value={atype} onChange={(e) => setAtype(e.target.value)} style={selStyle}>
