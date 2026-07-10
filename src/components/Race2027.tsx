@@ -105,10 +105,15 @@ export function Race2027({ race }: { race: string }) {
         <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '40px', color: '#fff', margin: '0 0 8px', letterSpacing: '-0.01em' }}>
           {TYPE_LABEL[race] ?? race} · 2027 Prediction
         </h1>
-        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.5, color: '#c7e7d4', margin: '0 0 22px', maxWidth: '60ch' }}>
+        <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', lineHeight: 1.5, color: '#c7e7d4', margin: '0 0 16px', maxWidth: '60ch' }}>
           Projected leading party in every state for the {raceWord} race. Step through measurement weeks to see how the
           picture is moving.
         </p>
+        {race === 'presidential' && (
+          <Link to="/2027/presidential/states" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f4a2c', background: '#ffe14d', textDecoration: 'none', padding: '11px 18px', borderRadius: '6px', marginBottom: '22px' }}>
+            📊 See prediction by state &amp; LGA →
+          </Link>
+        )}
 
         {/* map */}
         <div style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '10px', padding: '14px' }}>
