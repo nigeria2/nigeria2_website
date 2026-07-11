@@ -7,7 +7,8 @@ import { stateSlug } from '../stateSlug'
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
-type StateRow = { geo_id: string; state: string; parties: Record<string, number>; leading_party: string; total_votes: number; lga_count: number }
+type Cand = { politician_id: number | null; politician_name: string | null; photo: string; party: string; votes: number }
+type StateRow = { geo_id: string; state: string; candidates: Cand[]; leading_party: string; total_votes: number; baseline_votes: number; unknown_votes: number; lga_count: number }
 type LoaderData = { states: StateRow[] }
 
 export const Route = createFileRoute('/2027/presidential/states/')({
@@ -55,9 +56,34 @@ function StatesList() {
                     <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c' }}>{s.state}</div>
                     <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(s.leading_party), padding: '3px 10px', borderRadius: '20px' }}>{s.leading_party}</span>
                   </div>
-                  <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '26px', color: '#0f2a1c', marginTop: '8px' }}>{s.total_votes.toLocaleString()}<span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}> projected votes</span></div>
-                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#0f8a4a', marginTop: '10px' }}>
-                    {s.lga_count} local government{s.lga_count === 1 ? '' : 's'} · view breakdown →
+
+                  {/* stacked bar: each candidate's predicted share + unknown remainder */}
+                  {s.baseline_votes > 0 && (
+                    <div style={{ display: 'flex', height: '8px', borderRadius: '5px', overflow: 'hidden', background: '#eef2ee', marginTop: '12px' }}>
+                      {s.candidates.map((c) => (
+                        <div key={c.politician_id ?? c.party} style={{ width: `${(c.votes / s.baseline_votes) * 100}%`, background: colorOf(c.party) }} title={`${c.politician_name ?? c.party}: ${c.votes.toLocaleString()}`} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* per-candidate predicted votes, then the unknown remainder */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '12px' }}>
+                    {s.candidates.map((c) => (
+                      <div key={c.politician_id ?? c.party} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+                        <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '3px 0', borderRadius: '4px' }}>{c.party}</span>
+                        <span style={{ flex: 1, minWidth: 0, fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.politician_name ?? c.party}</span>
+                        <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{c.votes.toLocaleString()}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '9px', borderTop: '1px solid #eef2ee', paddingTop: '7px' }}>
+                      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#5c6b60', background: '#eef2ee', padding: '3px 0', borderRadius: '4px' }}>?</span>
+                      <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Unknown</span>
+                      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#8aa093' }}>{s.unknown_votes.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#0f8a4a', marginTop: '12px' }}>
+                    {s.lga_count} local government{s.lga_count === 1 ? '' : 's'} predicted · view breakdown →
                   </div>
                 </Link>
               ))}
