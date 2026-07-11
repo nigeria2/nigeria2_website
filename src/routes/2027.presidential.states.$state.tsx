@@ -9,8 +9,9 @@ import { politicianSlug } from '../politicianSlug'
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
-type Pred = { politician_id: number | null; politician_name: string | null; party: string; label: string; votes: number }
-type Row = { lga_id: number; lga_name: string; total_votes: number; predictions: Pred[] }
+type Pred = { label: string; votes: number; importance: number; pct: number | null }
+type Cand = { politician_id: number | null; politician_name: string | null; party: string; votes: number; pct: number | null; predictions: Pred[] }
+type Row = { lga_id: number; lga_name: string; total_votes: number; swing_votes: number; candidates: Cand[] }
 type LoaderData = { state: string; lgas: Row[] }
 
 export const Route = createFileRoute('/2027/presidential/states/$state')({
@@ -56,24 +57,29 @@ function StatePredictionPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {lgas.map((l) => (
-                <div key={l.lga_id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderLeft: `5px solid ${colorOf(l.predictions[0]?.party ?? '')}`, borderRadius: '12px', padding: '16px 20px' }}>
+                <div key={l.lga_id} style={{ background: '#fff', border: '1px solid #dbe4dc', borderLeft: `5px solid ${colorOf(l.candidates[0]?.party ?? '')}`, borderRadius: '12px', padding: '16px 20px' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <Link to="/2027/presidential/lga/$lga" params={{ lga: lgaSlug(l.lga_id, l.lga_name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', textDecoration: 'none' }}>{l.lga_name} →</Link>
-                    <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{l.predictions.length} prediction{l.predictions.length === 1 ? '' : 's'}</span>
+                    <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{l.candidates.length} candidate{l.candidates.length === 1 ? '' : 's'}</span>
                   </div>
                   <div style={{ marginTop: '8px', borderTop: '1px solid #eef2ee' }}>
-                    {l.predictions.map((p, i) => (
+                    {l.candidates.map((c, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 0' }}>
-                        <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(p.party), padding: '3px 0', borderRadius: '4px' }}>{p.party}</span>
+                        <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '3px 0', borderRadius: '4px' }}>{c.party}</span>
                         <span style={{ flex: 1, minWidth: 0 }}>
-                          {p.politician_id && p.politician_name
-                            ? <Link to="/politician/$id" params={{ id: politicianSlug(p.politician_id, p.politician_name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', textDecoration: 'none' }}>{p.politician_name}</Link>
-                            : <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{p.politician_name ?? p.party}</span>}
-                          {p.label && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}> · {p.label}</span>}
+                          {c.politician_id && c.politician_name
+                            ? <Link to="/politician/$id" params={{ id: politicianSlug(c.politician_id, c.politician_name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', textDecoration: 'none' }}>{c.politician_name}</Link>
+                            : <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{c.politician_name ?? c.party}</span>}
+                          {c.predictions.length > 0 && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}> · {c.predictions.length} prediction{c.predictions.length === 1 ? '' : 's'}</span>}
                         </span>
-                        <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{p.votes.toLocaleString()}</span>
+                        <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{c.votes.toLocaleString()}</span>
                       </div>
                     ))}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 0', borderTop: '1px dashed #cdd8cf' }}>
+                      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#8aa093', background: '#eef2ee', padding: '3px 0', borderRadius: '4px' }}>≈</span>
+                      <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Swing Votes (Unknown)</span>
+                      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#8aa093' }}>{l.swing_votes.toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
               ))}

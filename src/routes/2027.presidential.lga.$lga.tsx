@@ -9,9 +9,11 @@ import { politicianSlug } from '../politicianSlug'
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
-type Pred = { politician_id: number | null; politician_name: string | null; party: string; label: string; votes: number }
-type Ward = { ward: string; ward_code: string; registered_voters: number | null; total_votes: number; winner: string; winner_votes: number; predictions: Pred[] }
-type Detail = { lga_id: number; lga_name: string; state: string; state_geo: string; predictions: Pred[]; total_votes: number; baseline_votes: number; unknown_votes: number; wards: Ward[] }
+type Pred = { label: string; votes: number; importance: number; pct: number | null }
+type Cand = { politician_id: number | null; politician_name: string | null; photo: string; party: string; votes: number; pct: number | null; predictions: Pred[] }
+type Hist = { year: number; office: string; total_votes: number; winner: string; parties: Record<string, number> }
+type Ward = { ward: string; ward_code: string; registered_voters: number | null; total_votes: number; candidates: Cand[]; swing_votes: number; historical: Hist[] }
+type Detail = { lga_id: number; lga_name: string; state: string; state_geo: string; candidates: Cand[]; total_votes: number; baseline_votes: number; swing_votes: number; wards: Ward[] }
 
 export const Route = createFileRoute('/2027/presidential/lga/$lga')({
   loader: async ({ params }): Promise<Detail | null> => {
@@ -26,20 +28,54 @@ export const Route = createFileRoute('/2027/presidential/lga/$lga')({
   component: LgaPredictionPage,
 })
 
-/** One prediction line: candidate (party) · label · votes. */
-function PredLine({ p }: { p: Pred }) {
+/** One candidate: name + importance-weighted votes, with each prediction shown small. */
+function CandidateRow({ c }: { c: Cand }) {
+  const n = c.predictions.length
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 0' }}>
-      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(p.party), padding: '3px 0', borderRadius: '4px' }}>{p.party}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0' }}>
+      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '4px 0', borderRadius: '4px' }}>{c.party}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {p.politician_id && p.politician_name
-            ? <Link to="/politician/$id" params={{ id: politicianSlug(p.politician_id, p.politician_name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{p.politician_name}</Link>
-            : (p.politician_name ?? p.party)}
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {c.politician_id && c.politician_name
+            ? <Link to="/politician/$id" params={{ id: politicianSlug(c.politician_id, c.politician_name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{c.politician_name}</Link>
+            : (c.politician_name ?? c.party)}
         </div>
-        {p.label && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>{p.label}</div>}
+        {n > 0 && (
+          <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10.5px', color: '#8aa093' }}>
+            {n} prediction{n === 1 ? '' : 's'}: {c.predictions.map((p) => `${p.pct ?? '—'}%`).join(', ')}
+          </div>
+        )}
       </div>
-      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>{p.votes.toLocaleString()}</span>
+      <div style={{ textAlign: 'right', flex: 'none' }}>
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#0f2a1c' }}>{c.votes.toLocaleString()}</div>
+        {c.pct != null && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10px', color: '#8aa093' }}>{c.pct}%</div>}
+      </div>
+    </div>
+  )
+}
+
+function SwingRow({ votes }: { votes: number }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderTop: '1px dashed #cdd8cf' }}>
+      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', color: '#8aa093', background: '#eef2ee', padding: '4px 0', borderRadius: '4px' }}>≈</span>
+      <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Swing Votes (Unknown)</span>
+      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '16px', color: '#8aa093' }}>{votes.toLocaleString()}</span>
+    </div>
+  )
+}
+
+function Historical({ items }: { items: Hist[] }) {
+  if (items.length === 0) return null
+  return (
+    <div style={{ marginTop: '10px', paddingTop: '9px', borderTop: '1px solid #eef2ee' }}>
+      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '9px', letterSpacing: '0.06em', textTransform: 'uppercase', color: '#b3c2b8', marginBottom: '4px' }}>Historical results</div>
+      {items.map((h, i) => (
+        <div key={i} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '10.5px', color: '#8aa093', lineHeight: 1.5 }}>
+          <span style={{ fontWeight: 800, color: '#5c6b60' }}>{h.year} {h.office}:</span>{' '}
+          {Object.entries(h.parties).sort((a, b) => b[1] - a[1]).map(([p, v]) => `${p} ${v.toLocaleString()}`).join(' · ')}
+          {h.total_votes ? ` · ${h.total_votes.toLocaleString()} total` : ''}{h.winner ? ` · won ${h.winner}` : ''}
+        </div>
+      ))}
     </div>
   )
 }
@@ -62,7 +98,7 @@ function LgaPredictionPage() {
         </h1>
         {d && (
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '16px', color: '#c7e7d4', margin: '0 0 24px' }}>
-            We project each ward, then add them up. A candidate can have several predictions — each scenario is listed{d.baseline_votes ? ` · ${d.baseline_votes.toLocaleString()} votes were cast here in 2023` : ''}.
+            We project each ward, then add them up. A candidate can have several predictions — their votes are the importance-weighted average, and swing votes close the gap.
           </p>
         )}
       </div>
@@ -73,39 +109,30 @@ function LgaPredictionPage() {
             <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '40px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No prediction for this local government yet.</div>
           ) : (
             <>
-              {/* LGA-level aggregate: each prediction summed across wards, then unknown */}
+              {/* LGA total: each candidate (weighted average of their predictions) + swing */}
               <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>{d.lga_name} total</h2>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 12px' }}>Every ward’s prediction added up.</p>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 12px' }}>Every ward’s projection added up.</p>
               <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '10px 18px', marginBottom: '30px' }}>
-                {d.predictions.map((p, i) => <div key={i} style={{ borderTop: i ? '1px solid #eef2ee' : 'none' }}><PredLine p={p} /></div>)}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 0', borderTop: '1px dashed #cdd8cf' }}>
-                  <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#8aa093', background: '#eef2ee', padding: '3px 0', borderRadius: '4px' }}>?</span>
-                  <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Unknown (not yet predicted)</span>
-                  <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#8aa093' }}>{d.unknown_votes.toLocaleString()}</span>
-                </div>
+                {d.candidates.map((c, i) => <div key={i} style={{ borderTop: i ? '1px solid #eef2ee' : 'none' }}><CandidateRow c={c} /></div>)}
+                <SwingRow votes={d.swing_votes} />
               </div>
 
-              {/* ward by ward: each ward's 2023 result, then its predictions below */}
+              {/* ward by ward: plain header, candidate projections, swing, then history */}
               <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>Ward by ward</h2>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>Each ward in {d.lga_name}, its 2023 turnout and result, then every prediction added for that ward.</p>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>Each ward in {d.lga_name}: the projected votes per candidate, swing votes, and past results.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {d.wards.map((w) => (
                   <div key={w.ward_code} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '15px 18px' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                       <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '17px', color: '#0f2a1c' }}>{w.ward}</div>
-                      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                        {w.registered_voters != null && <span>{w.registered_voters.toLocaleString()} registered</span>}
-                        <span>{w.total_votes.toLocaleString()} cast ’23</span>
-                        {w.winner && <span>Won: <span style={{ color: colorOf(w.winner), fontWeight: 800 }}>{w.winner}</span>{w.winner_votes ? ` ${w.winner_votes.toLocaleString()}` : ''}</span>}
-                      </div>
+                      {w.registered_voters != null && <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{w.registered_voters.toLocaleString()} registered</div>}
                     </div>
-                    {w.predictions.length > 0 ? (
-                      <div style={{ marginTop: '8px', borderTop: '1px solid #eef2ee' }}>
-                        {w.predictions.map((p, i) => <PredLine key={i} p={p} />)}
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid #eef2ee', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#b3c2b8' }}>No prediction for this ward yet.</div>
-                    )}
+                    <div style={{ marginTop: '6px', borderTop: '1px solid #eef2ee' }}>
+                      {w.candidates.length > 0
+                        ? <>{w.candidates.map((c, i) => <CandidateRow key={i} c={c} />)}<SwingRow votes={w.swing_votes} /></>
+                        : <div style={{ padding: '9px 0', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#b3c2b8' }}>No prediction for this ward yet.</div>}
+                    </div>
+                    <Historical items={w.historical} />
                   </div>
                 ))}
               </div>

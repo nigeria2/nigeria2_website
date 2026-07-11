@@ -7,8 +7,9 @@ import { stateSlug } from '../stateSlug'
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
-type Pred = { politician_id: number | null; politician_name: string | null; photo: string; party: string; label: string; votes: number }
-type StateRow = { geo_id: string; state: string; predictions: Pred[]; leading_party: string; total_votes: number; baseline_votes: number; unknown_votes: number; lga_count: number }
+type Pred = { label: string; votes: number; importance: number; pct: number | null }
+type Cand = { politician_id: number | null; politician_name: string | null; photo: string; party: string; votes: number; pct: number | null; predictions: Pred[] }
+type StateRow = { geo_id: string; state: string; candidates: Cand[]; leading_party: string; total_votes: number; baseline_votes: number; swing_votes: number; lga_count: number }
 type LoaderData = { states: StateRow[] }
 
 export const Route = createFileRoute('/2027/presidential/states/')({
@@ -64,22 +65,22 @@ function StatesList() {
                     </div>
                   )}
 
-                  {/* each prediction (candidate · scenario), then the unknown remainder */}
+                  {/* each candidate (importance-weighted), then swing votes */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginTop: '12px' }}>
-                    {s.predictions.map((p, i) => (
+                    {s.candidates.map((c, i) => (
                       <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
-                        <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(p.party), padding: '3px 0', borderRadius: '4px' }}>{p.party}</span>
+                        <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '3px 0', borderRadius: '4px' }}>{c.party}</span>
                         <span style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                          <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{p.politician_name ?? p.party}</span>
-                          {p.label && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}> · {p.label}</span>}
+                          <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>{c.politician_name ?? c.party}</span>
+                          {c.predictions.length > 0 && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}> · {c.predictions.length} prediction{c.predictions.length === 1 ? '' : 's'}</span>}
                         </span>
-                        <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{p.votes.toLocaleString()}</span>
+                        <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c' }}>{c.votes.toLocaleString()}</span>
                       </div>
                     ))}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '9px', borderTop: '1px solid #eef2ee', paddingTop: '7px' }}>
-                      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#5c6b60', background: '#eef2ee', padding: '3px 0', borderRadius: '4px' }}>?</span>
-                      <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Unknown</span>
-                      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#8aa093' }}>{s.unknown_votes.toLocaleString()}</span>
+                      <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#5c6b60', background: '#eef2ee', padding: '3px 0', borderRadius: '4px' }}>≈</span>
+                      <span style={{ flex: 1, fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#8aa093' }}>Swing Votes (Unknown)</span>
+                      <span style={{ flex: 'none', fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#8aa093' }}>{s.swing_votes.toLocaleString()}</span>
                     </div>
                   </div>
 
