@@ -10,7 +10,8 @@ const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
 type Cand = { politician_id: number | null; politician_name: string | null; photo: string; party: string; votes: number }
-type Detail = { lga_id: number; lga_name: string; state: string; state_geo: string; candidates: Cand[]; total_votes: number; baseline_votes: number; unknown_votes: number }
+type Ward = { ward: string; ward_code: string; registered_voters: number | null; total_votes: number; winner: string; winner_votes: number; predicted: (number | null)[] }
+type Detail = { lga_id: number; lga_name: string; state: string; state_geo: string; candidates: Cand[]; total_votes: number; baseline_votes: number; unknown_votes: number; wards: Ward[] }
 
 export const Route = createFileRoute('/2027/presidential/lga/$lga')({
   loader: async ({ params }): Promise<Detail | null> => {
@@ -113,6 +114,63 @@ function LgaPredictionPage() {
                   </div>
                 </div>
               </div>
+
+              {/* ward-by-ward: 2023 turnout + result and our per-candidate projection */}
+              {d.wards.length > 0 && (() => {
+                const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#7a8a99', padding: '9px 12px', whiteSpace: 'nowrap' }
+                const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#33414f', padding: '9px 12px', whiteSpace: 'nowrap' }
+                const sumReg = d.wards.reduce((s, w) => s + (w.registered_voters ?? 0), 0)
+                const sum23 = d.wards.reduce((s, w) => s + w.total_votes, 0)
+                const sumPred = d.candidates.map((_, i) => d.wards.reduce((s, w) => s + (w.predicted[i] ?? 0), 0))
+                return (
+                  <div style={{ marginTop: '30px' }}>
+                    <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>Ward by ward</h2>
+                    <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 12px' }}>Every ward in {d.lga_name}: registered voters, votes cast in 2023, the 2023 winner, and our projected votes per candidate.</p>
+                    <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '620px' }}>
+                        <thead>
+                          <tr style={{ background: '#f4f7f2' }}>
+                            <th style={th}>Ward</th>
+                            <th style={{ ...th, textAlign: 'right' }}>Registered</th>
+                            <th style={{ ...th, textAlign: 'right' }}>2023 votes</th>
+                            <th style={{ ...th, textAlign: 'center' }}>2023 winner</th>
+                            {d.candidates.map((c) => (
+                              <th key={c.politician_id ?? c.party} style={{ ...th, textAlign: 'right' }}>{(c.politician_name ?? c.party)} <span style={{ color: colorOf(c.party) }}>({c.party})</span></th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {d.wards.map((w) => (
+                            <tr key={w.ward_code} style={{ borderTop: '1px solid #eef2ee' }}>
+                              <td style={{ ...td, fontFamily: "'Archivo Black', sans-serif", color: '#0f2a1c' }}>{w.ward}</td>
+                              <td style={{ ...td, textAlign: 'right' }}>{w.registered_voters != null ? w.registered_voters.toLocaleString() : '—'}</td>
+                              <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{w.total_votes.toLocaleString()}</td>
+                              <td style={{ ...td, textAlign: 'center' }}>
+                                {w.winner ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(w.winner), padding: '2px 8px', borderRadius: '20px' }}>{w.winner}</span> : '—'}
+                                {w.winner_votes ? <span style={{ color: '#8aa093', marginLeft: '6px' }}>{w.winner_votes.toLocaleString()}</span> : null}
+                              </td>
+                              {d.candidates.map((c, i) => (
+                                <td key={c.politician_id ?? c.party} style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: '#0f8a4a' }}>{w.predicted[i] != null ? (w.predicted[i] as number).toLocaleString() : '—'}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr style={{ background: '#f4f7f2', borderTop: '2px solid #dbe4dc' }}>
+                            <td style={{ ...td, fontFamily: "'Archivo Black', sans-serif", color: '#0f2a1c' }}>Total</td>
+                            <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{sumReg ? sumReg.toLocaleString() : '—'}</td>
+                            <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{sum23.toLocaleString()}</td>
+                            <td style={td}></td>
+                            {d.candidates.map((c, i) => (
+                              <td key={c.politician_id ?? c.party} style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: '#0f8a4a' }}>{sumPred[i].toLocaleString()}</td>
+                            ))}
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                )
+              })()}
 
               <div style={{ marginTop: '22px' }}>
                 <Link to="/lga/$id" params={{ id: lgaSlug(d.lga_id, d.lga_name) }} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f8a4a', textDecoration: 'none' }}>
