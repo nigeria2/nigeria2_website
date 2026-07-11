@@ -15,7 +15,7 @@ const colorOf = (p: string) => COLORS[p] ?? '#5c6b60'
 const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', senate: 'Senate', reps: 'House of Reps', primary: 'Primary' }
 
 type Assessment = { author_name: string; electoral_value: number; influential_lgas: string[]; reason: string; created_at: string | null }
-type PH = { party: string; state: string; year: string; election_type: string; votes: number; percent: number | null; position: number; running_mate: string | null; constituency: string | null }
+type PH = { party: string; state: string; year: string; election_type: string; votes: number | null; percent: number | null; position: number; running_mate: string | null; constituency: string | null; declared?: boolean }
 type TopLga = { lga: string; count: number }
 type BestRun = { year: string; election_type: string; votes: number; percent: number | null; party: string }
 type StateVote = { state: string; votes: number; total: number; won: boolean }
@@ -108,7 +108,7 @@ function PoliticianPage() {
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 72px', display: 'flex', flexDirection: 'column', gap: '26px' }}>
           {/* vote-pulling history — how many votes they could pull over time */}
           {(() => {
-            const runs = d.party_history.filter((h) => h.votes && h.election_type !== 'primary')
+            const runs = d.party_history.filter((h): h is PH & { votes: number } => !!h.votes && h.election_type !== 'primary')
             if (runs.length === 0) return null
             const chron = [...runs].sort((a, b) => Number(a.year) - Number(b.year))
             const peak = Math.max(...runs.map((h) => h.votes))
@@ -196,12 +196,12 @@ function PoliticianPage() {
                   </thead>
                   <tbody>
                     {d.party_history.map((h, i) => (
-                      <tr key={i} style={{ borderTop: '1px solid #eef2ee' }}>
+                      <tr key={i} style={{ borderTop: '1px solid #eef2ee', background: h.declared ? '#f2fbf5' : 'transparent' }}>
                         <td style={{ ...td, fontWeight: 800 }}>{h.year}</td>
-                        <td style={td}>{TYPE_LABEL[h.election_type] ?? h.election_type}{h.constituency ? <span style={{ color: '#8aa093' }}> · {h.constituency}</span> : null}</td>
+                        <td style={td}>{TYPE_LABEL[h.election_type] ?? h.election_type}{h.declared ? <span style={{ color: '#0f8a4a', fontWeight: 800 }}> · Declared</span> : null}{h.constituency ? <span style={{ color: '#8aa093' }}> · {h.constituency}</span> : null}</td>
                         <td style={td}><span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(h.party), padding: '2px 10px', borderRadius: '20px' }}>{h.party}</span></td>
                         <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{h.votes ? h.votes.toLocaleString() : '—'}</td>
-                        <td style={{ ...td, textAlign: 'right', fontWeight: 800, color: h.position === 1 ? '#0f8a4a' : '#5c6b60' }}>{h.position ? (h.position === 1 ? 'Won' : ord(h.position)) : '—'}</td>
+                        <td style={{ ...td, textAlign: 'right', fontWeight: 800, color: h.declared ? '#0f8a4a' : h.position === 1 ? '#0f8a4a' : '#5c6b60' }}>{h.declared ? 'Candidate' : h.position ? (h.position === 1 ? 'Won' : ord(h.position)) : '—'}</td>
                       </tr>
                     ))}
                   </tbody>
