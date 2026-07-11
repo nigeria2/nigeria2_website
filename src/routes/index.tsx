@@ -122,7 +122,7 @@ function Home() {
           </p>
           <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
             {[
-              { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', to: '/2027' as const, cta: 'View the forecast' },
+              { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', to: '/elections/2027/prediction' as const, cta: 'View the forecast' },
               { title: '2027 Problem Polling Units', desc: 'The polling units that showed strong anomalies in 2023 — the places to watch in 2027.', to: '/problem-units' as const, cta: 'See the units' },
               { title: 'Predictions Board', desc: 'The verified 2023 result and expert calls for every state. Add your own once you sign in.', to: '/predictions' as const, cta: 'Open the board' },
             ].map((c) => (

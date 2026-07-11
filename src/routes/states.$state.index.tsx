@@ -280,7 +280,7 @@ function StatePage() {
       <div style={{ background: '#0d8244' }}>
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '30px 40px 26px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '20px', flexWrap: 'wrap' }}>
           <div>
-            <Link to="/2027/presidential" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
+            <Link to="/elections/2027/prediction/presidential" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
               ← Back to the map
             </Link>
             <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '38px', color: '#fff', margin: '0 0 6px', letterSpacing: '-0.01em' }}>{state} State 2027 Election Analysis</h1>

@@ -25,9 +25,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContributeRouteImport } from './routes/contribute'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as R2027RouteImport } from './routes/2027'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as R2027IndexRouteImport } from './routes/2027.index'
 import { Route as WardsStateRouteImport } from './routes/wards.$state'
 import { Route as WardWardRouteImport } from './routes/ward.$ward'
 import { Route as StatesStateRouteImport } from './routes/states.$state'
@@ -35,17 +33,22 @@ import { Route as PredictionIdRouteImport } from './routes/prediction.$id'
 import { Route as PoliticianIdRouteImport } from './routes/politician.$id'
 import { Route as PartyAcronymRouteImport } from './routes/party.$acronym'
 import { Route as LgaIdRouteImport } from './routes/lga.$id'
-import { Route as R2027SenateRouteImport } from './routes/2027.senate'
-import { Route as R2027PresidentialRouteImport } from './routes/2027.presidential'
-import { Route as R2027GovernorRouteImport } from './routes/2027.governor'
 import { Route as StatesStateIndexRouteImport } from './routes/states.$state.index'
-import { Route as R2027PresidentialIndexRouteImport } from './routes/2027.presidential.index'
 import { Route as StatesStatePoliticiansRouteImport } from './routes/states.$state.politicians'
 import { Route as StatesStateLgasRouteImport } from './routes/states.$state.lgas'
-import { Route as R2027PresidentialStatesRouteImport } from './routes/2027.presidential.states'
-import { Route as R2027PresidentialStatesIndexRouteImport } from './routes/2027.presidential.states.index'
-import { Route as R2027PresidentialStatesStateRouteImport } from './routes/2027.presidential.states.$state'
-import { Route as R2027PresidentialLgaLgaRouteImport } from './routes/2027.presidential.lga.$lga'
+import { Route as Elections2027PredictionRouteImport } from './routes/elections.2027.prediction'
+import { Route as Elections2023ResultsRouteImport } from './routes/elections.2023.results'
+import { Route as Elections2027PredictionIndexRouteImport } from './routes/elections.2027.prediction.index'
+import { Route as Elections2023ResultsIndexRouteImport } from './routes/elections.2023.results.index'
+import { Route as Elections2027PredictionSenateRouteImport } from './routes/elections.2027.prediction.senate'
+import { Route as Elections2027PredictionPresidentialRouteImport } from './routes/elections.2027.prediction.presidential'
+import { Route as Elections2027PredictionGovernorRouteImport } from './routes/elections.2027.prediction.governor'
+import { Route as Elections2023ResultsStateRouteImport } from './routes/elections.2023.results.$state'
+import { Route as Elections2027PredictionPresidentialIndexRouteImport } from './routes/elections.2027.prediction.presidential.index'
+import { Route as Elections2027PredictionPresidentialStatesRouteImport } from './routes/elections.2027.prediction.presidential.states'
+import { Route as Elections2027PredictionPresidentialStatesIndexRouteImport } from './routes/elections.2027.prediction.presidential.states.index'
+import { Route as Elections2027PredictionPresidentialStatesStateRouteImport } from './routes/elections.2027.prediction.presidential.states.$state'
+import { Route as Elections2027PredictionPresidentialLgaLgaRouteImport } from './routes/elections.2027.prediction.presidential.lga.$lga'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -127,20 +130,10 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const R2027Route = R2027RouteImport.update({
-  id: '/2027',
-  path: '/2027',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const R2027IndexRoute = R2027IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => R2027Route,
 } as any)
 const WardsStateRoute = WardsStateRouteImport.update({
   id: '/wards/$state',
@@ -177,30 +170,10 @@ const LgaIdRoute = LgaIdRouteImport.update({
   path: '/lga/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const R2027SenateRoute = R2027SenateRouteImport.update({
-  id: '/senate',
-  path: '/senate',
-  getParentRoute: () => R2027Route,
-} as any)
-const R2027PresidentialRoute = R2027PresidentialRouteImport.update({
-  id: '/presidential',
-  path: '/presidential',
-  getParentRoute: () => R2027Route,
-} as any)
-const R2027GovernorRoute = R2027GovernorRouteImport.update({
-  id: '/governor',
-  path: '/governor',
-  getParentRoute: () => R2027Route,
-} as any)
 const StatesStateIndexRoute = StatesStateIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => StatesStateRoute,
-} as any)
-const R2027PresidentialIndexRoute = R2027PresidentialIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => R2027PresidentialRoute,
 } as any)
 const StatesStatePoliticiansRoute = StatesStatePoliticiansRouteImport.update({
   id: '/politicians',
@@ -212,32 +185,85 @@ const StatesStateLgasRoute = StatesStateLgasRouteImport.update({
   path: '/lgas',
   getParentRoute: () => StatesStateRoute,
 } as any)
-const R2027PresidentialStatesRoute = R2027PresidentialStatesRouteImport.update({
-  id: '/states',
-  path: '/states',
-  getParentRoute: () => R2027PresidentialRoute,
+const Elections2027PredictionRoute = Elections2027PredictionRouteImport.update({
+  id: '/elections/2027/prediction',
+  path: '/elections/2027/prediction',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const R2027PresidentialStatesIndexRoute =
-  R2027PresidentialStatesIndexRouteImport.update({
+const Elections2023ResultsRoute = Elections2023ResultsRouteImport.update({
+  id: '/elections/2023/results',
+  path: '/elections/2023/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Elections2027PredictionIndexRoute =
+  Elections2027PredictionIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => R2027PresidentialStatesRoute,
+    getParentRoute: () => Elections2027PredictionRoute,
   } as any)
-const R2027PresidentialStatesStateRoute =
-  R2027PresidentialStatesStateRouteImport.update({
+const Elections2023ResultsIndexRoute =
+  Elections2023ResultsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Elections2023ResultsRoute,
+  } as any)
+const Elections2027PredictionSenateRoute =
+  Elections2027PredictionSenateRouteImport.update({
+    id: '/senate',
+    path: '/senate',
+    getParentRoute: () => Elections2027PredictionRoute,
+  } as any)
+const Elections2027PredictionPresidentialRoute =
+  Elections2027PredictionPresidentialRouteImport.update({
+    id: '/presidential',
+    path: '/presidential',
+    getParentRoute: () => Elections2027PredictionRoute,
+  } as any)
+const Elections2027PredictionGovernorRoute =
+  Elections2027PredictionGovernorRouteImport.update({
+    id: '/governor',
+    path: '/governor',
+    getParentRoute: () => Elections2027PredictionRoute,
+  } as any)
+const Elections2023ResultsStateRoute =
+  Elections2023ResultsStateRouteImport.update({
     id: '/$state',
     path: '/$state',
-    getParentRoute: () => R2027PresidentialStatesRoute,
+    getParentRoute: () => Elections2023ResultsRoute,
   } as any)
-const R2027PresidentialLgaLgaRoute = R2027PresidentialLgaLgaRouteImport.update({
-  id: '/lga/$lga',
-  path: '/lga/$lga',
-  getParentRoute: () => R2027PresidentialRoute,
-} as any)
+const Elections2027PredictionPresidentialIndexRoute =
+  Elections2027PredictionPresidentialIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Elections2027PredictionPresidentialRoute,
+  } as any)
+const Elections2027PredictionPresidentialStatesRoute =
+  Elections2027PredictionPresidentialStatesRouteImport.update({
+    id: '/states',
+    path: '/states',
+    getParentRoute: () => Elections2027PredictionPresidentialRoute,
+  } as any)
+const Elections2027PredictionPresidentialStatesIndexRoute =
+  Elections2027PredictionPresidentialStatesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Elections2027PredictionPresidentialStatesRoute,
+  } as any)
+const Elections2027PredictionPresidentialStatesStateRoute =
+  Elections2027PredictionPresidentialStatesStateRouteImport.update({
+    id: '/$state',
+    path: '/$state',
+    getParentRoute: () => Elections2027PredictionPresidentialStatesRoute,
+  } as any)
+const Elections2027PredictionPresidentialLgaLgaRoute =
+  Elections2027PredictionPresidentialLgaLgaRouteImport.update({
+    id: '/lga/$lga',
+    path: '/lga/$lga',
+    getParentRoute: () => Elections2027PredictionPresidentialRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/2027': typeof R2027RouteWithChildren
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/contribute': typeof ContributeRoute
@@ -254,9 +280,6 @@ export interface FileRoutesByFullPath {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/2027/governor': typeof R2027GovernorRoute
-  '/2027/presidential': typeof R2027PresidentialRouteWithChildren
-  '/2027/senate': typeof R2027SenateRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
@@ -264,15 +287,22 @@ export interface FileRoutesByFullPath {
   '/states/$state': typeof StatesStateRouteWithChildren
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
-  '/2027/': typeof R2027IndexRoute
-  '/2027/presidential/states': typeof R2027PresidentialStatesRouteWithChildren
+  '/elections/2023/results': typeof Elections2023ResultsRouteWithChildren
+  '/elections/2027/prediction': typeof Elections2027PredictionRouteWithChildren
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
-  '/2027/presidential/': typeof R2027PresidentialIndexRoute
   '/states/$state/': typeof StatesStateIndexRoute
-  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
-  '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
-  '/2027/presidential/states/': typeof R2027PresidentialStatesIndexRoute
+  '/elections/2023/results/$state': typeof Elections2023ResultsStateRoute
+  '/elections/2027/prediction/governor': typeof Elections2027PredictionGovernorRoute
+  '/elections/2027/prediction/presidential': typeof Elections2027PredictionPresidentialRouteWithChildren
+  '/elections/2027/prediction/senate': typeof Elections2027PredictionSenateRoute
+  '/elections/2023/results/': typeof Elections2023ResultsIndexRoute
+  '/elections/2027/prediction/': typeof Elections2027PredictionIndexRoute
+  '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesRouteWithChildren
+  '/elections/2027/prediction/presidential/': typeof Elections2027PredictionPresidentialIndexRoute
+  '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
+  '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
+  '/elections/2027/prediction/presidential/states/': typeof Elections2027PredictionPresidentialStatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -292,27 +322,28 @@ export interface FileRoutesByTo {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/2027/governor': typeof R2027GovernorRoute
-  '/2027/senate': typeof R2027SenateRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
   '/prediction/$id': typeof PredictionIdRoute
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
-  '/2027': typeof R2027IndexRoute
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
-  '/2027/presidential': typeof R2027PresidentialIndexRoute
   '/states/$state': typeof StatesStateIndexRoute
-  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
-  '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
-  '/2027/presidential/states': typeof R2027PresidentialStatesIndexRoute
+  '/elections/2023/results/$state': typeof Elections2023ResultsStateRoute
+  '/elections/2027/prediction/governor': typeof Elections2027PredictionGovernorRoute
+  '/elections/2027/prediction/senate': typeof Elections2027PredictionSenateRoute
+  '/elections/2023/results': typeof Elections2023ResultsIndexRoute
+  '/elections/2027/prediction': typeof Elections2027PredictionIndexRoute
+  '/elections/2027/prediction/presidential': typeof Elections2027PredictionPresidentialIndexRoute
+  '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
+  '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
+  '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/2027': typeof R2027RouteWithChildren
   '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
   '/contribute': typeof ContributeRoute
@@ -329,9 +360,6 @@ export interface FileRoutesById {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
-  '/2027/governor': typeof R2027GovernorRoute
-  '/2027/presidential': typeof R2027PresidentialRouteWithChildren
-  '/2027/senate': typeof R2027SenateRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
@@ -339,21 +367,27 @@ export interface FileRoutesById {
   '/states/$state': typeof StatesStateRouteWithChildren
   '/ward/$ward': typeof WardWardRoute
   '/wards/$state': typeof WardsStateRoute
-  '/2027/': typeof R2027IndexRoute
-  '/2027/presidential/states': typeof R2027PresidentialStatesRouteWithChildren
+  '/elections/2023/results': typeof Elections2023ResultsRouteWithChildren
+  '/elections/2027/prediction': typeof Elections2027PredictionRouteWithChildren
   '/states/$state/lgas': typeof StatesStateLgasRoute
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
-  '/2027/presidential/': typeof R2027PresidentialIndexRoute
   '/states/$state/': typeof StatesStateIndexRoute
-  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
-  '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
-  '/2027/presidential/states/': typeof R2027PresidentialStatesIndexRoute
+  '/elections/2023/results/$state': typeof Elections2023ResultsStateRoute
+  '/elections/2027/prediction/governor': typeof Elections2027PredictionGovernorRoute
+  '/elections/2027/prediction/presidential': typeof Elections2027PredictionPresidentialRouteWithChildren
+  '/elections/2027/prediction/senate': typeof Elections2027PredictionSenateRoute
+  '/elections/2023/results/': typeof Elections2023ResultsIndexRoute
+  '/elections/2027/prediction/': typeof Elections2027PredictionIndexRoute
+  '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesRouteWithChildren
+  '/elections/2027/prediction/presidential/': typeof Elections2027PredictionPresidentialIndexRoute
+  '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
+  '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
+  '/elections/2027/prediction/presidential/states/': typeof Elections2027PredictionPresidentialStatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/2027'
     | '/admin'
     | '/contact'
     | '/contribute'
@@ -370,9 +404,6 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
-    | '/2027/governor'
-    | '/2027/presidential'
-    | '/2027/senate'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
@@ -380,15 +411,22 @@ export interface FileRouteTypes {
     | '/states/$state'
     | '/ward/$ward'
     | '/wards/$state'
-    | '/2027/'
-    | '/2027/presidential/states'
+    | '/elections/2023/results'
+    | '/elections/2027/prediction'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
-    | '/2027/presidential/'
     | '/states/$state/'
-    | '/2027/presidential/lga/$lga'
-    | '/2027/presidential/states/$state'
-    | '/2027/presidential/states/'
+    | '/elections/2023/results/$state'
+    | '/elections/2027/prediction/governor'
+    | '/elections/2027/prediction/presidential'
+    | '/elections/2027/prediction/senate'
+    | '/elections/2023/results/'
+    | '/elections/2027/prediction/'
+    | '/elections/2027/prediction/presidential/states'
+    | '/elections/2027/prediction/presidential/'
+    | '/elections/2027/prediction/presidential/lga/$lga'
+    | '/elections/2027/prediction/presidential/states/$state'
+    | '/elections/2027/prediction/presidential/states/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -408,26 +446,27 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
-    | '/2027/governor'
-    | '/2027/senate'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
     | '/prediction/$id'
     | '/ward/$ward'
     | '/wards/$state'
-    | '/2027'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
-    | '/2027/presidential'
     | '/states/$state'
-    | '/2027/presidential/lga/$lga'
-    | '/2027/presidential/states/$state'
-    | '/2027/presidential/states'
+    | '/elections/2023/results/$state'
+    | '/elections/2027/prediction/governor'
+    | '/elections/2027/prediction/senate'
+    | '/elections/2023/results'
+    | '/elections/2027/prediction'
+    | '/elections/2027/prediction/presidential'
+    | '/elections/2027/prediction/presidential/lga/$lga'
+    | '/elections/2027/prediction/presidential/states/$state'
+    | '/elections/2027/prediction/presidential/states'
   id:
     | '__root__'
     | '/'
-    | '/2027'
     | '/admin'
     | '/contact'
     | '/contribute'
@@ -444,9 +483,6 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
-    | '/2027/governor'
-    | '/2027/presidential'
-    | '/2027/senate'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
@@ -454,20 +490,26 @@ export interface FileRouteTypes {
     | '/states/$state'
     | '/ward/$ward'
     | '/wards/$state'
-    | '/2027/'
-    | '/2027/presidential/states'
+    | '/elections/2023/results'
+    | '/elections/2027/prediction'
     | '/states/$state/lgas'
     | '/states/$state/politicians'
-    | '/2027/presidential/'
     | '/states/$state/'
-    | '/2027/presidential/lga/$lga'
-    | '/2027/presidential/states/$state'
-    | '/2027/presidential/states/'
+    | '/elections/2023/results/$state'
+    | '/elections/2027/prediction/governor'
+    | '/elections/2027/prediction/presidential'
+    | '/elections/2027/prediction/senate'
+    | '/elections/2023/results/'
+    | '/elections/2027/prediction/'
+    | '/elections/2027/prediction/presidential/states'
+    | '/elections/2027/prediction/presidential/'
+    | '/elections/2027/prediction/presidential/lga/$lga'
+    | '/elections/2027/prediction/presidential/states/$state'
+    | '/elections/2027/prediction/presidential/states/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  R2027Route: typeof R2027RouteWithChildren
   AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
   ContributeRoute: typeof ContributeRoute
@@ -491,6 +533,8 @@ export interface RootRouteChildren {
   StatesStateRoute: typeof StatesStateRouteWithChildren
   WardWardRoute: typeof WardWardRoute
   WardsStateRoute: typeof WardsStateRoute
+  Elections2023ResultsRoute: typeof Elections2023ResultsRouteWithChildren
+  Elections2027PredictionRoute: typeof Elections2027PredictionRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -607,26 +651,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/2027': {
-      id: '/2027'
-      path: '/2027'
-      fullPath: '/2027'
-      preLoaderRoute: typeof R2027RouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/2027/': {
-      id: '/2027/'
-      path: '/'
-      fullPath: '/2027/'
-      preLoaderRoute: typeof R2027IndexRouteImport
-      parentRoute: typeof R2027Route
     }
     '/wards/$state': {
       id: '/wards/$state'
@@ -677,40 +707,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LgaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/2027/senate': {
-      id: '/2027/senate'
-      path: '/senate'
-      fullPath: '/2027/senate'
-      preLoaderRoute: typeof R2027SenateRouteImport
-      parentRoute: typeof R2027Route
-    }
-    '/2027/presidential': {
-      id: '/2027/presidential'
-      path: '/presidential'
-      fullPath: '/2027/presidential'
-      preLoaderRoute: typeof R2027PresidentialRouteImport
-      parentRoute: typeof R2027Route
-    }
-    '/2027/governor': {
-      id: '/2027/governor'
-      path: '/governor'
-      fullPath: '/2027/governor'
-      preLoaderRoute: typeof R2027GovernorRouteImport
-      parentRoute: typeof R2027Route
-    }
     '/states/$state/': {
       id: '/states/$state/'
       path: '/'
       fullPath: '/states/$state/'
       preLoaderRoute: typeof StatesStateIndexRouteImport
       parentRoute: typeof StatesStateRoute
-    }
-    '/2027/presidential/': {
-      id: '/2027/presidential/'
-      path: '/'
-      fullPath: '/2027/presidential/'
-      preLoaderRoute: typeof R2027PresidentialIndexRouteImport
-      parentRoute: typeof R2027PresidentialRoute
     }
     '/states/$state/politicians': {
       id: '/states/$state/politicians'
@@ -726,83 +728,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatesStateLgasRouteImport
       parentRoute: typeof StatesStateRoute
     }
-    '/2027/presidential/states': {
-      id: '/2027/presidential/states'
-      path: '/states'
-      fullPath: '/2027/presidential/states'
-      preLoaderRoute: typeof R2027PresidentialStatesRouteImport
-      parentRoute: typeof R2027PresidentialRoute
+    '/elections/2027/prediction': {
+      id: '/elections/2027/prediction'
+      path: '/elections/2027/prediction'
+      fullPath: '/elections/2027/prediction'
+      preLoaderRoute: typeof Elections2027PredictionRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/2027/presidential/states/': {
-      id: '/2027/presidential/states/'
+    '/elections/2023/results': {
+      id: '/elections/2023/results'
+      path: '/elections/2023/results'
+      fullPath: '/elections/2023/results'
+      preLoaderRoute: typeof Elections2023ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elections/2027/prediction/': {
+      id: '/elections/2027/prediction/'
       path: '/'
-      fullPath: '/2027/presidential/states/'
-      preLoaderRoute: typeof R2027PresidentialStatesIndexRouteImport
-      parentRoute: typeof R2027PresidentialStatesRoute
+      fullPath: '/elections/2027/prediction/'
+      preLoaderRoute: typeof Elections2027PredictionIndexRouteImport
+      parentRoute: typeof Elections2027PredictionRoute
     }
-    '/2027/presidential/states/$state': {
-      id: '/2027/presidential/states/$state'
+    '/elections/2023/results/': {
+      id: '/elections/2023/results/'
+      path: '/'
+      fullPath: '/elections/2023/results/'
+      preLoaderRoute: typeof Elections2023ResultsIndexRouteImport
+      parentRoute: typeof Elections2023ResultsRoute
+    }
+    '/elections/2027/prediction/senate': {
+      id: '/elections/2027/prediction/senate'
+      path: '/senate'
+      fullPath: '/elections/2027/prediction/senate'
+      preLoaderRoute: typeof Elections2027PredictionSenateRouteImport
+      parentRoute: typeof Elections2027PredictionRoute
+    }
+    '/elections/2027/prediction/presidential': {
+      id: '/elections/2027/prediction/presidential'
+      path: '/presidential'
+      fullPath: '/elections/2027/prediction/presidential'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialRouteImport
+      parentRoute: typeof Elections2027PredictionRoute
+    }
+    '/elections/2027/prediction/governor': {
+      id: '/elections/2027/prediction/governor'
+      path: '/governor'
+      fullPath: '/elections/2027/prediction/governor'
+      preLoaderRoute: typeof Elections2027PredictionGovernorRouteImport
+      parentRoute: typeof Elections2027PredictionRoute
+    }
+    '/elections/2023/results/$state': {
+      id: '/elections/2023/results/$state'
       path: '/$state'
-      fullPath: '/2027/presidential/states/$state'
-      preLoaderRoute: typeof R2027PresidentialStatesStateRouteImport
-      parentRoute: typeof R2027PresidentialStatesRoute
+      fullPath: '/elections/2023/results/$state'
+      preLoaderRoute: typeof Elections2023ResultsStateRouteImport
+      parentRoute: typeof Elections2023ResultsRoute
     }
-    '/2027/presidential/lga/$lga': {
-      id: '/2027/presidential/lga/$lga'
+    '/elections/2027/prediction/presidential/': {
+      id: '/elections/2027/prediction/presidential/'
+      path: '/'
+      fullPath: '/elections/2027/prediction/presidential/'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialIndexRouteImport
+      parentRoute: typeof Elections2027PredictionPresidentialRoute
+    }
+    '/elections/2027/prediction/presidential/states': {
+      id: '/elections/2027/prediction/presidential/states'
+      path: '/states'
+      fullPath: '/elections/2027/prediction/presidential/states'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialStatesRouteImport
+      parentRoute: typeof Elections2027PredictionPresidentialRoute
+    }
+    '/elections/2027/prediction/presidential/states/': {
+      id: '/elections/2027/prediction/presidential/states/'
+      path: '/'
+      fullPath: '/elections/2027/prediction/presidential/states/'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialStatesIndexRouteImport
+      parentRoute: typeof Elections2027PredictionPresidentialStatesRoute
+    }
+    '/elections/2027/prediction/presidential/states/$state': {
+      id: '/elections/2027/prediction/presidential/states/$state'
+      path: '/$state'
+      fullPath: '/elections/2027/prediction/presidential/states/$state'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialStatesStateRouteImport
+      parentRoute: typeof Elections2027PredictionPresidentialStatesRoute
+    }
+    '/elections/2027/prediction/presidential/lga/$lga': {
+      id: '/elections/2027/prediction/presidential/lga/$lga'
       path: '/lga/$lga'
-      fullPath: '/2027/presidential/lga/$lga'
-      preLoaderRoute: typeof R2027PresidentialLgaLgaRouteImport
-      parentRoute: typeof R2027PresidentialRoute
+      fullPath: '/elections/2027/prediction/presidential/lga/$lga'
+      preLoaderRoute: typeof Elections2027PredictionPresidentialLgaLgaRouteImport
+      parentRoute: typeof Elections2027PredictionPresidentialRoute
     }
   }
 }
-
-interface R2027PresidentialStatesRouteChildren {
-  R2027PresidentialStatesStateRoute: typeof R2027PresidentialStatesStateRoute
-  R2027PresidentialStatesIndexRoute: typeof R2027PresidentialStatesIndexRoute
-}
-
-const R2027PresidentialStatesRouteChildren: R2027PresidentialStatesRouteChildren =
-  {
-    R2027PresidentialStatesStateRoute: R2027PresidentialStatesStateRoute,
-    R2027PresidentialStatesIndexRoute: R2027PresidentialStatesIndexRoute,
-  }
-
-const R2027PresidentialStatesRouteWithChildren =
-  R2027PresidentialStatesRoute._addFileChildren(
-    R2027PresidentialStatesRouteChildren,
-  )
-
-interface R2027PresidentialRouteChildren {
-  R2027PresidentialStatesRoute: typeof R2027PresidentialStatesRouteWithChildren
-  R2027PresidentialIndexRoute: typeof R2027PresidentialIndexRoute
-  R2027PresidentialLgaLgaRoute: typeof R2027PresidentialLgaLgaRoute
-}
-
-const R2027PresidentialRouteChildren: R2027PresidentialRouteChildren = {
-  R2027PresidentialStatesRoute: R2027PresidentialStatesRouteWithChildren,
-  R2027PresidentialIndexRoute: R2027PresidentialIndexRoute,
-  R2027PresidentialLgaLgaRoute: R2027PresidentialLgaLgaRoute,
-}
-
-const R2027PresidentialRouteWithChildren =
-  R2027PresidentialRoute._addFileChildren(R2027PresidentialRouteChildren)
-
-interface R2027RouteChildren {
-  R2027GovernorRoute: typeof R2027GovernorRoute
-  R2027PresidentialRoute: typeof R2027PresidentialRouteWithChildren
-  R2027SenateRoute: typeof R2027SenateRoute
-  R2027IndexRoute: typeof R2027IndexRoute
-}
-
-const R2027RouteChildren: R2027RouteChildren = {
-  R2027GovernorRoute: R2027GovernorRoute,
-  R2027PresidentialRoute: R2027PresidentialRouteWithChildren,
-  R2027SenateRoute: R2027SenateRoute,
-  R2027IndexRoute: R2027IndexRoute,
-}
-
-const R2027RouteWithChildren = R2027Route._addFileChildren(R2027RouteChildren)
 
 interface StatesStateRouteChildren {
   StatesStateLgasRoute: typeof StatesStateLgasRoute
@@ -820,9 +838,81 @@ const StatesStateRouteWithChildren = StatesStateRoute._addFileChildren(
   StatesStateRouteChildren,
 )
 
+interface Elections2023ResultsRouteChildren {
+  Elections2023ResultsStateRoute: typeof Elections2023ResultsStateRoute
+  Elections2023ResultsIndexRoute: typeof Elections2023ResultsIndexRoute
+}
+
+const Elections2023ResultsRouteChildren: Elections2023ResultsRouteChildren = {
+  Elections2023ResultsStateRoute: Elections2023ResultsStateRoute,
+  Elections2023ResultsIndexRoute: Elections2023ResultsIndexRoute,
+}
+
+const Elections2023ResultsRouteWithChildren =
+  Elections2023ResultsRoute._addFileChildren(Elections2023ResultsRouteChildren)
+
+interface Elections2027PredictionPresidentialStatesRouteChildren {
+  Elections2027PredictionPresidentialStatesStateRoute: typeof Elections2027PredictionPresidentialStatesStateRoute
+  Elections2027PredictionPresidentialStatesIndexRoute: typeof Elections2027PredictionPresidentialStatesIndexRoute
+}
+
+const Elections2027PredictionPresidentialStatesRouteChildren: Elections2027PredictionPresidentialStatesRouteChildren =
+  {
+    Elections2027PredictionPresidentialStatesStateRoute:
+      Elections2027PredictionPresidentialStatesStateRoute,
+    Elections2027PredictionPresidentialStatesIndexRoute:
+      Elections2027PredictionPresidentialStatesIndexRoute,
+  }
+
+const Elections2027PredictionPresidentialStatesRouteWithChildren =
+  Elections2027PredictionPresidentialStatesRoute._addFileChildren(
+    Elections2027PredictionPresidentialStatesRouteChildren,
+  )
+
+interface Elections2027PredictionPresidentialRouteChildren {
+  Elections2027PredictionPresidentialStatesRoute: typeof Elections2027PredictionPresidentialStatesRouteWithChildren
+  Elections2027PredictionPresidentialIndexRoute: typeof Elections2027PredictionPresidentialIndexRoute
+  Elections2027PredictionPresidentialLgaLgaRoute: typeof Elections2027PredictionPresidentialLgaLgaRoute
+}
+
+const Elections2027PredictionPresidentialRouteChildren: Elections2027PredictionPresidentialRouteChildren =
+  {
+    Elections2027PredictionPresidentialStatesRoute:
+      Elections2027PredictionPresidentialStatesRouteWithChildren,
+    Elections2027PredictionPresidentialIndexRoute:
+      Elections2027PredictionPresidentialIndexRoute,
+    Elections2027PredictionPresidentialLgaLgaRoute:
+      Elections2027PredictionPresidentialLgaLgaRoute,
+  }
+
+const Elections2027PredictionPresidentialRouteWithChildren =
+  Elections2027PredictionPresidentialRoute._addFileChildren(
+    Elections2027PredictionPresidentialRouteChildren,
+  )
+
+interface Elections2027PredictionRouteChildren {
+  Elections2027PredictionGovernorRoute: typeof Elections2027PredictionGovernorRoute
+  Elections2027PredictionPresidentialRoute: typeof Elections2027PredictionPresidentialRouteWithChildren
+  Elections2027PredictionSenateRoute: typeof Elections2027PredictionSenateRoute
+  Elections2027PredictionIndexRoute: typeof Elections2027PredictionIndexRoute
+}
+
+const Elections2027PredictionRouteChildren: Elections2027PredictionRouteChildren =
+  {
+    Elections2027PredictionGovernorRoute: Elections2027PredictionGovernorRoute,
+    Elections2027PredictionPresidentialRoute:
+      Elections2027PredictionPresidentialRouteWithChildren,
+    Elections2027PredictionSenateRoute: Elections2027PredictionSenateRoute,
+    Elections2027PredictionIndexRoute: Elections2027PredictionIndexRoute,
+  }
+
+const Elections2027PredictionRouteWithChildren =
+  Elections2027PredictionRoute._addFileChildren(
+    Elections2027PredictionRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  R2027Route: R2027RouteWithChildren,
   AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
   ContributeRoute: ContributeRoute,
@@ -846,6 +936,8 @@ const rootRouteChildren: RootRouteChildren = {
   StatesStateRoute: StatesStateRouteWithChildren,
   WardWardRoute: WardWardRoute,
   WardsStateRoute: WardsStateRoute,
+  Elections2023ResultsRoute: Elections2023ResultsRouteWithChildren,
+  Elections2027PredictionRoute: Elections2027PredictionRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

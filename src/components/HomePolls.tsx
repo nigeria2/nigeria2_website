@@ -136,7 +136,7 @@ export function HomePolls() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', marginTop: '16px' }}>
           <Link
-            to="/2027"
+            to="/elections/2027/prediction"
             style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', letterSpacing: '0.02em', color: '#0f8a4a', background: '#fff', textDecoration: 'none', padding: '12px 18px', borderRadius: '3px', border: '2px solid #0f8a4a' }}
           >
             🗺 View Details →

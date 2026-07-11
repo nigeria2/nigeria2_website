@@ -7,7 +7,7 @@ import { stateSlug } from '../stateSlug'
 import { API_BASE } from '../config'
 import { colorOf, RACES, RACE_PATH, TYPE_LABEL, weekLabel, type Row } from '../components/Race2027'
 
-export const Route = createFileRoute('/2027/')({ component: Overview2027 })
+export const Route = createFileRoute('/elections/2027/prediction/')({ component: Overview2027 })
 
 type Summary = {
   topParty: string

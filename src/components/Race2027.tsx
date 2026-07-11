@@ -12,7 +12,7 @@ export const colorOf = (party: string) => COLORS[party] ?? '#8aa093'
 export const NO_DATA_FILL = '#9aa79f'
 export const TYPE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governor', senate: 'Senate' }
 export const RACES = ['presidential', 'governor', 'senate'] as const
-export const RACE_PATH = { presidential: '/2027/presidential', governor: '/2027/governor', senate: '/2027/senate' } as const
+export const RACE_PATH = { presidential: '/elections/2027/prediction/presidential', governor: '/elections/2027/prediction/governor', senate: '/elections/2027/prediction/senate' } as const
 
 // Pick readable text (dark on light backgrounds, e.g. NNPP yellow; white otherwise).
 function textOn(hex: string): string {
@@ -86,7 +86,7 @@ export function Race2027({ race }: { race: string }) {
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          <Link to="/2027" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>
+          <Link to="/elections/2027/prediction" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>
             ← All races
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -110,7 +110,7 @@ export function Race2027({ race }: { race: string }) {
           picture is moving.
         </p>
         {race === 'presidential' && (
-          <Link to="/2027/presidential/states" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f4a2c', background: '#ffe14d', textDecoration: 'none', padding: '11px 18px', borderRadius: '6px', marginBottom: '22px' }}>
+          <Link to="/elections/2027/prediction/presidential/states" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f4a2c', background: '#ffe14d', textDecoration: 'none', padding: '11px 18px', borderRadius: '6px', marginBottom: '22px' }}>
             📊 See prediction by state &amp; LGA →
           </Link>
         )}

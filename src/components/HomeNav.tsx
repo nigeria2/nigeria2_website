@@ -24,7 +24,7 @@ const navSep: React.CSSProperties = {
 export function HomeNav() {
   const { user } = useAuth()
   const pathname = useLocation({ select: (l) => l.pathname })
-  const on2027 = pathname === '/2027'
+  const on2027 = pathname === '/elections/2027/prediction'
   const onProblem = pathname === '/problem-units'
   return (
     <div
@@ -50,7 +50,10 @@ export function HomeNav() {
       </Link>
 
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
-        <Link to="/2027" className="nav-underline" style={{ ...navLink, borderBottom: on2027 ? '2px solid #ffe14d' : '2px solid transparent' }}>
+        <Link to="/elections/2023/results" className="nav-underline" style={{ ...navLink, borderBottom: pathname.startsWith('/elections/2023/results') ? '2px solid #ffe14d' : '2px solid transparent' }}>
+          2023 Results
+        </Link>
+        <Link to="/elections/2027/prediction" className="nav-underline" style={{ ...navLink, borderBottom: on2027 ? '2px solid #ffe14d' : '2px solid transparent' }}>
           2027 Prediction
         </Link>
         <span aria-hidden style={navSep} />

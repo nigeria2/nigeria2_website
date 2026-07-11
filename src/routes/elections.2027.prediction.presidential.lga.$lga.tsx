@@ -9,14 +9,28 @@ import { politicianSlug } from '../politicianSlug'
 const COLORS: Record<string, string> = { APC: '#1f6fd6', PDP: '#c0392b', LP: '#e05a1f', NNPP: '#f0b429', APGA: '#7b3fb5', SDP: '#0f8a4a', NDC: '#0e7490', ADC: '#db2777' }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 
-type Comp = { reason: string; votes: number }
+type Comp = { reason: string; votes: number; politician_id: number | null; politician_name: string | null }
 type Pred = { label: string; votes: number; importance: number; pct: number | null; components: Comp[] }
-type Cand = { politician_id: number | null; politician_name: string | null; photo: string; party: string; votes: number; pct: number | null; predictions: Pred[] }
+type Cand = { politician_id: number | null; politician_name: string | null; running_mate_id: number | null; running_mate_name: string | null; ticket_name: string | null; photo: string; party: string; votes: number; pct: number | null; predictions: Pred[] }
+
+const surname = (n: string | null | undefined) => (n ?? '').trim().split(/\s+/).pop() ?? ''
+
+/** A joint ticket: "Obi/Kwankwaso", each surname linking to that politician's page. */
+function TicketName({ c }: { c: Cand }) {
+  const link = (id: number, name: string, text: string) => (
+    <Link to="/politician/$id" params={{ id: politicianSlug(id, name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{text}</Link>
+  )
+  if (c.politician_id && c.politician_name && c.running_mate_id && c.running_mate_name) {
+    return <>{link(c.politician_id, c.politician_name, surname(c.politician_name))}<span style={{ color: '#8aa093' }}>/</span>{link(c.running_mate_id, c.running_mate_name, surname(c.running_mate_name))}</>
+  }
+  if (c.politician_id && c.politician_name) return link(c.politician_id, c.politician_name, c.politician_name)
+  return <>{c.ticket_name ?? c.politician_name ?? c.party}</>
+}
 type Hist = { year: number; office: string; total_votes: number; winner: string; parties: Record<string, number> }
 type Ward = { ward: string; ward_code: string; registered_voters: number | null; total_votes: number; candidates: Cand[]; swing_votes: number; historical: Hist[] }
 type Detail = { lga_id: number; lga_name: string; state: string; state_geo: string; candidates: Cand[]; total_votes: number; baseline_votes: number; swing_votes: number; wards: Ward[] }
 
-export const Route = createFileRoute('/2027/presidential/lga/$lga')({
+export const Route = createFileRoute('/elections/2027/prediction/presidential/lga/$lga')({
   loader: async ({ params }): Promise<Detail | null> => {
     const id = lgaIdFromSlug(params.lga)
     try {
@@ -37,9 +51,7 @@ function CandidateRow({ c }: { c: Cand }) {
       <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '4px 0', borderRadius: '4px' }}>{c.party}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '14px', color: '#0f2a1c', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {c.politician_id && c.politician_name
-            ? <Link to="/politician/$id" params={{ id: politicianSlug(c.politician_id, c.politician_name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{c.politician_name}</Link>
-            : (c.politician_name ?? c.party)}
+          <TicketName c={c} />
         </div>
         {n > 0 && (
           <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10.5px', color: '#8aa093' }}>
@@ -63,9 +75,7 @@ function CandidateDetail({ c }: { c: Cand }) {
         <span style={{ width: '46px', flex: 'none', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', color: '#fff', background: colorOf(c.party), padding: '4px 0', borderRadius: '4px' }}>{c.party}</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c' }}>
-            {c.politician_id && c.politician_name
-              ? <Link to="/politician/$id" params={{ id: politicianSlug(c.politician_id, c.politician_name) }} style={{ color: 'inherit', textDecoration: 'none' }}>{c.politician_name}</Link>
-              : (c.politician_name ?? c.party)}
+            <TicketName c={c} />
           </div>
           <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '10.5px', color: '#8aa093' }}>
             {c.predictions.length > 1 ? `importance-weighted average of ${c.predictions.length} predictions` : 'projected votes'}
@@ -88,7 +98,17 @@ function CandidateDetail({ c }: { c: Cand }) {
               <div style={{ marginTop: '5px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {p.components.map((cm, j) => (
                   <div key={j} style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '11px', color: '#5c6b60' }}>
-                    <span>{cm.reason}</span>
+                    <span>
+                      {cm.reason}
+                      {cm.politician_id && cm.politician_name && (
+                        <>
+                          {' '}
+                          <Link to="/politician/$id" params={{ id: politicianSlug(cm.politician_id, cm.politician_name) }} style={{ color: '#0e7490', textDecoration: 'none', fontWeight: 700 }}>
+                            {cm.politician_name}
+                          </Link>
+                        </>
+                      )}
+                    </span>
                     <span style={{ fontWeight: 800, color: '#33414f' }}>{cm.votes.toLocaleString()}</span>
                   </div>
                 ))}
@@ -136,7 +156,7 @@ function LgaPredictionPage() {
 
       <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 0' }}>
         {d && (
-          <Link to="/2027/presidential/states/$state" params={{ state: stateSlug(d.state) }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>
+          <Link to="/elections/2027/prediction/presidential/states/$state" params={{ state: stateSlug(d.state) }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>
             ← {d.state} prediction
           </Link>
         )}
