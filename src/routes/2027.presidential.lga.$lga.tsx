@@ -156,17 +156,17 @@ function LgaPredictionPage() {
             <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '40px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", fontWeight: 700, color: '#8aa093' }}>No prediction for this local government yet.</div>
           ) : (
             <>
-              {/* LGA total: each candidate (weighted average of their predictions) + swing */}
+              {/* LGA total: just the aggregate — each candidate's rolled-up votes + swing */}
               <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>{d.lga_name} total</h2>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 12px' }}>Every ward’s projection added up.</p>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 12px' }}>The aggregate of every ward below. Predictions are made per ward.</p>
               <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '10px 18px', marginBottom: '30px' }}>
-                {d.candidates.map((c, i) => <div key={i} style={{ borderTop: i ? '1px solid #eef2ee' : 'none' }}><CandidateDetail c={c} /></div>)}
+                {d.candidates.map((c, i) => <div key={i} style={{ borderTop: i ? '1px solid #eef2ee' : 'none' }}><CandidateRow c={c} /></div>)}
                 <SwingRow votes={d.swing_votes} />
               </div>
 
-              {/* ward by ward: plain header, candidate projections, swing, then history */}
+              {/* ward by ward: the predictions live here, each broken into components */}
               <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', margin: '0 0 4px' }}>Ward by ward</h2>
-              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>Each ward in {d.lga_name}: the projected votes per candidate, swing votes, and past results.</p>
+              <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#5c6b60', margin: '0 0 14px' }}>Each ward in {d.lga_name}: the predictions per candidate (broken into components), swing votes, and past results.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {d.wards.map((w) => (
                   <div key={w.ward_code} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '15px 18px' }}>
@@ -176,7 +176,7 @@ function LgaPredictionPage() {
                     </div>
                     <div style={{ marginTop: '6px', borderTop: '1px solid #eef2ee' }}>
                       {w.candidates.length > 0
-                        ? <>{w.candidates.map((c, i) => <CandidateRow key={i} c={c} />)}<SwingRow votes={w.swing_votes} /></>
+                        ? <>{w.candidates.map((c, i) => <div key={i} style={{ borderTop: i ? '1px solid #eef2ee' : 'none' }}><CandidateDetail c={c} /></div>)}<SwingRow votes={w.swing_votes} /></>
                         : <div style={{ padding: '9px 0', fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#b3c2b8' }}>No prediction for this ward yet.</div>}
                     </div>
                     <Historical items={w.historical} />
