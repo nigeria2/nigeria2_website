@@ -60,7 +60,7 @@ function StatePredictionPage() {
                     ? <img src={l.politician_photo} alt={l.politician_name ?? ''} style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flex: 'none' }} />
                     : <div style={{ width: 52, height: 52, borderRadius: '50%', flex: 'none', background: colorOf(l.party), color: '#fff', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{(l.politician_name ?? l.party).split(/\s+/).map((w) => w[0]).slice(0, 2).join('')}</div>}
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <Link to="/lga/$id" params={{ id: lgaSlug(l.lga_id, l.lga_name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', textDecoration: 'none' }}>{l.lga_name}</Link>
+                    <Link to="/2027/presidential/lga/$lga" params={{ lga: lgaSlug(l.lga_id, l.lga_name) }} style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '18px', color: '#0f2a1c', textDecoration: 'none' }}>{l.lga_name}</Link>
                     <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '13px', color: '#5c6b60', marginTop: '2px' }}>
                       {l.politician_id && l.politician_name
                         ? <Link to="/politician/$id" params={{ id: politicianSlug(l.politician_id, l.politician_name) }} style={{ color: '#0f2a1c', textDecoration: 'none' }}>{l.politician_name}</Link>

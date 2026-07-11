@@ -45,6 +45,7 @@ import { Route as StatesStateLgasRouteImport } from './routes/states.$state.lgas
 import { Route as R2027PresidentialStatesRouteImport } from './routes/2027.presidential.states'
 import { Route as R2027PresidentialStatesIndexRouteImport } from './routes/2027.presidential.states.index'
 import { Route as R2027PresidentialStatesStateRouteImport } from './routes/2027.presidential.states.$state'
+import { Route as R2027PresidentialLgaLgaRouteImport } from './routes/2027.presidential.lga.$lga'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -228,6 +229,11 @@ const R2027PresidentialStatesStateRoute =
     path: '/$state',
     getParentRoute: () => R2027PresidentialStatesRoute,
   } as any)
+const R2027PresidentialLgaLgaRoute = R2027PresidentialLgaLgaRouteImport.update({
+  id: '/lga/$lga',
+  path: '/lga/$lga',
+  getParentRoute: () => R2027PresidentialRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
   '/2027/presidential/': typeof R2027PresidentialIndexRoute
   '/states/$state/': typeof StatesStateIndexRoute
+  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
   '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
   '/2027/presidential/states/': typeof R2027PresidentialStatesIndexRoute
 }
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
   '/2027/presidential': typeof R2027PresidentialIndexRoute
   '/states/$state': typeof StatesStateIndexRoute
+  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
   '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
   '/2027/presidential/states': typeof R2027PresidentialStatesIndexRoute
 }
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/states/$state/politicians': typeof StatesStatePoliticiansRoute
   '/2027/presidential/': typeof R2027PresidentialIndexRoute
   '/states/$state/': typeof StatesStateIndexRoute
+  '/2027/presidential/lga/$lga': typeof R2027PresidentialLgaLgaRoute
   '/2027/presidential/states/$state': typeof R2027PresidentialStatesStateRoute
   '/2027/presidential/states/': typeof R2027PresidentialStatesIndexRoute
 }
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/states/$state/politicians'
     | '/2027/presidential/'
     | '/states/$state/'
+    | '/2027/presidential/lga/$lga'
     | '/2027/presidential/states/$state'
     | '/2027/presidential/states/'
   fileRoutesByTo: FileRoutesByTo
@@ -411,6 +421,7 @@ export interface FileRouteTypes {
     | '/states/$state/politicians'
     | '/2027/presidential'
     | '/states/$state'
+    | '/2027/presidential/lga/$lga'
     | '/2027/presidential/states/$state'
     | '/2027/presidential/states'
   id:
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | '/states/$state/politicians'
     | '/2027/presidential/'
     | '/states/$state/'
+    | '/2027/presidential/lga/$lga'
     | '/2027/presidential/states/$state'
     | '/2027/presidential/states/'
   fileRoutesById: FileRoutesById
@@ -735,6 +747,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R2027PresidentialStatesStateRouteImport
       parentRoute: typeof R2027PresidentialStatesRoute
     }
+    '/2027/presidential/lga/$lga': {
+      id: '/2027/presidential/lga/$lga'
+      path: '/lga/$lga'
+      fullPath: '/2027/presidential/lga/$lga'
+      preLoaderRoute: typeof R2027PresidentialLgaLgaRouteImport
+      parentRoute: typeof R2027PresidentialRoute
+    }
   }
 }
 
@@ -757,11 +776,13 @@ const R2027PresidentialStatesRouteWithChildren =
 interface R2027PresidentialRouteChildren {
   R2027PresidentialStatesRoute: typeof R2027PresidentialStatesRouteWithChildren
   R2027PresidentialIndexRoute: typeof R2027PresidentialIndexRoute
+  R2027PresidentialLgaLgaRoute: typeof R2027PresidentialLgaLgaRoute
 }
 
 const R2027PresidentialRouteChildren: R2027PresidentialRouteChildren = {
   R2027PresidentialStatesRoute: R2027PresidentialStatesRouteWithChildren,
   R2027PresidentialIndexRoute: R2027PresidentialIndexRoute,
+  R2027PresidentialLgaLgaRoute: R2027PresidentialLgaLgaRoute,
 }
 
 const R2027PresidentialRouteWithChildren =
