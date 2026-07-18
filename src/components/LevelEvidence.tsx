@@ -6,6 +6,7 @@ type PartyRow = { party?: string; votes?: number | null }
 export type LevelEvidenceItem = {
   id: number | null
   election_type: string
+  year?: string
   kind: string
   source: string
   method?: string
@@ -54,7 +55,7 @@ export function LevelEvidence({ items, blurb }: { items: LevelEvidenceItem[]; bl
                     <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: kindColor, padding: '3px 9px', borderRadius: '20px' }}>{KIND_LABEL[t.kind] ?? t.kind}</span>
                     {t.source && t.source !== t.kind && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093', marginLeft: '8px' }}>{t.source}</span>}
                   </td>
-                  <td style={td}>{RACE_LABEL[t.election_type] ?? t.election_type}</td>
+                  <td style={td}>{t.year ? `${t.year} ` : ''}{RACE_LABEL[t.election_type] ?? t.election_type}</td>
                   {PARTIES.map((p) => (
                     <td key={p} style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: m[p] != null ? '#0f2a1c' : '#c3ccc6' }}>{m[p] != null ? (m[p] as number).toLocaleString() : '—'}</td>
                   ))}
