@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
+import { ApiLink } from '../components/ApiLink'
 import { LevelEvidence, type LevelEvidenceItem } from '../components/LevelEvidence'
 import { API_BASE } from '../config'
 import { geoIdFromSlug, STATE_BY_SLUG } from '../stateSlug'
@@ -196,7 +197,8 @@ function ResultsState() {
   return (
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 0' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '26px 40px 0', position: 'relative' }}>
+        <ApiLink href={`${API_BASE}/elections/${year}/${state}`} />
         <Link to="/elections/$year/results" params={{ year }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none' }}>← All {year} results</Link>
         <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '38px', color: '#fff', margin: '12px 0 8px', letterSpacing: '-0.01em' }}>{d.state} · {year} results</h1>
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', color: '#c7e7d4', margin: '0 0 18px' }}>Verified results by local government area.</p>

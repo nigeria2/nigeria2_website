@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
+import { ApiLink } from '../components/ApiLink'
 import { API_BASE } from '../config'
 import { STATE_BY_SLUG } from '../stateSlug'
 
@@ -205,7 +206,8 @@ function PollingUnitPage() {
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
       <div style={{ background: '#0d8244' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '30px 40px 26px' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '30px 40px 26px', position: 'relative' }}>
+          <ApiLink href={`${API_BASE}/elections/${year}/${state}/${lga}/${ward}/${pu}`} />
           <Link to="/elections/$year/results/$state/$lga/$ward" params={{ year, state, lga, ward }} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '13px', letterSpacing: '0.04em', textTransform: 'uppercase', color: '#9fd9b8', textDecoration: 'none', marginBottom: '12px' }}>
             ← {d?.ward || 'Ward'} · polling units
           </Link>
