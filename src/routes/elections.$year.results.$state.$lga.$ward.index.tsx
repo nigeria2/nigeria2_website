@@ -5,15 +5,13 @@ import { HomeFooter } from '../components/HomeFooter'
 import { API_BASE } from '../config'
 import { STATE_BY_SLUG } from '../stateSlug'
 
-type Sheet = { election_type: string; year: string; sheet_url: string; status: string; has_json?: boolean }
-type PU = { pu_name: string; pu_code: string; registered_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null>; sheets?: Sheet[] }
+type PU = { pu_name: string; pu_code: string; registered_voters: number | null; accredited_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null> }
 type Result = { winner: string; runner_up: string; total_votes: number; scores: Record<string, number> }
 type Detail = { state: string; lga: string; ward: string; ward_code: string; result: Result | null; polling_units: PU[] }
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', LP: '#e05a1f', PDP: '#c0392b', NNPP: '#f0b429' }
 const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
 const PARTIES = ['APC', 'LP', 'PDP', 'NNPP'] as const
-const RACE_ABBR: Record<string, string> = { presidential: 'Pres', governorship: 'Gov', senatorial: 'Sen', house: 'Reps' }
 
 const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '12px 14px', whiteSpace: 'nowrap' }
 const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '11px 14px' }
@@ -108,51 +106,32 @@ function WardResultsPage() {
                   ))}
                   <th style={{ ...th, textAlign: 'center' }}>Winner</th>
                   <th style={{ ...th, textAlign: 'right' }}>Registered</th>
-                  <th style={{ ...th, textAlign: 'left' }}>Sheets</th>
+                  <th style={{ ...th, textAlign: 'right' }}>Accredited</th>
                 </tr>
               </thead>
               <tbody>
-                {d.polling_units.map((p) => {
-                  const sheets = p.sheets ?? []
-                  return (
-                    <tr key={p.pu_code} style={{ borderTop: '1px solid #eef2ee' }}>
-                      <td style={{ ...td, fontWeight: 800 }}>
-                        <Link to="/elections/$year/results/$state/$lga/$ward/$pu" params={{ year, state, lga, ward, pu: puSlug(p.pu_code) }} style={{ color: '#0f2a1c', textDecoration: 'none', borderBottom: '1px dotted #9db3a3' }}>
-                          <span style={{ textTransform: 'capitalize' }}>{p.pu_name || p.pu_code}</span>
-                        </Link>
-                        <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b3c2b8' }}>{p.pu_code}</div>
-                      </td>
-                      {PARTIES.map((party) => {
-                        const v = p.scores?.[party]
-                        const isWin = party === p.winner
-                        return (
-                          <td key={party} style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: v == null ? '#c3ccc6' : isWin ? colorOf(party) : '#33414f' }}>
-                            {v != null ? v.toLocaleString() : '—'}
-                          </td>
-                        )
-                      })}
-                      <td style={{ ...td, textAlign: 'center' }}>{p.winner ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(p.winner), padding: '3px 10px', borderRadius: '20px' }}>{p.winner}</span> : <span style={{ color: '#b3c2b8' }}>—</span>}</td>
-                      <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{p.registered_voters != null ? p.registered_voters.toLocaleString() : '—'}</td>
-                      <td style={{ ...td }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          {sheets.length === 0 && <span style={{ color: '#b3c2b8' }}>—</span>}
-                          {sheets.map((s) => (
-                            s.sheet_url ? (
-                              <a key={s.election_type} href={s.sheet_url} target="_blank" rel="noreferrer" title={`${s.election_type} result sheet on INEC IReV`}
-                                 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f6a38', background: '#e3f5ea', border: '1px solid #bfe6cd', padding: '3px 9px', borderRadius: '20px', textDecoration: 'none' }}>
-                                {RACE_ABBR[s.election_type] ?? s.election_type} ↗
-                              </a>
-                            ) : (
-                              <span key={s.election_type} title={`${s.election_type}: ${s.status}`} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#b3c2b8', border: '1px solid #e4ebe5', padding: '3px 9px', borderRadius: '20px' }}>
-                                {RACE_ABBR[s.election_type] ?? s.election_type} —
-                              </span>
-                            )
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
+                {d.polling_units.map((p) => (
+                  <tr key={p.pu_code} style={{ borderTop: '1px solid #eef2ee' }}>
+                    <td style={{ ...td, fontWeight: 800 }}>
+                      <Link to="/elections/$year/results/$state/$lga/$ward/$pu" params={{ year, state, lga, ward, pu: puSlug(p.pu_code) }} style={{ color: '#0f2a1c', textDecoration: 'none', borderBottom: '1px dotted #9db3a3' }}>
+                        <span style={{ textTransform: 'capitalize' }}>{p.pu_name || p.pu_code}</span>
+                      </Link>
+                      <div style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b3c2b8' }}>{p.pu_code}</div>
+                    </td>
+                    {PARTIES.map((party) => {
+                      const v = p.scores?.[party]
+                      const isWin = party === p.winner
+                      return (
+                        <td key={party} style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: v == null ? '#c3ccc6' : isWin ? colorOf(party) : '#33414f' }}>
+                          {v != null ? v.toLocaleString() : '—'}
+                        </td>
+                      )
+                    })}
+                    <td style={{ ...td, textAlign: 'center' }}>{p.winner ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(p.winner), padding: '3px 10px', borderRadius: '20px' }}>{p.winner}</span> : <span style={{ color: '#b3c2b8' }}>—</span>}</td>
+                    <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{p.registered_voters != null ? p.registered_voters.toLocaleString() : '—'}</td>
+                    <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: p.accredited_voters != null ? '#0f2a1c' : '#c3ccc6' }}>{p.accredited_voters != null ? p.accredited_voters.toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
                 {anyPuScores && (
                   <tr style={{ borderTop: '2px solid #cdd8cf', background: '#f7faf7' }}>
                     <td style={{ ...td, fontFamily: "'Archivo Black', sans-serif", textTransform: 'uppercase', letterSpacing: '0.03em', fontSize: '12px' }}>Ward total</td>
@@ -169,7 +148,7 @@ function WardResultsPage() {
           </div>
         )}
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '18px 0 0' }}>
-          Party columns show verified 2023 presidential votes per polling unit. Open a polling unit to see its full result, INEC sheet and every recorded transcription of the votes.
+          Party columns show verified 2023 presidential votes per polling unit. Open a polling unit to see its full result, the INEC result sheets and every recorded transcription of the votes. Accredited-voter figures are shown only for polling units we have flagged data for.
         </p>
       </div>
       <HomeFooter />

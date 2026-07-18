@@ -32,7 +32,7 @@ type Transcription = {
 type Sheet = { election_type: string; year: string; sheet_url: string; status: string }
 type Detail = {
   pu_code: string; pu_name: string; ward: string; ward_code: string; lga: string; lga_id: number | null
-  state: string; state_geo: string | null; registered_voters: number | null
+  state: string; state_geo: string | null; registered_voters: number | null; accredited_voters: number | null
   definitive: Definitive[]; sheets: Sheet[]; transcriptions: Transcription[]
 }
 
@@ -200,6 +200,7 @@ function PollingUnitPage() {
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '14px', color: '#c7e7d4', margin: 0 }}>
             {d ? `${d.lga} · ${d.ward}` : ''}{d ? <span style={{ fontFamily: 'monospace', marginLeft: '8px', color: '#9fd9b8' }}>{d.pu_code}</span> : ''}
             {d?.registered_voters != null ? ` · ${d.registered_voters.toLocaleString()} registered` : ''}
+            {d?.accredited_voters != null ? ` · ${d.accredited_voters.toLocaleString()} accredited` : ''}
           </p>
         </div>
       </div>
@@ -243,7 +244,12 @@ function PollingUnitPage() {
               Every transcription of this unit's result sheets — a sheet may be recorded by more than one method or person. The one chosen as definitive is marked.
             </p>
             {d.transcriptions.length === 0 ? (
-              <div style={{ ...card, color: '#8aa093', fontWeight: 700 }}>No transcribed entries for this polling unit yet.</div>
+              <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>
+                No individual transcriptions for this polling unit yet.
+                {d.definitive.some((x) => x.source === 'official') && (
+                  <span> The definitive result above comes from our verified 2023 dataset (INEC official figures), not from a per-sheet transcription. Transcriptions will appear here as volunteers record this unit's result sheets.</span>
+                )}
+              </div>
             ) : (
               d.transcriptions.map((t, i) => (
                 <TranscriptionCard key={t.id ?? i} t={t} index={i} total={d.transcriptions.length} chosenId={chosenByRace[t.election_type] ?? null} />
