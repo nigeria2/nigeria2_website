@@ -364,6 +364,42 @@ function ApiDocs() {
 }`}</Code>
           </Card>
 
+          <Card>
+            <div style={h2}>Browsable results (mirrors the website)</div>
+            <p style={p}>
+              Every results page on the website has a data twin here, using the same URL slugs —
+              so a page you can browse has a JSON endpoint one step away. Walk down the levels:
+              state → LGA → ward → polling unit. Each returns roughly what that page shows.
+            </p>
+            <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: '8px' }}>
+              <thead>
+                <tr><th style={th}>Path</th><th style={th}>Returns</th></tr>
+              </thead>
+              <tbody>
+                {[
+                  ['/elections/{year}/{state}', 'A state’s results (pres + gov by LGA, senate/house, evidence)'],
+                  ['/elections/{year}/{state}/{lga}', 'One LGA: wards, per-party votes, evidence'],
+                  ['/elections/{year}/{state}/{lga}/{ward}', 'A ward’s polling units + ward-level result'],
+                  ['/elections/{year}/{state}/{lga}/{ward}/{pu}', 'One polling unit: result, every piece of evidence, and the result sheets'],
+                ].map(([pth, ret]) => (
+                  <tr key={pth}>
+                    <td style={{ ...td, ...mono, fontWeight: 700, whiteSpace: 'nowrap' }}>{pth}</td>
+                    <td style={td}>{ret}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div style={label}>Slugs (same as the website)</div>
+            <p style={{ ...p, fontSize: '13px' }}>
+              <span style={mono}>state</span> = <span style={mono}>akwa-ibom</span> ·
+              <span style={mono}> lga</span> = <span style={mono}>162-abak</span> (the leading number is the LGA id) ·
+              <span style={mono}> ward</span> = <span style={mono}>03-01-01</span> (INEC ward code, <span style={mono}>/</span> written as <span style={mono}>-</span>) ·
+              <span style={mono}> pu</span> = <span style={mono}>001</span> (unit number).
+            </p>
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/elections/2023/akwa-ibom/162-abak/03-01-01/001"`}</Code>
+          </Card>
+
           <SectionTitle id="reference">Reference</SectionTitle>
           <Card>
             <div style={h2}>Party response fields</div>
