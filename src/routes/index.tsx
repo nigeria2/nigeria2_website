@@ -19,14 +19,12 @@ const ctaStyle: React.CSSProperties = {
 }
 
 type Project = { title: string; desc: string; cta: string } & (
-  | { external?: false; href: '/elections/results' | '/elections/2027/prediction' | '/problem-units' }
+  | { external?: false; href: '/elections/results' }
   | { external: true; href: string }
 )
 
 const PROJECTS: Project[] = [
   { title: 'Election Results Data', desc: 'Verified results from past elections, broken down all the way to the local government, ward and polling unit.', href: '/elections/results', cta: 'Explore the data' },
-  { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', href: '/elections/2027/prediction', cta: 'View the forecast' },
-  { title: '2027 Problem Polling Units', desc: 'The polling units that showed strong anomalies in 2023 — the places to watch in 2027.', href: '/problem-units', cta: 'See the units' },
   { title: '2023 Vote Counting', desc: 'Our independent, parallel count of the 2023 general election, transcribed from INEC result sheets.', external: true, href: 'https://forensic.nigeria2.com/', cta: 'Explore the count' },
 ]
 
