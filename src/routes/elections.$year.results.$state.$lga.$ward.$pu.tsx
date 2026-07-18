@@ -11,6 +11,12 @@ const COLORS: Record<string, string> = {
 }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 const RACE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', governorship: 'Governorship', senate: 'Senate', senatorial: 'Senate', house: 'House of Reps' }
+const SOURCE_LABEL: Record<string, string> = {
+  rolled_up: 'definitive · from polling-unit transcriptions',
+  declared: 'definitive · declared',
+  official: 'definitive · INEC official',
+  legacy: 'from our 2023 dataset',
+}
 
 type Definitive = {
   election_type: string; year: string; winner: string; runner_up: string
@@ -64,7 +70,7 @@ function DefinitiveCard({ d }: { d: Definitive }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', background: '#ffe14d', padding: '4px 12px', borderRadius: '20px' }}>{RACE_LABEL[d.election_type] ?? d.election_type} · {d.year}</span>
         {d.winner && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#fff', background: colorOf(d.winner), padding: '5px 14px', borderRadius: '8px' }}>{d.winner} ✓</span>}
-        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>definitive · {d.source}{d.method ? ` (${d.method})` : ''}</span>
+        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{SOURCE_LABEL[d.source] ?? `definitive · ${d.source}`}{d.method ? ` (${d.method})` : ''}</span>
       </div>
       <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '12px' }}>
         {d.registered_voters != null && <Stat label="Registered" value={d.registered_voters} />}
