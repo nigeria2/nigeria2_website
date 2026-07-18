@@ -35,6 +35,59 @@ const p: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight
 const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', padding: '8px 12px', borderBottom: '1px solid #eef2ee' }
 const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#33414f', padding: '9px 12px', borderBottom: '1px solid #f2f6f2', verticalAlign: 'top' }
 
+/** A category divider that doubles as the scroll anchor the sidebar links to. */
+function SectionTitle({ id, children }: { id: string; children: React.ReactNode }) {
+  return (
+    <h2 id={id} style={{ scrollMarginTop: '20px', fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#0f6a38', margin: '10px 0 14px' }}>
+      {children}
+    </h2>
+  )
+}
+
+// The API categories, mirrored in the sidebar. Each links to a section anchor and
+// lists the endpoints it contains so callers can see the whole surface at a glance.
+const API_CATEGORIES: { id: string; title: string; endpoints: string[] }[] = [
+  { id: 'getting-started', title: 'Getting started', endpoints: [] },
+  { id: 'parties', title: 'Political Parties', endpoints: ['GET /parties', 'GET /parties/{acronym}'] },
+  { id: 'results', title: 'Election Results', endpoints: ['GET /states', 'GET /results/{year}', 'GET /results/{year}/{geo_id}'] },
+  { id: 'reference', title: 'Reference', endpoints: ['Response fields', 'Terms of use'] },
+]
+
+/** Sticky left-hand index of the API categories people can use. */
+function ApiSidebar({ base }: { base: string }) {
+  void base
+  return (
+    <nav
+      aria-label="API categories"
+      className="api-sidebar"
+      style={{ position: 'sticky', top: '20px', flex: '0 0 236px', width: '236px', alignSelf: 'flex-start' }}
+    >
+      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8aa093', margin: '2px 0 12px 12px' }}>
+        API Categories
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {API_CATEGORIES.map((c) => (
+          <a
+            key={c.id}
+            href={`#${c.id}`}
+            className="api-side-link"
+            style={{ display: 'block', textDecoration: 'none', padding: '9px 12px', borderRadius: '8px', borderLeft: '2px solid transparent' }}
+          >
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', color: '#0f2a1c' }}>{c.title}</span>
+            {c.endpoints.length > 0 && (
+              <span style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '5px' }}>
+                {c.endpoints.map((e) => (
+                  <span key={e} style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: '11.5px', color: '#7d8f83', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e}</span>
+                ))}
+              </span>
+            )}
+          </a>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
 function ApiDocs() {
   const base = API_BASE
   return (
@@ -53,8 +106,13 @@ function ApiDocs() {
       </div>
 
       <div style={{ background: '#f4f7f2' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '34px 40px 70px' }}>
+        <div className="api-layout" style={{ maxWidth: '1180px', margin: '0 auto', padding: '34px 40px 70px', display: 'flex', gap: '36px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
 
+          <ApiSidebar base={base} />
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+
+          <section id="getting-started">
           <Card>
             <div style={h2}>Getting started</div>
             <p style={p}>
@@ -67,7 +125,9 @@ function ApiDocs() {
             <div style={label}>Versioning</div>
             <p style={p}>Public endpoints live under <span style={mono}>/api/v1/</span>. We will not make breaking changes to a version once published.</p>
           </Card>
+          </section>
 
+          <SectionTitle id="parties">Political Parties</SectionTitle>
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <Method m="GET" />
@@ -149,8 +209,9 @@ function ApiDocs() {
 }`}</Code>
           </Card>
 
+          <SectionTitle id="results">Election Results</SectionTitle>
           <Card>
-            <div style={h2}>Election results</div>
+            <div style={h2}>How results are organised</div>
             <p style={p}>
               Results are organised by <strong>year</strong> then <strong>state</strong>. Every state
               is keyed by a canonical <span style={mono}>geo_id</span> (e.g. Akwa Ibom is
@@ -303,6 +364,7 @@ function ApiDocs() {
 }`}</Code>
           </Card>
 
+          <SectionTitle id="reference">Reference</SectionTitle>
           <Card>
             <div style={h2}>Party response fields</div>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -342,6 +404,7 @@ function ApiDocs() {
             </p>
           </Card>
 
+          </div>
         </div>
       </div>
 

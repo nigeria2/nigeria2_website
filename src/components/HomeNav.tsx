@@ -22,9 +22,7 @@ export function HomeNav() {
   const wrapRef = useRef<HTMLDivElement>(null)
 
   const onResults = /^\/elections\/\d+\/results/.test(pathname)
-  const on2027 = pathname === '/elections/2027/prediction'
-  const onProblem = pathname === '/problem-units'
-  const projectActive = onResults || on2027 || onProblem
+  const projectActive = onResults
 
   // close the dropdown on outside click or Escape
   useEffect(() => {
@@ -117,12 +115,6 @@ export function HomeNav() {
             >
               <Link to="/elections/results" onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
                 Election Results Data
-              </Link>
-              <Link to="/elections/2027/prediction" onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
-                2027 Prediction
-              </Link>
-              <Link to="/problem-units" onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
-                2027 Problem Polling Units
               </Link>
               <a href="https://forensic.nigeria2.com/" className="nav-menu-item" style={itemStyle}>
                 2023 Vote Counting
