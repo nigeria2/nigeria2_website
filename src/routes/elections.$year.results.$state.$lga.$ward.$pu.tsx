@@ -21,20 +21,23 @@ type Definitive = {
   election_type: string; year: string; winner: string; runner_up: string
   total_votes: number; valid_votes: number | null; registered_voters: number | null
   accredited_voters: number | null; source: string; method: string
-  chosen_transcription_id: number | null; parties: Record<string, number>
+  chosen_evidence_id: number | null; parties: Record<string, number>
 }
 type PartyRow = { party?: string; votes?: number | null; votes_words?: string; votes_figures?: string; votes_in_words?: string }
-type Transcription = {
-  id: number | null; election_type: string; year: string; source: string; method: string
-  submitted_by?: string; poll_summary?: Record<string, unknown>; party_results?: PartyRow[]
-  source_image?: string
+type EvidenceItem = {
+  id: number | null; election_type: string; year: string; kind: string; source: string; method: string
+  submitted_by?: string; submitted_by_id?: number | null; created_at?: string | null
+  poll_summary?: Record<string, unknown>; party_results?: PartyRow[]; source_image?: string
 }
 type Sheet = { election_type: string; year: string; sheet_url: string; status: string }
 type Detail = {
   pu_code: string; pu_name: string; ward: string; ward_code: string; lga: string; lga_id: number | null
   state: string; state_geo: string | null; registered_voters: number | null; accredited_voters: number | null
-  definitive: Definitive[]; sheets: Sheet[]; transcriptions: Transcription[]
+  definitive: Definitive[]; sheets: Sheet[]; evidence: EvidenceItem[]
 }
+
+const KIND_LABEL: Record<string, string> = { inec: 'INEC reported', llm: 'LLM transcription', human: 'Human transcription', crowd: 'Crowd submission' }
+const KIND_COLOR: Record<string, string> = { inec: '#0f8a4a', llm: '#7a4bd0', human: '#1f6fd6', crowd: '#e05a1f' }
 
 export const Route = createFileRoute('/elections/$year/results/$state/$lga/$ward/$pu')({
   head: ({ params }) => ({ meta: [{ title: `${STATE_BY_SLUG[params.state] ?? 'State'} — polling unit ${params.pu}, ${params.year} | Nigeria 2.0` }] }),
@@ -105,18 +108,20 @@ function Stat({ label, value }: { label: string; value: number }) {
   )
 }
 
-function TranscriptionCard({ t, index, total, chosenId }: { t: Transcription; index: number; total: number; chosenId: number | null }) {
+function EvidenceCard({ t, chosenId }: { t: EvidenceItem; chosenId: number | null }) {
   const parties = (t.party_results ?? []).filter((p) => (p.party ?? '').trim())
   const isChosen = t.id != null && t.id === chosenId
+  const kindColor = KIND_COLOR[t.kind] ?? '#7a4bd0'
   return (
     <div style={{ background: '#fff', border: `1px solid ${isChosen ? '#bfe6cd' : '#e4dcf5'}`, borderRadius: '10px', padding: '14px 16px', marginBottom: '10px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#fff', background: isChosen ? '#0f8a4a' : '#7a4bd0', padding: '3px 10px', borderRadius: '20px' }}>
-          {RACE_LABEL[t.election_type] ?? t.election_type} · entry {index + 1}{total > 1 ? ` of ${total}` : ''}
+        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#fff', background: kindColor, padding: '3px 10px', borderRadius: '20px' }}>
+          {KIND_LABEL[t.kind] ?? t.kind}
         </span>
+        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>{RACE_LABEL[t.election_type] ?? t.election_type}</span>
         {isChosen && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f6a38' }}>✓ chosen as definitive</span>}
-        {t.source && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#7a4bd0' }}>source: {t.source}</span>}
-        {t.method && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>method: {t.method}</span>}
+        {t.source && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: kindColor }}>source: {t.source}</span>}
+        {t.submitted_by && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>by: {t.submitted_by}</span>}
         {t.source_image && <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b3c2b8' }}>{t.source_image}</span>}
       </div>
       {(() => {
@@ -184,7 +189,7 @@ function PollingUnitPage() {
   }, [pu])
 
   const chosenByRace = (d?.definitive ?? []).reduce<Record<string, number | null>>((acc, x) => {
-    acc[x.election_type] = x.chosen_transcription_id
+    acc[x.election_type] = x.chosen_evidence_id
     return acc
   }, {})
 
@@ -236,23 +241,18 @@ function PollingUnitPage() {
               d.definitive.map((x) => <DefinitiveCard key={`${x.election_type}-${x.year}`} d={x} />)
             )}
 
-            {/* all alternative transcriptions */}
+            {/* every piece of evidence for this unit */}
             <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', margin: '22px 0 6px' }}>
-              All recorded entries {d.transcriptions.length > 0 ? `(${d.transcriptions.length})` : ''}
+              Evidence {d.evidence.length > 0 ? `(${d.evidence.length})` : ''}
             </div>
             <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 12px' }}>
-              Every transcription of this unit's result sheets — a sheet may be recorded by more than one method or person. The one chosen as definitive is marked.
+              Every recorded figure for this unit is a piece of evidence — the INEC-reported result, plus any LLM- or human-transcribed sheets. The definitive result above is derived from weighing them; the chosen one is marked.
             </p>
-            {d.transcriptions.length === 0 ? (
-              <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>
-                No individual transcriptions for this polling unit yet.
-                {d.definitive.some((x) => x.source === 'official') && (
-                  <span> The definitive result above comes from our verified 2023 dataset (INEC official figures), not from a per-sheet transcription. Transcriptions will appear here as volunteers record this unit's result sheets.</span>
-                )}
-              </div>
+            {d.evidence.length === 0 ? (
+              <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>No evidence recorded for this polling unit yet.</div>
             ) : (
-              d.transcriptions.map((t, i) => (
-                <TranscriptionCard key={t.id ?? i} t={t} index={i} total={d.transcriptions.length} chosenId={chosenByRace[t.election_type] ?? null} />
+              d.evidence.map((t, i) => (
+                <EvidenceCard key={t.id ?? i} t={t} chosenId={chosenByRace[t.election_type] ?? null} />
               ))
             )}
           </>
