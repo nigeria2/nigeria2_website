@@ -16,8 +16,8 @@ export type LevelEvidenceItem = {
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', LP: '#e05a1f', PDP: '#c0392b', NNPP: '#f0b429' }
 const PARTIES = ['APC', 'LP', 'PDP', 'NNPP'] as const
-const KIND_LABEL: Record<string, string> = { rollup: 'Roll-up (from below)', inec_declared: 'INEC declared', collation: 'Collation', '2023_transcription': '2023 transcription' }
-const KIND_COLOR: Record<string, string> = { rollup: '#0f8a4a', inec_declared: '#1f6fd6', collation: '#7a4bd0', '2023_transcription': '#0e7490' }
+const KIND_LABEL: Record<string, string> = { rollup: 'Roll-up (from below)', declared: 'Declared', inec_declared: 'INEC declared', collation: 'Collation', '2023_transcription': '2023 transcription' }
+const KIND_COLOR: Record<string, string> = { rollup: '#0f8a4a', declared: '#b45309', inec_declared: '#1f6fd6', collation: '#7a4bd0', '2023_transcription': '#0e7490' }
 const RACE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', senate: 'Senate', house: 'House of Reps' }
 
 const th: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '10px 12px', whiteSpace: 'nowrap' }
