@@ -86,11 +86,7 @@ export function HomeFooter() {
           <div>
             <div style={colTitle}>Follow</div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <a href="#" aria-label="Facebook" style={socialIcon}>f</a>
-              <a href="#" aria-label="Instagram" style={socialIcon}>◎</a>
-              <a href="#" aria-label="TikTok" style={socialIcon}>♪</a>
-              <a href="#" aria-label="X" style={socialIcon}>✕</a>
-              <a href="#" aria-label="YouTube" style={socialIcon}>▶</a>
+              <a href="https://x.com/nigeria20" target="_blank" rel="noreferrer" aria-label="X (Twitter)" style={socialIcon}>✕</a>
             </div>
           </div>
         </div>
@@ -108,7 +104,7 @@ export function HomeFooter() {
           color: '#9fd9b8',
         }}
       >
-        © 2027 Nigeria 2.0 · Techies for a Better Nigeria
+        © 2026 Nigeria 2.0 · Techies for a Better Nigeria
       </div>
     </div>
   )
