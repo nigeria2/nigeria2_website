@@ -47,8 +47,8 @@ function ApiDocs() {
         </div>
         <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '48px', lineHeight: 0.98, color: '#fff', margin: '0 0 16px', letterSpacing: '-0.01em' }}>Public API</h1>
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '18px', lineHeight: 1.55, color: '#eafaf0', maxWidth: '720px', margin: 0 }}>
-          Open, no-key endpoints for building on Nigeria 2.0's election data. We start with political
-          parties; more resources will follow.
+          Open, no-key endpoints for building on Nigeria 2.0's election data — political parties and
+          verified election results, per state, down to the LGA.
         </p>
       </div>
 
@@ -150,7 +150,161 @@ function ApiDocs() {
           </Card>
 
           <Card>
-            <div style={h2}>Response fields</div>
+            <div style={h2}>Election results</div>
+            <p style={p}>
+              Results are organised by <strong>year</strong> then <strong>state</strong>. Every state
+              is keyed by a canonical <span style={mono}>geo_id</span> (e.g. Akwa Ibom is
+              <span style={{ ...mono, background: '#eef2ee', padding: '1px 6px', borderRadius: '4px', fontSize: '13px' }}> nga_3</span>) —
+              always look a state up by its <span style={mono}>geo_id</span>, never by name, since
+              spellings vary in the underlying data. Use <span style={mono}>/api/v1/states</span> to get
+              the full list of ids.
+            </p>
+            <p style={{ ...p, fontSize: '13px', color: '#8aa093', marginTop: '10px' }}>
+              Note: every figure we publish is <em>evidence</em> — our best reading of the sheets and
+              official collation, not a definitive count. A state's score is a merge of the evidence
+              behind it, which each result carries in its <span style={mono}>evidence</span> array.
+            </p>
+          </Card>
+
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/states</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>List all 36 states + the FCT with the canonical <span style={mono}>geo_id</span> every results endpoint uses.</p>
+
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/states"`}</Code>
+
+            <div style={label}>Example response</div>
+            <Code>{`{
+  "count": 37,
+  "states": [
+    { "geo_id": "nga_1", "name": "Abia" },
+    { "geo_id": "nga_3", "name": "Akwa Ibom" },
+    ...
+  ]
+}`}</Code>
+          </Card>
+
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/results/&#123;year&#125;</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>
+              Every state we hold results for in a given election year, which races are available for
+              each, per-office party totals and winner, plus a national summary. Then drill into one
+              state with the endpoint below.
+            </p>
+
+            <div style={label}>Path parameters</div>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr><th style={th}>Name</th><th style={th}>Type</th><th style={th}>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ ...td, ...mono, fontWeight: 700 }}>year</td>
+                  <td style={td}>string · required</td>
+                  <td style={td}>Election year, e.g. <span style={mono}>2019</span> or <span style={mono}>2023</span>.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/results/2023"`}</Code>
+
+            <div style={label}>Example response</div>
+            <Code>{`{
+  "year": "2023",
+  "states": [
+    {
+      "geo_id": "nga_3",
+      "state": "Akwa Ibom",
+      "has_presidential": true,
+      "has_governor": true,
+      "has_senate": false,
+      "has_house": false,
+      "party_totals": {
+        "presidential": {
+          "parties": { "PDP": 214012, "LP": 132683, "APC": 160620 },
+          "total": 507315, "winner": "PDP", "level": "lga"
+        },
+        "governor": { "parties": { "...": 0 }, "winner": "PDP", "level": "lga" }
+      }
+    }
+  ],
+  "summary": {
+    "presidential": { "parties": { "APC": 8794726, "LP": 6101533 }, "winner": "APC", "states": 37 }
+  }
+}`}</Code>
+          </Card>
+
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/results/&#123;year&#125;/&#123;geo_id&#125;</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>
+              One state's full results for a year: presidential and governor as an LGA-by-party table
+              (or a state-level summary where we have no LGA breakdown, e.g. 2019 presidential), Senate
+              and House of Reps as per-constituency candidate lists, and the <span style={mono}>evidence</span> behind
+              the state's score. Returns <span style={mono}>404</span> for an unknown state.
+            </p>
+
+            <div style={label}>Path parameters</div>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr><th style={th}>Name</th><th style={th}>Type</th><th style={th}>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ ...td, ...mono, fontWeight: 700 }}>year</td>
+                  <td style={td}>string · required</td>
+                  <td style={td}>Election year, e.g. <span style={mono}>2023</span>.</td>
+                </tr>
+                <tr>
+                  <td style={{ ...td, ...mono, fontWeight: 700 }}>geo_id</td>
+                  <td style={td}>string · required</td>
+                  <td style={td}>Canonical state id from <span style={mono}>/api/v1/states</span>, e.g. <span style={mono}>nga_3</span>.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/results/2023/nga_3"`}</Code>
+
+            <div style={label}>Example response</div>
+            <Code>{`{
+  "year": "2023",
+  "geo_id": "nga_3",
+  "state": "Akwa Ibom",
+  "presidential": {
+    "parties": ["PDP", "APC", "LP"],
+    "party_totals": { "PDP": 214012, "APC": 160620, "LP": 132683 },
+    "winner": "PDP",
+    "total_votes": 507315,
+    "lga_count": 31,
+    "lgas": [
+      { "lga_id": 162, "lga": "Abak",
+        "parties": { "PDP": 12345, "APC": 6789, "LP": 2100 }, "total": 21713 }
+    ]
+  },
+  "presidential_state": null,
+  "governor": { "parties": ["..."], "lgas": ["..."] },
+  "senate": null,
+  "house": null,
+  "evidence": [
+    { "election_type": "presidential", "year": "2023", "kind": "rollup",
+      "source": "sum of LGAs", "total_votes": 507315,
+      "party_results": [ { "party": "PDP", "votes": 214012 } ] }
+  ]
+}`}</Code>
+          </Card>
+
+          <Card>
+            <div style={h2}>Party response fields</div>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <thead>
                 <tr><th style={th}>Field</th><th style={th}>Type</th><th style={th}>Description</th></tr>
