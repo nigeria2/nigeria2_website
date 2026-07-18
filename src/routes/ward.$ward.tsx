@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
@@ -9,9 +9,12 @@ export const Route = createFileRoute('/ward/$ward')({
   component: WardPage,
 })
 
-type PU = { pu_name: string; pu_code: string; registered_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null> }
+type Sheet = { election_type: string; year: string; sheet_url: string; status: string; has_json: boolean }
+type PU = { pu_name: string; pu_code: string; registered_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null>; sheets?: Sheet[] }
 type Result = { winner: string; runner_up: string; total_votes: number; scores: Record<string, number> }
 type Detail = { state: string; lga: string; ward: string; ward_code: string; result: Result | null; polling_units: PU[] }
+
+const RACE_ABBR: Record<string, string> = { presidential: 'Pres', governorship: 'Gov', senatorial: 'Sen', house: 'Reps' }
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', LP: '#e05a1f', PDP: '#c0392b', NNPP: '#f0b429' }
 const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
@@ -23,6 +26,19 @@ const td: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeigh
 function WardPage() {
   const { ward: code } = Route.useParams()
   const [d, setD] = useState<Detail | null>(null)
+  const [openPu, setOpenPu] = useState<string | null>(null)
+  const [tx, setTx] = useState<Record<string, unknown>>({})
+
+  const toggleTranscript = (pu_code: string) => {
+    if (openPu === pu_code) { setOpenPu(null); return }
+    setOpenPu(pu_code)
+    if (!(pu_code in tx)) {
+      fetch(`${API_BASE}/api/polling-units/${pu_code}/sheets`)
+        .then((r) => r.json())
+        .then((data) => setTx((prev) => ({ ...prev, [pu_code]: data.sheets })))
+        .catch(() => setTx((prev) => ({ ...prev, [pu_code]: null })))
+    }
+  }
 
   useEffect(() => {
     if (!code) {
@@ -104,19 +120,59 @@ function WardPage() {
                   <th style={{ ...th, textAlign: 'center' }}>Runner-up</th>
                   <th style={{ ...th, textAlign: 'right' }}>Registered</th>
                   <th style={{ ...th, textAlign: 'right' }}>Known votes</th>
+                  <th style={{ ...th, textAlign: 'left' }}>Result sheets (INEC)</th>
                 </tr>
               </thead>
               <tbody>
-                {d.polling_units.map((p) => (
-                  <tr key={p.pu_code} style={{ borderTop: '1px solid #eef2ee' }}>
+                {d.polling_units.map((p) => {
+                  const sheets = p.sheets ?? []
+                  const hasTx = sheets.some((s) => s.has_json)
+                  const open = openPu === p.pu_code
+                  return (
+                  <Fragment key={p.pu_code}>
+                  <tr style={{ borderTop: '1px solid #eef2ee' }}>
                     <td style={{ ...td, fontWeight: 800, textTransform: 'capitalize' }}>{p.pu_name || '—'}</td>
                     <td style={{ ...td, fontFamily: 'monospace', color: '#8aa093' }}>{p.pu_code}</td>
                     <td style={{ ...td, textAlign: 'center' }}>{p.winner ? <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: colorOf(p.winner), padding: '3px 10px', borderRadius: '20px' }}>{p.winner}</span> : <span style={{ color: '#b3c2b8' }}>—</span>}</td>
                     <td style={{ ...td, textAlign: 'center', color: p.runner_up ? '#5c6b60' : '#b3c2b8', fontWeight: 800, fontSize: '12px' }}>{p.runner_up || '—'}</td>
                     <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{p.registered_voters != null ? p.registered_voters.toLocaleString() : '—'}</td>
                     <td style={{ ...td, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: p.known_votes != null ? '#0f2a1c' : '#b3c2b8' }}>{p.known_votes != null ? p.known_votes.toLocaleString() : '—'}</td>
+                    <td style={{ ...td }}>
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {sheets.length === 0 && <span style={{ color: '#b3c2b8' }}>—</span>}
+                        {sheets.map((s) => (
+                          s.sheet_url ? (
+                            <a key={s.election_type} href={s.sheet_url} target="_blank" rel="noreferrer"
+                               title={`${s.election_type} result sheet on INEC IReV`}
+                               style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f6a38', background: '#e3f5ea', border: '1px solid #bfe6cd', padding: '3px 9px', borderRadius: '20px', textDecoration: 'none' }}>
+                              {RACE_ABBR[s.election_type] ?? s.election_type} ↗
+                            </a>
+                          ) : (
+                            <span key={s.election_type} title={`${s.election_type}: ${s.status}`} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#b3c2b8', border: '1px solid #e4ebe5', padding: '3px 9px', borderRadius: '20px' }}>
+                              {RACE_ABBR[s.election_type] ?? s.election_type} —
+                            </span>
+                          )
+                        ))}
+                        {hasTx && (
+                          <button onClick={() => toggleTranscript(p.pu_code)} style={{ cursor: 'pointer', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: open ? '#fff' : '#7a4bd0', background: open ? '#7a4bd0' : '#f0e9fb', border: '1px solid #d9c8f5', padding: '3px 9px', borderRadius: '20px' }}>
+                            {open ? 'Hide JSON' : 'JSON'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
-                ))}
+                  {open && (
+                    <tr>
+                      <td colSpan={7} style={{ padding: '0 14px 14px', background: '#faf7fe' }}>
+                        <pre style={{ margin: 0, maxHeight: '420px', overflow: 'auto', fontFamily: 'monospace', fontSize: '11px', lineHeight: 1.5, color: '#33414f', background: '#fff', border: '1px solid #e4dcf5', borderRadius: '8px', padding: '12px' }}>
+                          {tx[p.pu_code] === undefined ? 'Loading transcription…' : JSON.stringify(tx[p.pu_code], null, 2)}
+                        </pre>
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
+                  )
+                })}
               </tbody>
             </table>
           </div>
