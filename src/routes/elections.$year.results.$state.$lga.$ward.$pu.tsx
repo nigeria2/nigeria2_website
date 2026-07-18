@@ -11,33 +11,26 @@ const COLORS: Record<string, string> = {
 }
 const colorOf = (p: string) => COLORS[p] ?? '#8aa093'
 const RACE_LABEL: Record<string, string> = { presidential: 'Presidential', governor: 'Governorship', governorship: 'Governorship', senate: 'Senate', senatorial: 'Senate', house: 'House of Reps' }
-const SOURCE_LABEL: Record<string, string> = {
-  rolled_up: 'definitive · from polling-unit transcriptions',
-  declared: 'definitive · declared',
-  official: 'definitive · INEC official',
-}
 
-type Definitive = {
+type ResultItem = {
   election_type: string; year: string; winner: string; runner_up: string
   total_votes: number; valid_votes: number | null; registered_voters: number | null
-  accredited_voters: number | null; source: string; method: string
-  chosen_evidence_id: number | null; parties: Record<string, number>
+  source: string; method: string; parties: Record<string, number>
 }
 type PartyRow = { party?: string; votes?: number | null; votes_words?: string; votes_figures?: string; votes_in_words?: string }
 type EvidenceItem = {
   id: number | null; election_type: string; year: string; kind: string; source: string; method: string
-  submitted_by?: string; submitted_by_id?: number | null; created_at?: string | null
-  poll_summary?: Record<string, unknown>; party_results?: PartyRow[]; source_image?: string
+  created_at?: string | null; poll_summary?: Record<string, unknown>; party_results?: PartyRow[]; source_image?: string
 }
 type Sheet = { election_type: string; year: string; sheet_url: string; status: string }
 type Detail = {
   pu_code: string; pu_name: string; ward: string; ward_code: string; lga: string; lga_id: number | null
-  state: string; state_geo: string | null; registered_voters: number | null; accredited_voters: number | null
-  definitive: Definitive[]; sheets: Sheet[]; evidence: EvidenceItem[]
+  state: string; state_geo: string | null; registered_voters: number | null
+  result: ResultItem[]; sheets: Sheet[]; evidence: EvidenceItem[]
 }
 
-const KIND_LABEL: Record<string, string> = { inec: 'INEC reported', llm: 'LLM transcription', human: 'Human transcription', crowd: 'Crowd submission' }
-const KIND_COLOR: Record<string, string> = { inec: '#0f8a4a', llm: '#7a4bd0', human: '#1f6fd6', crowd: '#e05a1f' }
+const KIND_LABEL: Record<string, string> = { '2023_transcription': '2023 transcription', inec: 'INEC reported', llm: 'LLM transcription', human: 'Human transcription', crowd: 'Crowd submission' }
+const KIND_COLOR: Record<string, string> = { '2023_transcription': '#1f6fd6', inec: '#0f8a4a', llm: '#7a4bd0', human: '#0e7490', crowd: '#e05a1f' }
 
 export const Route = createFileRoute('/elections/$year/results/$state/$lga/$ward/$pu')({
   head: ({ params }) => ({ meta: [{ title: `${STATE_BY_SLUG[params.state] ?? 'State'} — polling unit ${params.pu}, ${params.year} | Nigeria 2.0` }] }),
@@ -45,6 +38,8 @@ export const Route = createFileRoute('/elections/$year/results/$state/$lga/$ward
 })
 
 const card: React.CSSProperties = { background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px 22px', marginBottom: '18px' }
+const sheetTh: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '10px 14px', whiteSpace: 'nowrap' }
+const sheetTd: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '10px 14px', whiteSpace: 'nowrap' }
 
 /** Read a poll-summary figure regardless of whether it came from the unified schema
  *  (registered_voters, accredited_voters, valid_votes, …) or the legacy EC8A JSON
@@ -64,24 +59,24 @@ function partyVotes(row: PartyRow): { figure: string; words: string } {
   return { figure: (fig ?? '').trim(), words: (words ?? '').trim() }
 }
 
-function DefinitiveCard({ d }: { d: Definitive }) {
+function ResultCard({ d }: { d: ResultItem }) {
   const ranked = Object.entries(d.parties).filter(([, v]) => v != null).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
   const max = Math.max(1, ...ranked.map(([, v]) => v ?? 0))
+  const mergeNote = d.method === 'single-source' ? 'from a single entry' : (d.method || '')
   return (
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', background: '#ffe14d', padding: '4px 12px', borderRadius: '20px' }}>{RACE_LABEL[d.election_type] ?? d.election_type} · {d.year}</span>
-        {d.winner && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#fff', background: colorOf(d.winner), padding: '5px 14px', borderRadius: '8px' }}>{d.winner} ✓</span>}
-        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>{SOURCE_LABEL[d.source] ?? `definitive · ${d.source}`}{d.method ? ` (${d.method})` : ''}</span>
+        {d.winner && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#fff', background: colorOf(d.winner), padding: '5px 14px', borderRadius: '8px' }}>{d.winner}</span>}
+        {mergeNote && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>merged {mergeNote}</span>}
       </div>
       <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '12px' }}>
         {d.registered_voters != null && <Stat label="Registered" value={d.registered_voters} />}
-        {d.accredited_voters != null && <Stat label="Accredited" value={d.accredited_voters} />}
         {d.valid_votes != null && <Stat label="Valid votes" value={d.valid_votes} />}
         <Stat label="Total" value={d.total_votes} />
       </div>
       {ranked.length === 0 ? (
-        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093' }}>Summary only — no party-by-party breakdown recorded for this result.</div>
+        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093' }}>Summary only — no party-by-party breakdown recorded.</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
           {ranked.map(([p, v]) => (
@@ -108,20 +103,17 @@ function Stat({ label, value }: { label: string; value: number }) {
   )
 }
 
-function EvidenceCard({ t, chosenId }: { t: EvidenceItem; chosenId: number | null }) {
+function EvidenceCard({ t }: { t: EvidenceItem }) {
   const parties = (t.party_results ?? []).filter((p) => (p.party ?? '').trim())
-  const isChosen = t.id != null && t.id === chosenId
   const kindColor = KIND_COLOR[t.kind] ?? '#7a4bd0'
   return (
-    <div style={{ background: '#fff', border: `1px solid ${isChosen ? '#bfe6cd' : '#e4dcf5'}`, borderRadius: '10px', padding: '14px 16px', marginBottom: '10px' }}>
+    <div style={{ background: '#fff', border: '1px solid #e4dcf5', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
         <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#fff', background: kindColor, padding: '3px 10px', borderRadius: '20px' }}>
           {KIND_LABEL[t.kind] ?? t.kind}
         </span>
         <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>{RACE_LABEL[t.election_type] ?? t.election_type}</span>
-        {isChosen && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#0f6a38' }}>✓ chosen as definitive</span>}
         {t.source && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: kindColor }}>source: {t.source}</span>}
-        {t.submitted_by && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>by: {t.submitted_by}</span>}
         {t.source_image && <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b3c2b8' }}>{t.source_image}</span>}
       </div>
       {(() => {
@@ -188,11 +180,6 @@ function PollingUnitPage() {
       .catch(() => setFailed(true))
   }, [pu])
 
-  const chosenByRace = (d?.definitive ?? []).reduce<Record<string, number | null>>((acc, x) => {
-    acc[x.election_type] = x.chosen_evidence_id
-    return acc
-  }, {})
-
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>
       <HomeNav />
@@ -205,7 +192,6 @@ function PollingUnitPage() {
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '14px', color: '#c7e7d4', margin: 0 }}>
             {d ? `${d.lga} · ${d.ward}` : ''}{d ? <span style={{ fontFamily: 'monospace', marginLeft: '8px', color: '#9fd9b8' }}>{d.pu_code}</span> : ''}
             {d?.registered_voters != null ? ` · ${d.registered_voters.toLocaleString()} registered` : ''}
-            {d?.accredited_voters != null ? ` · ${d.accredited_voters.toLocaleString()} accredited` : ''}
           </p>
         </div>
       </div>
@@ -217,43 +203,70 @@ function PollingUnitPage() {
           <div style={{ padding: '60px', textAlign: 'center', fontFamily: "'Archivo Black', sans-serif", color: '#8aa093' }}>Loading…</div>
         ) : (
           <>
-            {/* INEC sheet links */}
-            {d.sheets.length > 0 && (
-              <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c' }}>INEC result sheets:</span>
-                {d.sheets.map((s) => (
-                  s.sheet_url ? (
-                    <a key={s.election_type} href={s.sheet_url} target="_blank" rel="noreferrer" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f6a38', background: '#e3f5ea', border: '1px solid #bfe6cd', padding: '5px 12px', borderRadius: '20px', textDecoration: 'none' }}>
-                      {RACE_LABEL[s.election_type] ?? s.election_type} ↗
-                    </a>
-                  ) : (
-                    <span key={s.election_type} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#b3c2b8', border: '1px solid #e4ebe5', padding: '5px 12px', borderRadius: '20px' }}>{RACE_LABEL[s.election_type] ?? s.election_type} —</span>
-                  )
-                ))}
-              </div>
-            )}
-
-            {/* definitive result per election */}
-            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', margin: '4px 0 12px' }}>Definitive result</div>
-            {d.definitive.length === 0 ? (
-              <div style={{ ...card, color: '#8aa093', fontWeight: 700 }}>No definitive result has been set for this polling unit yet.</div>
+            {/* the unit's result per election — a merge of the evidence, not a "definitive" */}
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', margin: '4px 0 12px' }}>Result</div>
+            {d.result.length === 0 ? (
+              <div style={{ ...card, color: '#8aa093', fontWeight: 700 }}>No result recorded for this polling unit yet.</div>
             ) : (
-              d.definitive.map((x) => <DefinitiveCard key={`${x.election_type}-${x.year}`} d={x} />)
+              d.result.map((x) => <ResultCard key={`${x.election_type}-${x.year}`} d={x} />)
             )}
 
-            {/* every piece of evidence for this unit */}
+            {/* every piece of evidence — each a guess */}
             <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', margin: '22px 0 6px' }}>
               Evidence {d.evidence.length > 0 ? `(${d.evidence.length})` : ''}
             </div>
             <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 12px' }}>
-              Every recorded figure for this unit is a piece of evidence — the INEC-reported result, plus any LLM- or human-transcribed sheets. The definitive result above is derived from weighing them; the chosen one is marked.
+              Every recorded figure for this unit is a piece of evidence — a reading of a result sheet. None is treated as certain; the result above is a merge of them.
             </p>
             {d.evidence.length === 0 ? (
               <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>No evidence recorded for this polling unit yet.</div>
             ) : (
-              d.evidence.map((t, i) => (
-                <EvidenceCard key={t.id ?? i} t={t} chosenId={chosenByRace[t.election_type] ?? null} />
-              ))
+              d.evidence.map((t, i) => <EvidenceCard key={t.id ?? i} t={t} />)
+            )}
+
+            {/* all result sheets for this unit, including broken URLs */}
+            <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#0f2a1c', margin: '22px 0 6px' }}>
+              Result sheets {d.sheets.length > 0 ? `(${d.sheets.length})` : ''}
+            </div>
+            <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '0 0 12px' }}>
+              Every INEC result sheet we hold for this unit, including ones whose link is broken or missing.
+            </p>
+            {d.sheets.length === 0 ? (
+              <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>No result sheets recorded for this polling unit.</div>
+            ) : (
+              <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
+                  <thead>
+                    <tr style={{ background: '#f4f7f2' }}>
+                      <th style={sheetTh}>Election</th>
+                      <th style={sheetTh}>Year</th>
+                      <th style={sheetTh}>Status</th>
+                      <th style={sheetTh}>Sheet</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.sheets.map((s, i) => {
+                      const ok = /^saved|have|ok$/i.test(s.status || '') || (!s.status && s.sheet_url)
+                      return (
+                        <tr key={`${s.election_type}-${s.year}-${i}`} style={{ borderTop: '1px solid #eef2ee' }}>
+                          <td style={sheetTd}>{RACE_LABEL[s.election_type] ?? s.election_type}</td>
+                          <td style={sheetTd}>{s.year}</td>
+                          <td style={{ ...sheetTd }}>
+                            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: ok ? '#0f6a38' : '#b45309', background: ok ? '#e3f5ea' : '#fdf0dc', border: `1px solid ${ok ? '#bfe6cd' : '#f0d9ac'}`, padding: '2px 9px', borderRadius: '20px' }}>{s.status || (s.sheet_url ? 'available' : 'no sheet')}</span>
+                          </td>
+                          <td style={sheetTd}>
+                            {s.sheet_url ? (
+                              <a href={s.sheet_url} target="_blank" rel="noreferrer" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f6a38', textDecoration: 'none', borderBottom: '1px dotted #9db3a3' }}>Open sheet ↗</a>
+                            ) : (
+                              <span style={{ color: '#b3c2b8' }}>—</span>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </>
         )}
