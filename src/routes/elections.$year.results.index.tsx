@@ -83,13 +83,7 @@ function YearTabs({ year }: { year: string }) {
   )
 }
 
-function Badge({ label, on }: { label: string; on: boolean }) {
-  return (
-    <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: on ? '#0f4a2c' : '#b6c3b8', background: on ? '#d8f0df' : '#f0f3ef', padding: '3px 10px', borderRadius: '20px' }}>{label}</span>
-  )
-}
-
-/** Office toggle used both globally (top) and per-card. */
+/** Office toggle used at the top of the page to switch all cards' bars. */
 function OfficeSwitch({ value, onChange, available, size = 'md' }: { value: OfficeKey; onChange: (o: OfficeKey) => void; available: OfficeKey[]; size?: 'sm' | 'md' }) {
   const pad = size === 'sm' ? '3px 10px' : '6px 14px'
   const fs = size === 'sm' ? '11px' : '13px'
@@ -145,32 +139,18 @@ function StateCard({ s, year, globalOffice }: { s: StateRow; year: string; globa
     ...(s.has_presidential ? (['presidential'] as const) : []),
     ...(s.has_governor ? (['governor'] as const) : []),
   ]
-  // per-card override starts null → follows the global switch; a click pins it
-  const [override, setOverride] = useState<OfficeKey | null>(null)
-  const office: OfficeKey = override ?? (available.includes(globalOffice) ? globalOffice : available[0] ?? 'presidential')
+  // follow the page-level office switch; fall back to whatever this state has
+  const office: OfficeKey = available.includes(globalOffice) ? globalOffice : available[0] ?? 'presidential'
   const totals = s.party_totals?.[office]
   return (
     <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '18px 20px', display: 'flex', flexDirection: 'column' }}>
       <Link to="/elections/$year/results/$state" params={{ year, state: stateSlug(s.state) }} style={{ textDecoration: 'none' }}>
-        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', marginBottom: '8px' }}>{s.state}</div>
+        <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '20px', color: '#0f2a1c', marginBottom: '10px' }}>{s.state}</div>
       </Link>
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <Badge label={s.has_presidential ? (s.presidential_lga_count ? `Pres · ${s.presidential_lga_count} LGAs` : 'Presidential') : 'Pres —'} on={s.has_presidential} />
-        <Badge label={s.has_governor ? `Gov · ${s.governor_lga_count} LGAs` : 'Gov —'} on={s.has_governor} />
-        {(s.has_senate || s.has_house) && <Badge label={s.has_senate ? `Senate · ${s.senate_count}` : 'Senate —'} on={s.has_senate} />}
-        {(s.has_senate || s.has_house) && <Badge label={s.has_house ? `House · ${s.house_count}` : 'House —'} on={s.has_house} />}
-      </div>
       {available.length > 0 && (
-        <>
-          {available.length > 1 && (
-            <div style={{ marginBottom: '2px' }}>
-              <OfficeSwitch value={office} onChange={setOverride} available={available} size="sm" />
-            </div>
-          )}
-          {totals ? <PartyBars totals={totals} /> : (
-            <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#b3c2b8', padding: '8px 0' }}>No {OFFICES.find((o) => o.key === office)?.label.toLowerCase()} totals captured.</div>
-          )}
-        </>
+        totals ? <PartyBars totals={totals} /> : (
+          <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#b3c2b8', padding: '8px 0' }}>No {OFFICES.find((o) => o.key === office)?.label.toLowerCase()} totals captured.</div>
+        )
       )}
       <Link to="/elections/$year/results/$state" params={{ year, state: stateSlug(s.state) }} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '12px', color: '#0f8a4a', marginTop: '12px', textDecoration: 'none' }}>View full results →</Link>
     </div>
