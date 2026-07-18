@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
+import { LevelEvidence, type LevelEvidenceItem } from '../components/LevelEvidence'
 import { API_BASE } from '../config'
 import { STATE_BY_SLUG } from '../stateSlug'
 
 type PU = { pu_name: string; pu_code: string; registered_voters: number | null; accredited_voters: number | null; known_votes: number | null; winner: string; runner_up: string; scores: Record<string, number | null> }
 type Result = { winner: string; runner_up: string; total_votes: number; scores: Record<string, number> }
-type Detail = { state: string; lga: string; ward: string; ward_code: string; result: Result | null; polling_units: PU[] }
+type Detail = { state: string; lga: string; ward: string; ward_code: string; result: Result | null; polling_units: PU[]; evidence?: LevelEvidenceItem[] }
 
 const COLORS: Record<string, string> = { APC: '#1f6fd6', LP: '#e05a1f', PDP: '#c0392b', NNPP: '#f0b429' }
 const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
@@ -152,6 +153,12 @@ function WardResultsPage() {
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '18px 0 0' }}>
           Party columns show verified 2023 presidential votes per polling unit. Open a polling unit to see its full result, the INEC result sheets and every recorded transcription of the votes. Accredited-voter figures are shown only for polling units we have flagged data for.
         </p>
+        {d && (
+          <LevelEvidence
+            items={d.evidence ?? []}
+            blurb="The evidence behind this ward's score — its roll-up from the polling units, plus any figures recorded independently at ward level. Each is a guess; the ward score is a merge of them."
+          />
+        )}
       </div>
       <HomeFooter />
     </div>

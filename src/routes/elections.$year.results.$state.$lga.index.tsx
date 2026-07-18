@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
+import { LevelEvidence, type LevelEvidenceItem } from '../components/LevelEvidence'
 import { API_BASE } from '../config'
 import { STATE_BY_SLUG } from '../stateSlug'
 
@@ -10,7 +11,7 @@ const colorOf = (p: string) => COLORS[p] ?? '#cdd8cf'
 const PARTIES = ['APC', 'LP', 'PDP', 'NNPP'] as const
 
 type Ward = { ward: string; ward_code: string; pu_count: number; registered_voters: number | null; winner: string; runner_up: string; scores: Record<string, number | null>; total_votes: number | null }
-type Detail = { id: number; name: string; state: string; geo_id: string; wards: Ward[] }
+type Detail = { id: number; name: string; state: string; geo_id: string; wards: Ward[]; evidence?: LevelEvidenceItem[] }
 
 export const Route = createFileRoute('/elections/$year/results/$state/$lga/')({
   head: ({ params }) => ({ meta: [{ title: `${STATE_BY_SLUG[params.state] ?? 'State'} — LGA wards, ${params.year} results | Nigeria 2.0` }] }),
@@ -113,6 +114,12 @@ function LgaResults() {
         <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093', margin: '18px 0 0' }}>
           Party columns show verified 2023 presidential votes for the four major parties per ward. Open a ward to see its polling units and the INEC result sheets.
         </p>
+        {d && (
+          <LevelEvidence
+            items={d.evidence ?? []}
+            blurb="The evidence behind this LGA's score — its roll-up from the wards, plus any figures recorded independently at LGA level from another source. Each is a guess; the LGA score is a merge of them."
+          />
+        )}
       </div>
       <HomeFooter />
     </div>

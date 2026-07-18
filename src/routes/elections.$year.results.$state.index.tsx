@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { HomeNav } from '../components/HomeNav'
 import { HomeFooter } from '../components/HomeFooter'
+import { LevelEvidence, type LevelEvidenceItem } from '../components/LevelEvidence'
 import { API_BASE } from '../config'
 import { geoIdFromSlug, STATE_BY_SLUG } from '../stateSlug'
 import { lgaSlug } from '../lgaSlug'
@@ -23,6 +24,7 @@ type Detail = {
   year: string; geo_id: string; state: string
   presidential: Table | null; presidential_state: PresState | null; governor: Table | null
   senate: LegBlock[] | null; house: LegBlock[] | null
+  evidence?: LevelEvidenceItem[]
 }
 
 export const Route = createFileRoute('/elections/$year/results/$state/')({
@@ -225,6 +227,10 @@ function ResultsState() {
           {!d.governor && !d.presidential && !d.presidential_state && !d.senate && !d.house && (
             <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '40px', textAlign: 'center', fontFamily: "'Archivo', sans-serif", color: '#8aa093' }}>No results captured for {d.state} in {year} yet.</div>
           )}
+          <LevelEvidence
+            items={d.evidence ?? []}
+            blurb="The evidence behind this state's score — its roll-up from the LGAs, plus any figures recorded independently at state level from another source. Each is a guess; the state score is a merge of them."
+          />
         </div>
       </div>
       <HomeFooter />
