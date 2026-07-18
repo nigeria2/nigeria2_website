@@ -189,13 +189,17 @@ function PollingUnitPage() {
 
   useEffect(() => {
     setD(null); setFailed(false)
-    // pu param carries the code with dashes (03-03-05-001); the API takes raw slashes.
-    const puCode = pu.replace(/-/g, '/')
+    // The URL carries the ward code (03-01-01) and the PU's own number (005); the full
+    // pu_code is ward + "/" + pu. (Older links passed the whole code, e.g. 03-01-01-005 —
+    // still handled by stripping the ward prefix.)
+    const wardCode = ward.replace(/-/g, '/')
+    const puNum = pu.replace(/-/g, '/').replace(new RegExp('^' + wardCode + '/?'), '')
+    const puCode = `${wardCode}/${puNum}`
     fetch(`${API_BASE}/api/polling-units/${puCode}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((data: Detail) => setD(data))
       .catch(() => setFailed(true))
-  }, [pu])
+  }, [pu, ward])
 
   return (
     <div style={{ minHeight: '100vh', background: '#f4f7f2', fontFamily: "'Archivo', sans-serif" }}>

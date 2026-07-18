@@ -22,8 +22,10 @@ export const Route = createFileRoute('/elections/$year/results/$state/$lga/$ward
 })
 
 // The ward code carries slashes as dashes in the URL (03/03/05 -> 03-03-05); the API
-// accepts the dash form directly. A PU code (03/03/05/001) is likewise passed as dashes.
-const puSlug = (pu_code: string) => pu_code.replace(/\//g, '-')
+// accepts the dash form directly. The polling-unit URL segment is just the PU's own
+// number — its last code segment (03/01/01/005 -> 005) — since the ward is already in the
+// path; the PU page reconstructs the full code from ward + this segment.
+const puSlug = (pu_code: string) => pu_code.split('/').pop() ?? pu_code
 
 function WardResultsPage() {
   const { year, state, lga, ward } = Route.useParams()
