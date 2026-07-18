@@ -40,6 +40,8 @@ export const Route = createFileRoute('/elections/$year/results/$state/$lga/$ward
 const card: React.CSSProperties = { background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '20px 22px', marginBottom: '18px' }
 const sheetTh: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '10px 14px', whiteSpace: 'nowrap' }
 const sheetTd: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '10px 14px', whiteSpace: 'nowrap' }
+const evTh: React.CSSProperties = { textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#5c6b60', padding: '10px 12px', whiteSpace: 'nowrap' }
+const evTd: React.CSSProperties = { fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#0f2a1c', padding: '9px 12px', whiteSpace: 'nowrap' }
 
 /** Read a poll-summary figure regardless of whether it came from the unified schema
  *  (registered_voters, accredited_voters, valid_votes, …) or the legacy EC8A JSON
@@ -59,16 +61,38 @@ function partyVotes(row: PartyRow): { figure: string; words: string } {
   return { figure: (fig ?? '').trim(), words: (words ?? '').trim() }
 }
 
+/** Humanise the raw sheet download-outcome status into a user-facing label + colour.
+ *  saved/have = we successfully have the scan; no_sheet = INEC had none; dead = broken URL;
+ *  jpeg_fail/deferred = we haven't managed to fetch it yet. */
+function sheetStatus(status: string, url: string): { label: string; fg: string; bg: string; bd: string } {
+  const ok = { fg: '#0f6a38', bg: '#e3f5ea', bd: '#bfe6cd' }
+  const warn = { fg: '#b45309', bg: '#fdf0dc', bd: '#f0d9ac' }
+  const grey = { fg: '#5c6b60', bg: '#eef2ee', bd: '#dbe4dc' }
+  switch ((status || '').toLowerCase()) {
+    case 'saved':
+    case 'have':
+    case 'ok':
+      return { label: 'Available', ...ok }
+    case 'dead':
+      return { label: 'Broken link', ...warn }
+    case 'no_sheet':
+      return { label: 'No sheet', ...grey }
+    case 'jpeg_fail':
+    case 'deferred':
+      return { label: 'Not fetched', ...warn }
+    default:
+      return url ? { label: 'Available', ...ok } : { label: 'No sheet', ...grey }
+  }
+}
+
 function ResultCard({ d }: { d: ResultItem }) {
   const ranked = Object.entries(d.parties).filter(([, v]) => v != null).sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))
   const max = Math.max(1, ...ranked.map(([, v]) => v ?? 0))
-  const mergeNote = d.method === 'single-source' ? 'from a single entry' : (d.method || '')
   return (
     <div style={card}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
         <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: '#0f2a1c', background: '#ffe14d', padding: '4px 12px', borderRadius: '20px' }}>{RACE_LABEL[d.election_type] ?? d.election_type} · {d.year}</span>
         {d.winner && <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '15px', color: '#fff', background: colorOf(d.winner), padding: '5px 14px', borderRadius: '8px' }}>{d.winner}</span>}
-        {mergeNote && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#8aa093' }}>merged {mergeNote}</span>}
       </div>
       <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '12px' }}>
         {d.registered_voters != null && <Stat label="Registered" value={d.registered_voters} />}
@@ -103,67 +127,60 @@ function Stat({ label, value }: { label: string; value: number }) {
   )
 }
 
-function EvidenceCard({ t }: { t: EvidenceItem }) {
-  const parties = (t.party_results ?? []).filter((p) => (p.party ?? '').trim())
-  const kindColor = KIND_COLOR[t.kind] ?? '#7a4bd0'
+const EVIDENCE_PARTIES = ['APC', 'LP', 'PDP', 'NNPP'] as const
+
+/** All evidence for a unit in one table — one row per entry. */
+function EvidenceTable({ items }: { items: EvidenceItem[] }) {
+  const partyMap = (t: EvidenceItem): Record<string, string> => {
+    const m: Record<string, string> = {}
+    for (const p of t.party_results ?? []) {
+      const key = (p.party ?? '').trim()
+      if (key) m[key] = partyVotes(p).figure
+    }
+    return m
+  }
   return (
-    <div style={{ background: '#fff', border: '1px solid #e4dcf5', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
-        <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: '#fff', background: kindColor, padding: '3px 10px', borderRadius: '20px' }}>
-          {KIND_LABEL[t.kind] ?? t.kind}
-        </span>
-        <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '11px', color: '#8aa093' }}>{RACE_LABEL[t.election_type] ?? t.election_type}</span>
-        {t.source && <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: kindColor }}>source: {t.source}</span>}
-        {t.source_image && <span style={{ fontFamily: 'monospace', fontSize: '11px', color: '#b3c2b8' }}>{t.source_image}</span>}
-      </div>
-      {(() => {
-        const reg = summaryVal(t.poll_summary, 'registered_voters', '1_registered_voters')
-        const acc = summaryVal(t.poll_summary, 'accredited_voters', '2_accredited_voters')
-        const valid = summaryVal(t.poll_summary, 'valid_votes', '7_total_valid_votes')
-        if (!reg && !acc && !valid) return null
-        return (
-          <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #f0ecfa' }}>
-            {reg && <SummaryPill label="Registered" value={reg} />}
-            {acc && <SummaryPill label="Accredited" value={acc} />}
-            {valid && <SummaryPill label="Valid votes" value={valid} />}
-          </div>
-        )
-      })()}
-      {parties.length === 0 ? (
-        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '13px', color: '#8aa093' }}>No party figures in this entry.</div>
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '340px' }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', padding: '6px 10px' }}>Party</th>
-                <th style={{ textAlign: 'right', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', padding: '6px 10px' }}>Votes</th>
-                <th style={{ textAlign: 'left', fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8aa093', padding: '6px 10px' }}>In words</th>
+    <div style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '10px', overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '760px' }}>
+        <thead>
+          <tr style={{ background: '#f4f7f2' }}>
+            <th style={evTh}>Kind</th>
+            <th style={evTh}>Election</th>
+            {EVIDENCE_PARTIES.map((p) => (
+              <th key={p} style={{ ...evTh, textAlign: 'right', color: colorOf(p) }}>{p}</th>
+            ))}
+            <th style={{ ...evTh, textAlign: 'right' }}>Registered</th>
+            <th style={{ ...evTh, textAlign: 'right' }}>Accredited</th>
+            <th style={evTh}>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((t, i) => {
+            const m = partyMap(t)
+            const reg = summaryVal(t.poll_summary, 'registered_voters', '1_registered_voters')
+            const acc = summaryVal(t.poll_summary, 'accredited_voters', '2_accredited_voters')
+            const kindColor = KIND_COLOR[t.kind] ?? '#7a4bd0'
+            return (
+              <tr key={t.id ?? i} style={{ borderTop: '1px solid #eef2ee' }}>
+                <td style={evTd}>
+                  <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: '#fff', background: kindColor, padding: '3px 9px', borderRadius: '20px' }}>{KIND_LABEL[t.kind] ?? t.kind}</span>
+                </td>
+                <td style={evTd}>{RACE_LABEL[t.election_type] ?? t.election_type}</td>
+                {EVIDENCE_PARTIES.map((p) => (
+                  <td key={p} style={{ ...evTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: m[p] != null && m[p] !== '' ? '#0f2a1c' : '#c3ccc6' }}>{m[p] != null && m[p] !== '' ? Number(m[p]).toLocaleString() : '—'}</td>
+                ))}
+                <td style={{ ...evTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif" }}>{reg ? Number(reg).toLocaleString() : '—'}</td>
+                <td style={{ ...evTd, textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", color: acc ? '#0f2a1c' : '#c3ccc6' }}>{acc ? Number(acc).toLocaleString() : '—'}</td>
+                <td style={{ ...evTd, color: '#8aa093' }}>{t.source || '—'}</td>
               </tr>
-            </thead>
-            <tbody>
-              {parties.map((p, i) => {
-                const { figure, words } = partyVotes(p)
-                const has = figure !== ''
-                return (
-                  <tr key={`${p.party}-${i}`} style={{ borderTop: '1px solid #f0ecfa', background: has ? 'transparent' : '#faf9fe' }}>
-                    <td style={{ padding: '6px 10px', fontFamily: "'Archivo Black', sans-serif", fontSize: '12px', color: colorOf(p.party ?? '') !== '#8aa093' ? colorOf(p.party ?? '') : '#0f2a1c' }}>{p.party}</td>
-                    <td style={{ padding: '6px 10px', textAlign: 'right', fontFamily: "'Archivo Black', sans-serif", fontSize: '13px', color: has ? '#0f2a1c' : '#c3ccc6' }}>{has ? figure : '0'}</td>
-                    <td style={{ padding: '6px 10px', fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '12px', color: '#8aa093', textTransform: 'capitalize' }}>{words || '—'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+            )
+          })}
+        </tbody>
+      </table>
     </div>
   )
 }
 
-function SummaryPill({ label, value }: { label: string; value: string }) {
-  return <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 700, fontSize: '12px', color: '#5c6b60' }}>{label}: <strong style={{ color: '#0f2a1c' }}>{value}</strong></span>
-}
 
 function PollingUnitPage() {
   const { year, state, lga, ward, pu } = Route.useParams()
@@ -221,7 +238,7 @@ function PollingUnitPage() {
             {d.evidence.length === 0 ? (
               <div style={{ ...card, color: '#8aa093', fontWeight: 600 }}>No evidence recorded for this polling unit yet.</div>
             ) : (
-              d.evidence.map((t, i) => <EvidenceCard key={t.id ?? i} t={t} />)
+              <EvidenceTable items={d.evidence} />
             )}
 
             {/* all result sheets for this unit, including broken URLs */}
@@ -246,13 +263,13 @@ function PollingUnitPage() {
                   </thead>
                   <tbody>
                     {d.sheets.map((s, i) => {
-                      const ok = /^saved|have|ok$/i.test(s.status || '') || (!s.status && s.sheet_url)
+                      const st = sheetStatus(s.status, s.sheet_url)
                       return (
                         <tr key={`${s.election_type}-${s.year}-${i}`} style={{ borderTop: '1px solid #eef2ee' }}>
                           <td style={sheetTd}>{RACE_LABEL[s.election_type] ?? s.election_type}</td>
                           <td style={sheetTd}>{s.year}</td>
                           <td style={{ ...sheetTd }}>
-                            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: ok ? '#0f6a38' : '#b45309', background: ok ? '#e3f5ea' : '#fdf0dc', border: `1px solid ${ok ? '#bfe6cd' : '#f0d9ac'}`, padding: '2px 9px', borderRadius: '20px' }}>{s.status || (s.sheet_url ? 'available' : 'no sheet')}</span>
+                            <span title={s.status || undefined} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', color: st.fg, background: st.bg, border: `1px solid ${st.bd}`, padding: '2px 9px', borderRadius: '20px' }}>{st.label}</span>
                           </td>
                           <td style={sheetTd}>
                             {s.sheet_url ? (
