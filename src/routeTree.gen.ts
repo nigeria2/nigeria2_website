@@ -55,6 +55,8 @@ import { Route as ElectionsYearResultsStateLgaIndexRouteImport } from './routes/
 import { Route as Elections2027PredictionPresidentialStatesStateRouteImport } from './routes/elections.2027.prediction.presidential.states.$state'
 import { Route as Elections2027PredictionPresidentialLgaLgaRouteImport } from './routes/elections.2027.prediction.presidential.lga.$lga'
 import { Route as ElectionsYearResultsStateLgaWardRouteImport } from './routes/elections.$year.results.$state.$lga.$ward'
+import { Route as ElectionsYearResultsStateLgaWardIndexRouteImport } from './routes/elections.$year.results.$state.$lga.$ward.index'
+import { Route as ElectionsYearResultsStateLgaWardPuRouteImport } from './routes/elections.$year.results.$state.$lga.$ward.$pu'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -301,6 +303,18 @@ const ElectionsYearResultsStateLgaWardRoute =
     path: '/$ward',
     getParentRoute: () => ElectionsYearResultsStateLgaRoute,
   } as any)
+const ElectionsYearResultsStateLgaWardIndexRoute =
+  ElectionsYearResultsStateLgaWardIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ElectionsYearResultsStateLgaWardRoute,
+  } as any)
+const ElectionsYearResultsStateLgaWardPuRoute =
+  ElectionsYearResultsStateLgaWardPuRouteImport.update({
+    id: '/$pu',
+    path: '/$pu',
+    getParentRoute: () => ElectionsYearResultsStateLgaWardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -344,11 +358,13 @@ export interface FileRoutesByFullPath {
   '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesRouteWithChildren
   '/elections/$year/results/$state/': typeof ElectionsYearResultsStateIndexRoute
   '/elections/2027/prediction/presidential/': typeof Elections2027PredictionPresidentialIndexRoute
-  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardRoute
+  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardRouteWithChildren
   '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
   '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
   '/elections/$year/results/$state/$lga/': typeof ElectionsYearResultsStateLgaIndexRoute
   '/elections/2027/prediction/presidential/states/': typeof Elections2027PredictionPresidentialStatesIndexRoute
+  '/elections/$year/results/$state/$lga/$ward/$pu': typeof ElectionsYearResultsStateLgaWardPuRoute
+  '/elections/$year/results/$state/$lga/$ward/': typeof ElectionsYearResultsStateLgaWardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -385,11 +401,12 @@ export interface FileRoutesByTo {
   '/elections/2027/prediction': typeof Elections2027PredictionIndexRoute
   '/elections/$year/results/$state': typeof ElectionsYearResultsStateIndexRoute
   '/elections/2027/prediction/presidential': typeof Elections2027PredictionPresidentialIndexRoute
-  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardRoute
   '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
   '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
   '/elections/$year/results/$state/$lga': typeof ElectionsYearResultsStateLgaIndexRoute
   '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesIndexRoute
+  '/elections/$year/results/$state/$lga/$ward/$pu': typeof ElectionsYearResultsStateLgaWardPuRoute
+  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -434,11 +451,13 @@ export interface FileRoutesById {
   '/elections/2027/prediction/presidential/states': typeof Elections2027PredictionPresidentialStatesRouteWithChildren
   '/elections/$year/results/$state/': typeof ElectionsYearResultsStateIndexRoute
   '/elections/2027/prediction/presidential/': typeof Elections2027PredictionPresidentialIndexRoute
-  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardRoute
+  '/elections/$year/results/$state/$lga/$ward': typeof ElectionsYearResultsStateLgaWardRouteWithChildren
   '/elections/2027/prediction/presidential/lga/$lga': typeof Elections2027PredictionPresidentialLgaLgaRoute
   '/elections/2027/prediction/presidential/states/$state': typeof Elections2027PredictionPresidentialStatesStateRoute
   '/elections/$year/results/$state/$lga/': typeof ElectionsYearResultsStateLgaIndexRoute
   '/elections/2027/prediction/presidential/states/': typeof Elections2027PredictionPresidentialStatesIndexRoute
+  '/elections/$year/results/$state/$lga/$ward/$pu': typeof ElectionsYearResultsStateLgaWardPuRoute
+  '/elections/$year/results/$state/$lga/$ward/': typeof ElectionsYearResultsStateLgaWardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -489,6 +508,8 @@ export interface FileRouteTypes {
     | '/elections/2027/prediction/presidential/states/$state'
     | '/elections/$year/results/$state/$lga/'
     | '/elections/2027/prediction/presidential/states/'
+    | '/elections/$year/results/$state/$lga/$ward/$pu'
+    | '/elections/$year/results/$state/$lga/$ward/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -525,11 +546,12 @@ export interface FileRouteTypes {
     | '/elections/2027/prediction'
     | '/elections/$year/results/$state'
     | '/elections/2027/prediction/presidential'
-    | '/elections/$year/results/$state/$lga/$ward'
     | '/elections/2027/prediction/presidential/lga/$lga'
     | '/elections/2027/prediction/presidential/states/$state'
     | '/elections/$year/results/$state/$lga'
     | '/elections/2027/prediction/presidential/states'
+    | '/elections/$year/results/$state/$lga/$ward/$pu'
+    | '/elections/$year/results/$state/$lga/$ward'
   id:
     | '__root__'
     | '/'
@@ -578,6 +600,8 @@ export interface FileRouteTypes {
     | '/elections/2027/prediction/presidential/states/$state'
     | '/elections/$year/results/$state/$lga/'
     | '/elections/2027/prediction/presidential/states/'
+    | '/elections/$year/results/$state/$lga/$ward/$pu'
+    | '/elections/$year/results/$state/$lga/$ward/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -935,6 +959,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ElectionsYearResultsStateLgaWardRouteImport
       parentRoute: typeof ElectionsYearResultsStateLgaRoute
     }
+    '/elections/$year/results/$state/$lga/$ward/': {
+      id: '/elections/$year/results/$state/$lga/$ward/'
+      path: '/'
+      fullPath: '/elections/$year/results/$state/$lga/$ward/'
+      preLoaderRoute: typeof ElectionsYearResultsStateLgaWardIndexRouteImport
+      parentRoute: typeof ElectionsYearResultsStateLgaWardRoute
+    }
+    '/elections/$year/results/$state/$lga/$ward/$pu': {
+      id: '/elections/$year/results/$state/$lga/$ward/$pu'
+      path: '/$pu'
+      fullPath: '/elections/$year/results/$state/$lga/$ward/$pu'
+      preLoaderRoute: typeof ElectionsYearResultsStateLgaWardPuRouteImport
+      parentRoute: typeof ElectionsYearResultsStateLgaWardRoute
+    }
   }
 }
 
@@ -954,15 +992,33 @@ const StatesStateRouteWithChildren = StatesStateRoute._addFileChildren(
   StatesStateRouteChildren,
 )
 
+interface ElectionsYearResultsStateLgaWardRouteChildren {
+  ElectionsYearResultsStateLgaWardPuRoute: typeof ElectionsYearResultsStateLgaWardPuRoute
+  ElectionsYearResultsStateLgaWardIndexRoute: typeof ElectionsYearResultsStateLgaWardIndexRoute
+}
+
+const ElectionsYearResultsStateLgaWardRouteChildren: ElectionsYearResultsStateLgaWardRouteChildren =
+  {
+    ElectionsYearResultsStateLgaWardPuRoute:
+      ElectionsYearResultsStateLgaWardPuRoute,
+    ElectionsYearResultsStateLgaWardIndexRoute:
+      ElectionsYearResultsStateLgaWardIndexRoute,
+  }
+
+const ElectionsYearResultsStateLgaWardRouteWithChildren =
+  ElectionsYearResultsStateLgaWardRoute._addFileChildren(
+    ElectionsYearResultsStateLgaWardRouteChildren,
+  )
+
 interface ElectionsYearResultsStateLgaRouteChildren {
-  ElectionsYearResultsStateLgaWardRoute: typeof ElectionsYearResultsStateLgaWardRoute
+  ElectionsYearResultsStateLgaWardRoute: typeof ElectionsYearResultsStateLgaWardRouteWithChildren
   ElectionsYearResultsStateLgaIndexRoute: typeof ElectionsYearResultsStateLgaIndexRoute
 }
 
 const ElectionsYearResultsStateLgaRouteChildren: ElectionsYearResultsStateLgaRouteChildren =
   {
     ElectionsYearResultsStateLgaWardRoute:
-      ElectionsYearResultsStateLgaWardRoute,
+      ElectionsYearResultsStateLgaWardRouteWithChildren,
     ElectionsYearResultsStateLgaIndexRoute:
       ElectionsYearResultsStateLgaIndexRoute,
   }
