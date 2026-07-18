@@ -15,7 +15,6 @@ const SOURCE_LABEL: Record<string, string> = {
   rolled_up: 'definitive · from polling-unit transcriptions',
   declared: 'definitive · declared',
   official: 'definitive · INEC official',
-  legacy: 'from our 2023 dataset',
 }
 
 type Definitive = {
