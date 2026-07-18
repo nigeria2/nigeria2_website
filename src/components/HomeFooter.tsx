@@ -60,19 +60,19 @@ export function HomeFooter() {
             <div style={colTitle}>Projects</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
               <Link to="/elections/2027/prediction" className="footer-link" style={colLink}>2027 Prediction</Link>
-              <Link to="/elections/$year/results" params={{ year: '2023' }} className="footer-link" style={colLink}>2023 Results</Link>
-              <Link to="/elections/$year/results" params={{ year: '2019' }} className="footer-link" style={colLink}>2019 Results</Link>
+              <Link to="/elections/results" className="footer-link" style={colLink}>Election Results Data</Link>
               <Link to="/problem-units" className="footer-link" style={colLink}>2027 Problem Polling Units</Link>
-              <Link to="/parties" className="footer-link" style={colLink}>Political Parties</Link>
               <a href="https://forensic.nigeria2.com/" className="footer-link" style={colLink}>2023 Vote Counting</a>
             </div>
           </div>
           <div>
             <div style={colTitle}>Data</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '9px' }}>
+              <Link to="/parties" className="footer-link" style={colLink}>Political Parties</Link>
               <Link to="/senators" className="footer-link" style={colLink}>Senators</Link>
               <Link to="/reps" className="footer-link" style={colLink}>House of Reps</Link>
               <Link to="/politicians" className="footer-link" style={colLink}>Politicians</Link>
+              <Link to="/api" className="footer-link" style={colLink}>Public API</Link>
             </div>
           </div>
           <div>

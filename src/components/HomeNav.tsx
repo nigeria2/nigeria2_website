@@ -115,8 +115,8 @@ export function HomeNav() {
                 zIndex: 50,
               }}
             >
-              <Link to="/elections/$year/results" params={{ year: '2023' }} onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
-                Election Results
+              <Link to="/elections/results" onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
+                Election Results Data
               </Link>
               <Link to="/elections/2027/prediction" onClick={() => setOpen(false)} className="nav-menu-item" style={itemStyle}>
                 2027 Prediction
@@ -130,13 +130,6 @@ export function HomeNav() {
             </div>
           )}
         </div>
-
-        <Link to="/parties" className="nav-underline" style={{ ...navLink, borderBottom: pathname.startsWith('/parties') || pathname.startsWith('/party') ? '2px solid #ffe14d' : '2px solid transparent' }}>
-          Parties
-        </Link>
-        <Link to="/team" className="nav-underline" style={{ ...navLink, borderBottom: pathname === '/team' ? '2px solid #ffe14d' : '2px solid transparent' }}>
-          Team
-        </Link>
       </div>
 
       <Link

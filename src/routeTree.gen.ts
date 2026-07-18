@@ -34,6 +34,7 @@ import { Route as PredictionIdRouteImport } from './routes/prediction.$id'
 import { Route as PoliticianIdRouteImport } from './routes/politician.$id'
 import { Route as PartyAcronymRouteImport } from './routes/party.$acronym'
 import { Route as LgaIdRouteImport } from './routes/lga.$id'
+import { Route as ElectionsResultsRouteImport } from './routes/elections.results'
 import { Route as StatesStateIndexRouteImport } from './routes/states.$state.index'
 import { Route as StatesStatePoliticiansRouteImport } from './routes/states.$state.politicians'
 import { Route as StatesStateLgasRouteImport } from './routes/states.$state.lgas'
@@ -179,6 +180,11 @@ const LgaIdRoute = LgaIdRouteImport.update({
   path: '/lga/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ElectionsResultsRoute = ElectionsResultsRouteImport.update({
+  id: '/elections/results',
+  path: '/elections/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatesStateIndexRoute = StatesStateIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/elections/results': typeof ElectionsResultsRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
@@ -354,6 +361,7 @@ export interface FileRoutesByTo {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/elections/results': typeof ElectionsResultsRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
@@ -395,6 +403,7 @@ export interface FileRoutesById {
   '/senators': typeof SenatorsRoute
   '/signup': typeof SignupRoute
   '/team': typeof TeamRoute
+  '/elections/results': typeof ElectionsResultsRoute
   '/lga/$id': typeof LgaIdRoute
   '/party/$acronym': typeof PartyAcronymRoute
   '/politician/$id': typeof PoliticianIdRoute
@@ -443,6 +452,7 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
+    | '/elections/results'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
@@ -489,6 +499,7 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
+    | '/elections/results'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/senators'
     | '/signup'
     | '/team'
+    | '/elections/results'
     | '/lga/$id'
     | '/party/$acronym'
     | '/politician/$id'
@@ -576,6 +588,7 @@ export interface RootRouteChildren {
   SenatorsRoute: typeof SenatorsRoute
   SignupRoute: typeof SignupRoute
   TeamRoute: typeof TeamRoute
+  ElectionsResultsRoute: typeof ElectionsResultsRoute
   LgaIdRoute: typeof LgaIdRoute
   PartyAcronymRoute: typeof PartyAcronymRoute
   PoliticianIdRoute: typeof PoliticianIdRoute
@@ -762,6 +775,13 @@ declare module '@tanstack/react-router' {
       path: '/lga/$id'
       fullPath: '/lga/$id'
       preLoaderRoute: typeof LgaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/elections/results': {
+      id: '/elections/results'
+      path: '/elections/results'
+      fullPath: '/elections/results'
+      preLoaderRoute: typeof ElectionsResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/states/$state/': {
@@ -1040,6 +1060,7 @@ const rootRouteChildren: RootRouteChildren = {
   SenatorsRoute: SenatorsRoute,
   SignupRoute: SignupRoute,
   TeamRoute: TeamRoute,
+  ElectionsResultsRoute: ElectionsResultsRoute,
   LgaIdRoute: LgaIdRoute,
   PartyAcronymRoute: PartyAcronymRoute,
   PoliticianIdRoute: PoliticianIdRoute,

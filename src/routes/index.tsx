@@ -5,6 +5,31 @@ import { HomeFooter } from '../components/HomeFooter'
 
 export const Route = createFileRoute('/')({ component: Home })
 
+const ctaStyle: React.CSSProperties = {
+  fontFamily: "'Archivo', sans-serif",
+  fontWeight: 800,
+  fontSize: '14px',
+  letterSpacing: '0.02em',
+  color: '#fff',
+  background: '#0f8a4a',
+  textDecoration: 'none',
+  padding: '11px 16px',
+  borderRadius: '4px',
+  textAlign: 'center',
+}
+
+type Project = { title: string; desc: string; cta: string } & (
+  | { external?: false; href: '/elections/results' | '/elections/2027/prediction' | '/problem-units' }
+  | { external: true; href: string }
+)
+
+const PROJECTS: Project[] = [
+  { title: 'Election Results Data', desc: 'Verified results from past elections, broken down all the way to the local government, ward and polling unit.', href: '/elections/results', cta: 'Explore the data' },
+  { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', href: '/elections/2027/prediction', cta: 'View the forecast' },
+  { title: '2027 Problem Polling Units', desc: 'The polling units that showed strong anomalies in 2023 — the places to watch in 2027.', href: '/problem-units', cta: 'See the units' },
+  { title: '2023 Vote Counting', desc: 'Our independent, parallel count of the 2023 general election, transcribed from INEC result sheets.', external: true, href: 'https://forensic.nigeria2.com/', cta: 'Explore the count' },
+]
+
 function Home() {
   return (
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif", display: 'flex', flexDirection: 'column' }}>
@@ -117,26 +142,22 @@ function Home() {
         <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '34px', lineHeight: 1.05, color: '#0f2a1c', margin: '0 0 10px', textAlign: 'center' }}>What we're doing</h2>
           <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '17px', lineHeight: 1.6, color: '#5c6b60', margin: '0 auto 34px', maxWidth: '760px', textAlign: 'center' }}>
-            We turn civic energy into credible electoral data: a crowd-sourced 2027 forecast, a public record of the polling
-            units that failed in 2023, and an independent count of the last election. Explore each below.
+            We turn civic energy into credible electoral data: an open record of past results, a crowd-sourced 2027
+            forecast, a watchlist of the polling units that failed in 2023, and an independent count of the last
+            election. Explore each below.
           </p>
-          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '18px' }}>
-            {[
-              { title: '2027 Election Prediction', desc: 'Our crowd-sourced, weekly forecast of the presidential, governorship and senate races — state by state.', to: '/elections/2027/prediction' as const, cta: 'View the forecast' },
-              { title: '2027 Problem Polling Units', desc: 'The polling units that showed strong anomalies in 2023 — the places to watch in 2027.', to: '/problem-units' as const, cta: 'See the units' },
-              { title: 'Predictions Board', desc: 'The verified 2023 result and expert calls for every state. Add your own once you sign in.', to: '/predictions' as const, cta: 'Open the board' },
-            ].map((c) => (
+          <div className="two-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '18px' }}>
+            {PROJECTS.map((c) => (
               <div key={c.title} style={{ background: '#fff', border: '1px solid #dbe4dc', borderRadius: '12px', padding: '26px', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '19px', color: '#0f2a1c', marginBottom: '10px' }}>{c.title}</div>
                 <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 600, fontSize: '15px', lineHeight: 1.55, color: '#5c6b60', margin: '0 0 20px', flex: 1 }}>{c.desc}</p>
-                <Link to={c.to} style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '14px', letterSpacing: '0.02em', color: '#fff', background: '#0f8a4a', textDecoration: 'none', padding: '11px 16px', borderRadius: '4px', textAlign: 'center' }}>{c.cta} →</Link>
+                {c.external ? (
+                  <a href={c.href} style={ctaStyle}>{c.cta} →</a>
+                ) : (
+                  <Link to={c.href} style={ctaStyle}>{c.cta} →</Link>
+                )}
               </div>
             ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <a href="https://forensic.nigeria2.com/" style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '15px', color: '#0f8a4a', textDecoration: 'none' }}>
-              Or explore our 2023 parallel vote count →
-            </a>
           </div>
         </div>
       </div>
