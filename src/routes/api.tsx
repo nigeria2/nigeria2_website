@@ -74,7 +74,7 @@ Endpoints:
 - GET /elections/{year}/{state}[/{lga}[/{ward}[/{pu}]]]  — browse results down to a polling unit (twins the website).
 - GET /api/v1/polling-units/{pu_code}/sheets  — the INEC result sheet(s) for a unit, with our transcription model's status + comment.
 - GET /api/v1/polling-units/{pu_code}/sheets/{office}  — the exact transcription JSON we produced for that sheet.
-- GET /api/v1/outliers/{year}?state=&office=&rule=&limit=&offset=  — polling units that look anomalous (rules: over_voting = votes >= 2x registered; large_roll = registered > 5000; no_roll = no register but > 2000 votes). Each row includes the sheet link and every vote we recorded grouped by source. limit max 100; paginate with offset (response has has_more/next_offset).
+- GET /api/v1/outliers/{year}?state=&office=&rule=&limit=&offset=  — polling units that look anomalous (rules: over_voting = votes >= 2x registered; large_roll = registered > 10000; no_roll = no register but > 2000 votes). Each row includes the sheet link and every vote we recorded grouped by source. limit max 100; paginate with offset (response has has_more/next_offset).
 
 To answer a question, choose the narrowest endpoint, fetch it, and read the JSON. Prefer geo_id over names. Cache where you can.`
 
@@ -514,7 +514,7 @@ function ApiDocs() {
               <tbody>
                 {[
                   ['over_voting', 'Total votes ≥ 2× the registered voters'],
-                  ['large_roll', 'Registered voters > 5000'],
+                  ['large_roll', 'Registered voters > 10000'],
                   ['no_roll', 'No registered voters on record, but > 2000 votes'],
                 ].map(([r, d]) => (
                   <tr key={r}><td style={{ ...td, ...mono, fontWeight: 700 }}>{r}</td><td style={td}>{d}</td></tr>
