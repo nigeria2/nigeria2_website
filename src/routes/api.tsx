@@ -50,6 +50,7 @@ const API_CATEGORIES: { id: string; title: string; endpoints: string[] }[] = [
   { id: 'getting-started', title: 'Getting started', endpoints: [] },
   { id: 'parties', title: 'Political Parties', endpoints: ['GET /parties', 'GET /parties/{acronym}'] },
   { id: 'results', title: 'Election Results', endpoints: ['GET /states', 'GET /results/{year}', 'GET /results/{year}/{geo_id}'] },
+  { id: 'outliers', title: 'Outliers', endpoints: ['GET /outliers/{year}'] },
   { id: 'reference', title: 'Reference', endpoints: ['Response fields', 'Terms of use'] },
 ]
 
@@ -398,6 +399,76 @@ function ApiDocs() {
             </p>
             <div style={label}>Example request</div>
             <Code>{`curl "${base}/elections/2023/akwa-ibom/162-abak/03-01-01/001"`}</Code>
+          </Card>
+
+          <SectionTitle id="outliers">Outliers</SectionTitle>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/outliers/&#123;year&#125;</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>
+              Polling-unit results that look anomalous — flagged against the canonical INEC
+              register (not the transcribed one). Each row lists which rules it tripped. These
+              are candidates for review, not proof of fraud. Also reachable at
+              <span style={mono}> /elections/&#123;year&#125;/outliers</span>.
+            </p>
+
+            <div style={label}>Rules</div>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr><th style={th}>Rule</th><th style={th}>Flagged when</th></tr>
+              </thead>
+              <tbody>
+                {[
+                  ['over_voting', 'Total votes ≥ 2× the registered voters'],
+                  ['large_roll', 'Registered voters > 2000'],
+                  ['no_roll', 'No registered voters on record, but > 2000 votes'],
+                ].map(([r, d]) => (
+                  <tr key={r}><td style={{ ...td, ...mono, fontWeight: 700 }}>{r}</td><td style={td}>{d}</td></tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div style={label}>Query parameters</div>
+            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+              <thead>
+                <tr><th style={th}>Name</th><th style={th}>Type</th><th style={th}>Description</th></tr>
+              </thead>
+              <tbody>
+                {[
+                  ['state', 'string · optional', 'State slug, e.g. akwa-ibom. Omit for all states.'],
+                  ['office', 'string · optional', 'presidential | governor | senate.'],
+                  ['rule', 'string · optional', 'Limit to one rule (over_voting | large_roll | no_roll).'],
+                  ['limit', 'int · optional', 'Page size, default 200, max 1000.'],
+                  ['offset', 'int · optional', 'Rows to skip (pagination).'],
+                ].map(([n, t, d]) => (
+                  <tr key={n}><td style={{ ...td, ...mono, fontWeight: 700 }}>{n}</td><td style={td}>{t}</td><td style={td}>{d}</td></tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/outliers/2023?office=presidential&rule=over_voting&limit=50"`}</Code>
+
+            <div style={label}>Example response</div>
+            <Code>{`{
+  "year": "2023",
+  "count": 50,
+  "total": 4424,
+  "limit": 50,
+  "offset": 0,
+  "rules": { "over_voting": "total votes >= 2x the canonical registered voters", "...": "..." },
+  "outliers": [
+    {
+      "pu_code": "08/24/07/042", "pu_name": "...",
+      "state": "Borno", "lga": "...", "ward": "...", "ward_code": "08/24/07",
+      "election_type": "presidential", "year": "2023",
+      "registered_voters": 512, "total_votes": 1400, "winner": "APC",
+      "ratio": 2.73, "rules": ["over_voting"]
+    }
+  ]
+}`}</Code>
           </Card>
 
           <SectionTitle id="reference">Reference</SectionTitle>
