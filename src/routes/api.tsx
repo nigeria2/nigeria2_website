@@ -48,11 +48,35 @@ function SectionTitle({ id, children }: { id: string; children: React.ReactNode 
 // lists the endpoints it contains so callers can see the whole surface at a glance.
 const API_CATEGORIES: { id: string; title: string; endpoints: string[] }[] = [
   { id: 'getting-started', title: 'Getting started', endpoints: [] },
+  { id: 'ai', title: 'Query with AI', endpoints: ['Prompt for an LLM'] },
   { id: 'parties', title: 'Political Parties', endpoints: ['GET /parties', 'GET /parties/{acronym}'] },
   { id: 'results', title: 'Election Results', endpoints: ['GET /states', 'GET /results/{year}', 'GET /results/{year}/{geo_id}'] },
+  { id: 'sheets', title: 'Sheets & Transcriptions', endpoints: ['GET /polling-units/{code}/sheets', 'GET /polling-units/{code}/sheets/{office}'] },
   { id: 'outliers', title: 'Outliers', endpoints: ['GET /outliers/{year}'] },
   { id: 'reference', title: 'Reference', endpoints: ['Response fields', 'Terms of use'] },
 ]
+
+// A succinct, copy-pasteable description of the whole API to hand to an LLM so it can
+// query the data on the user's behalf. Kept plain so it survives a copy to any chat.
+const AI_PROMPT = `You can query Nigeria 2.0's open election API (no key, returns JSON, CORS-open).
+Base URL: https://api.nigeria2.com
+
+Conventions:
+- States are keyed by a canonical geo_id like nga_3 (Akwa Ibom). Get the full list from GET /api/v1/states. In browsable URLs a state is a slug (akwa-ibom), an LGA is "{lga_id}-{name}" (e.g. 162-abak), a ward is its INEC code with / written as - (03-01-01), a polling unit is its number (001). The full INEC pu_code uses slashes: 03/01/01/001.
+- Election years are 2019 and 2023. Offices: presidential, governor, senate.
+- Every figure is evidence (our best reading of INEC result sheets), not an official count.
+
+Endpoints:
+- GET /api/v1/parties[?active=true]  — political parties. GET /api/v1/parties/{acronym} for one.
+- GET /api/v1/states  — every state with its geo_id.
+- GET /api/v1/results/{year}  — all states with results that year + a national summary.
+- GET /api/v1/results/{year}/{geo_id}  — one state's LGA-by-party results, senate/house, and evidence.
+- GET /elections/{year}/{state}[/{lga}[/{ward}[/{pu}]]]  — browse results down to a polling unit (twins the website).
+- GET /api/v1/polling-units/{pu_code}/sheets  — the INEC result sheet(s) for a unit, with our transcription model's status + comment.
+- GET /api/v1/polling-units/{pu_code}/sheets/{office}  — the exact transcription JSON we produced for that sheet.
+- GET /api/v1/outliers/{year}?state=&office=&rule=&limit=&offset=  — polling units that look anomalous (rules: over_voting = votes >= 2x registered; large_roll = registered > 2000; no_roll = no register but > 2000 votes). Each row includes the sheet link and every vote we recorded grouped by source.
+
+To answer a question, choose the narrowest endpoint, fetch it, and read the JSON. Prefer geo_id over names. Cache where you can.`
 
 /** Sticky left-hand index of the API categories people can use. */
 function ApiSidebar({ base }: { base: string }) {
@@ -127,6 +151,22 @@ function ApiDocs() {
             <p style={p}>Public endpoints live under <span style={mono}>/api/v1/</span>. We will not make breaking changes to a version once published.</p>
           </Card>
           </section>
+
+          <SectionTitle id="ai">Query with AI</SectionTitle>
+          <Card>
+            <div style={h2}>Let an LLM query the data for you</div>
+            <p style={p}>
+              Paste the prompt below into ChatGPT, Claude, or any tool that can fetch URLs, then
+              ask your question in plain English (e.g. “which Lagos LGAs did the LP win in 2023?”
+              or “list the worst over-voting outliers in Kano”). It's a succinct description of
+              this whole API, so the model knows exactly which endpoint to call.
+            </p>
+            <Code>{AI_PROMPT}</Code>
+            <p style={{ ...p, fontSize: '13px', color: '#8aa093', marginTop: '10px' }}>
+              The API is read-only and public, so this is safe to share. Every figure is our
+              transcription of INEC sheets — evidence, not an official count.
+            </p>
+          </Card>
 
           <SectionTitle id="parties">Political Parties</SectionTitle>
           <Card>
@@ -401,6 +441,58 @@ function ApiDocs() {
             <Code>{`curl "${base}/elections/2023/akwa-ibom/162-abak/03-01-01/001"`}</Code>
           </Card>
 
+          <SectionTitle id="sheets">Sheets &amp; Transcriptions</SectionTitle>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/polling-units/&#123;pu_code&#125;/sheets</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>
+              Every INEC result sheet we hold for a polling unit (one per office), each with its
+              link, download status, and our transcription model's analysis of the scan — its
+              confidence <span style={mono}>status</span> (valid / unsure / blurry), legibility, the
+              check flags, and the model's own <span style={mono}>validity_notes</span> comment. Use the
+              full INEC code, e.g. <span style={mono}>03/01/01/001</span>.
+            </p>
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/polling-units/03/01/01/001/sheets"`}</Code>
+          </Card>
+
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <Method m="GET" />
+              <span style={{ ...mono, fontSize: '16px', fontWeight: 700, color: '#0f2a1c' }}>/api/v1/polling-units/&#123;pu_code&#125;/sheets/&#123;office&#125;</span>
+            </div>
+            <p style={{ ...p, marginTop: '12px' }}>
+              One sheet plus the <strong>exact transcription(s)</strong> we produced of it — the
+              verbatim JSON the model returned: party votes, the poll summary, the validity block
+              (with the model's comment), and its transcription notes. <span style={mono}>office</span> is
+              presidential | governor | senate. This is the raw data behind everything else.
+            </p>
+            <div style={label}>Example request</div>
+            <Code>{`curl "${base}/api/v1/polling-units/03/01/01/001/sheets/presidential"`}</Code>
+
+            <div style={label}>Example response (abridged)</div>
+            <Code>{`{
+  "pu_code": "03/01/01/001", "election_type": "presidential", "year": "2023",
+  "sheet_url": "https://irev.../result-sheet.pdf", "sheet_status": "saved",
+  "analysis": {
+    "status": "valid", "legibility": "readable", "model": "qwen/qwen3.5-9b",
+    "sum_check_passed": true, "totals_consistent": true,
+    "validity_notes": "", "discrepancies": null
+  },
+  "transcriptions": [
+    {
+      "source_image": "001.jpg",
+      "poll_summary": { "1_registered_voters": "179", "7_total_valid_votes": "153" },
+      "party_results": [ { "party": "APC", "votes_figures": "87" }, ... ],
+      "validity": { "status": "valid", "validity_notes": "" },
+      "transcription_notes": { "legibility": "readable", "discrepancies": "" }
+    }
+  ]
+}`}</Code>
+          </Card>
+
           <SectionTitle id="outliers">Outliers</SectionTitle>
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -465,10 +557,24 @@ function ApiDocs() {
       "state": "Borno", "lga": "...", "ward": "...", "ward_code": "08/24/07",
       "election_type": "presidential", "year": "2023",
       "registered_voters": 512, "total_votes": 1400, "winner": "APC",
-      "ratio": 2.73, "rules": ["over_voting"]
+      "ratio": 2.73, "rules": ["over_voting"],
+      "sheets": [
+        { "election_type": "presidential", "year": "2023",
+          "url": "https://.../result-sheet.pdf", "status": "saved" }
+      ],
+      "votes_by_source": [
+        { "source": "LLM (qwen3.5-9b)", "kind": "llm", "method": "unsure",
+          "valid_votes": 1400, "parties": { "APC": 700, "PDP": 500, "LP": 200 } }
+      ]
     }
   ]
 }`}</Code>
+            <p style={{ ...p, fontSize: '13px', color: '#8aa093', marginTop: '10px' }}>
+              <span style={mono}>sheets</span> are the INEC result sheet(s) for the unit (with a
+              download link and status, including broken/missing ones). <span style={mono}>votes_by_source</span> lists
+              every set of party votes we recorded for that unit and office, grouped by contributor
+              (e.g. our qwen transcription) — so you can compare readings side by side.
+            </p>
           </Card>
 
           <SectionTitle id="reference">Reference</SectionTitle>
