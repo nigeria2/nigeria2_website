@@ -160,9 +160,14 @@ function StateCard({ s, year, globalOffice }: { s: StateRow; year: string; globa
 function ResultsIndex() {
   const { year, states, summary } = Route.useLoaderData()
   const future = isFutureElection(year)
-  const [globalOffice, setGlobalOffice] = useState<OfficeKey>('presidential')
+  const anyPres = states.some((s) => s.has_presidential)
   const anyGov = states.some((s) => s.has_governor)
-  const globalAvail: OfficeKey[] = ['presidential', ...(anyGov ? (['governor'] as const) : [])]
+  // off-cycle governorship years (2020/2021/2025) have no presidential — default to governor
+  const globalAvail: OfficeKey[] = [
+    ...(anyPres ? (['presidential'] as const) : []),
+    ...(anyGov ? (['governor'] as const) : []),
+  ]
+  const [globalOffice, setGlobalOffice] = useState<OfficeKey>(anyPres ? 'presidential' : 'governor')
 
   return (
     <div style={{ minHeight: '100vh', background: '#0d8244', fontFamily: "'Archivo', sans-serif" }}>

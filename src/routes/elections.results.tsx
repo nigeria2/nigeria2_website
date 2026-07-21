@@ -8,9 +8,14 @@ export const Route = createFileRoute('/elections/results')({
   component: ResultsOverview,
 })
 
-const ELECTIONS: Record<string, { blurb: string }> = {
+// `tag` overrides the default "General election" badge for off-cycle governorships
+// (states whose governor vote is held on its own year, not the general-election cycle).
+const ELECTIONS: Record<string, { blurb: string; tag?: string }> = {
   '2019': { blurb: 'Presidential and governorship results, local government by local government, from the 2019 general election.' },
+  '2020': { blurb: 'Off-cycle governorship elections — Edo and Ondo held their governor votes in 2020.', tag: 'Governorship' },
+  '2021': { blurb: 'Off-cycle governorship — Anambra elected its governor in November 2021.', tag: 'Governorship' },
   '2023': { blurb: 'The 2023 general election — presidential, governorship, senate and House results down to the ward and polling-unit sheets.' },
+  '2025': { blurb: 'Off-cycle governorship — Anambra elected its governor in November 2025.', tag: 'Governorship' },
   '2027': { blurb: 'The next general election. Results will be published here, LGA by LGA, once votes are declared.' },
 }
 
@@ -48,7 +53,7 @@ function ResultsOverview() {
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '12px' }}>
                     <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: '34px', color: '#0f2a1c', letterSpacing: '-0.01em' }}>{y}</span>
                     <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '11px', letterSpacing: '0.06em', textTransform: 'uppercase', color: future ? '#b06a00' : '#0f6a38', background: future ? '#fff2d6' : '#d8f0df', padding: '3px 10px', borderRadius: '20px' }}>
-                      {future ? 'Not held yet' : 'General election'}
+                      {future ? 'Not held yet' : (meta.tag ?? 'General election')}
                     </span>
                   </div>
                   <p style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 500, fontSize: '15px', lineHeight: 1.55, color: '#5c6b60', margin: '0 0 20px', flex: 1 }}>{meta.blurb}</p>

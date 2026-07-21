@@ -1,6 +1,7 @@
-// Election years we surface results/prediction pages for. 2027 has not been held
-// yet, so its results pages render empty ("not held yet").
-export const RESULT_YEARS = ['2019', '2023', '2027'] as const
+// Election years we surface results/prediction pages for. 2019 & 2023 are general
+// elections; 2020/2021/2025 are OFF-CYCLE governorships (Edo 2020, Anambra 2021 & 2025).
+// 2027 has not been held yet, so its results pages render empty ("not held yet").
+export const RESULT_YEARS = ['2019', '2020', '2021', '2023', '2025', '2027'] as const
 export type ResultYear = (typeof RESULT_YEARS)[number]
 
 // Years with real captured results vs. future elections (empty pages).
